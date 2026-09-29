@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}Sharing & settings · {{ tree.name }} · Kinroot{% endblock %}
+{% block content %}
+<main class="page narrow">
+  <div class="page-head">
+    <a href="{{ url_for('trees.tree_view', tree_id=tree.id) }}">← Back to the tree</a>
+    <h1>{{ tree.name }}</h1>
+    <p class="muted">Sharing, privacy and settings. Only you, the owner, can see this page.</p>
+  </div>
+
+  <section class="card stack" aria-labelledby="invite-title">
+    <h2 id="invite-title">Invite family with a link</h2>
+    <p class="muted small">Anyone with the link can join after making an account. If you pick their leaf, the link works once and connects their account to that spot on the tree. Links expire after {{ invite_days }} days.</p>
+    <form method="post" class="stack">
+      {{ m.csrf() }}<input type="hidden" name="action" value="create_invite">
+      <div class="two-col">
+        <div class="field"><label for="inv-person">Their leaf <span class="hint">optional</span></label>
+          <select id="inv-person" name="person_id">
+            <option value="">Anyone (a general family link)</option>
+            {% for p in unclaimed %}<option value="{{ p.id }}" {{ 'selected' if request.args.get('person', type=int) == p.id }}>{{ p.first_name }} {{ p.last_name }}</option>{% endfor %}
+          </select></div>
+        <div class="field"><label for="inv-role">They can</label>
+          <select id="inv-role" name="role"><option value="viewer">View the tree</option><option value="editor">View and edit</option></select></div>
+      </div>
+      <div><button class="btn-primary">{{ m.icon("link") }} Create invite link</button></div>
+    </form>
+    {% if invites %}
+      <ul class="list">
+        {% for inv in invites %}
+          <li>
+            <div class="grow stack-sm">
+              <strong>{% if inv.person_first %}For {{ inv.person_first }}{% else %}General family link{% endif %}
+                · {{ 'can edit' if inv.role == 'editor' else 'can view' }}</strong>
+              <div class="invite-link">
+                <input id="invite-{{ inv.id }}" readonly value="{{ url_for('trees.join', token=inv.token, _external=True) }}" aria-label="Invite link">
+                <button type="button" class="btn-sm" data-copy="invite-{{ inv.id }}">Copy</button>
+              </div>
+              <span class="hint">Used {{ inv.uses }} time{{ '' if inv.uses == 1 else 's' }} · expires {{ inv.expires_at[:10] | fdate }}</span>
+            </div>
+            <form method="post">{{ m.csrf() }}<input type="hidden" name="action" value="revoke_invite"><input type="hidden" name="invite_id" value="{{ inv.id }}"><button class="linklike danger">Turn off</button></form>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="hint">While Kinroot runs only on your computer, these links work on your computer and home network. They'll work for everyone once Kinroot is online.</p>
+    {% endif %}
+  </section>
+
+  <section class="card stack" aria-labelledby="members-title">
+    <h2 id="members-title">People with access</h2>
+    <ul class="list">
+      {% for mem in members %}
+        <li>
+          {{ m.avatar(mem.name) }}
+          <div class="grow">
+            <strong>{{ mem.name }}</strong><br>
+            <span class="muted small">{{ mem.email }}{% if mem.leaf %} · leaf: {{ mem.leaf }}{% endif %}</span>
+          </div>
+          {% if mem.role == 'owner' %}
+            {{ m.role_pill('owner', role_label) }}
+          {% else %}
+            <form method="post" class="btn-row">
+              {{ m.csrf() }}<input type="hidden" name="action" value="set_role"><input type="hidden" name="user_id" value="{{ mem.id }}">
+              <label class="sr-only" for="role-{{ mem.id }}">Access for {{ mem.name }}</label>
+              <select id="role-{{ mem.id }}" name="role" onchange="this.form.submit()" style="width:auto">
+                <option value="viewer" {{ 'selected' if mem.role == 'viewer' }}>Can view</option>
+                <option value="editor" {{ 'selected' if mem.role == 'editor' }}>Can edit</option>
+              </select>
+              <noscript><button class="btn-sm">Save</button></noscript>
+            </form>
+            <form method="post">{{ m.csrf() }}<input type="hidden" name="action" value="remove_member"><input type="hidden" name="user_id" value="{{ mem.id }}"><button class="linklike danger">Remove</button></form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <details>
+      <summary>Add someone who already has a Kinroot account</summary>
+      <form method="post" class="inline-form" style="margin-top: 12px">
+        {{ m.csrf() }}<input type="hidden" name="action" value="add_member">
+        <div class="field"><label for="add-email">Their email</label><input id="add-email" name="email" type="email" required></div>
+        <div class="field" style="flex: 0 1 160px"><label for="add-role">Access</label>
+          <select id="add-role" name="role"><option value="viewer">Can view</option><option value="editor">Can edit</option></select></div>
+        <button>Add</button>
+      </form>
+    </details>
+  </section>
+
+  <section class="card stack" aria-labelledby="privacy-title">
+    <h2 id="privacy-title">{{ m.icon("shield") }} Privacy</h2>
+    <form method="post" class="stack">
+      {{ m.csrf() }}<input type="hidden" name="action" value="privacy">
+      <label class="check"><input type="checkbox" name="hide_living" {{ 'checked' if tree.hide_living }}>
+        <span class="setting">Hide living relatives' details from view-only guests
+          <span class="hint">They'll still see names and photos, but not birth dates, birthplaces or notes. Recommended: those are common answers to bank security questions.</span></span></label>
+      <label class="check"><input type="checkbox" name="discoverable" {{ 'checked' if tree.discoverable }}>
+        <span class="setting">Let other Kinroot families find shared ancestors
+          <span class="hint">If someone else's tree has the same ancestor (same name and birth year), they can send you a connection request. Only people who have passed away are matched, and nobody can see your tree unless you invite them.</span></span></label>
+      <div><button>Save privacy settings</button></div>
+    </form>
+  </section>
+
+  <section class="card stack" aria-labelledby="data-title">
+    <h2 id="data-title">Name and data</h2>
+    <form method="post" class="inline-form">
+      {{ m.csrf() }}<input type="hidden" name="action" value="rename">
+      <div class="field"><label for="rename">Tree name</label><input id="rename" name="name" value="{{ tree.name }}" required maxlength="120"></div>
+      <button>Rename</button>
+    </form>
+    <p class="muted small">Download everything as a GEDCOM file, the format every genealogy site understands. It's a good backup, too.</p>
+    <div><a class="btn" href="{{ url_for('trees.export_gedcom', tree_id=tree.id) }}">{{ m.icon("download") }} Download GEDCOM</a></div>
+  </section>
+
+  <section class="card stack danger-zone" aria-labelledby="delete-title">
+    <h2 id="delete-title">Delete this tree</h2>
+    <p class="muted small">This removes every person and photo in it, for everyone it's shared with. It can't be undone. Type the tree's name to confirm.</p>
+    <form method="post" class="inline-form">
+      {{ m.csrf() }}<input type="hidden" name="action" value="delete">
+      <div class="field"><label for="confirm">Tree name</label><input id="confirm" name="confirm" placeholder="{{ tree.name }}" autocomplete="off"></div>
+      <button class="btn-danger">Delete tree</button>
+    </form>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+{% endblock %}

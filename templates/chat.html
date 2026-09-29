@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}{{ other.name }} · Kinroot{% endblock %}
+{% block content %}
+<main class="chat" data-connection="{{ connection.id }}" data-last="{{ messages[-1].id if messages else 0 }}">
+  <header class="chat-head">
+    <a href="{{ url_for('family.hub') }}" class="btn btn-ghost btn-sm" aria-label="Back to Family">←</a>
+    {{ m.avatar(other.name) }}
+    <div class="grow" style="flex: 1; min-width: 0">
+      <h1 style="font-size: 1.4rem">{{ other.name }}</h1>
+      {% if relation %}<span class="relation">Your {{ relation.term }} · {{ relation.tree_name }}</span>
+      {% elif via %}<span class="muted small">Connected through “{{ via.name }}”</span>{% endif %}
+    </div>
+    <details class="menu">
+      <summary class="btn btn-ghost btn-sm" aria-label="More options">{{ m.icon("dots") }}</summary>
+      <div class="menu-list">
+        <form method="post" action="{{ url_for('family.withdraw', cid=connection.id) }}">{{ m.csrf() }}<button>Remove connection</button></form>
+        <form method="post" action="{{ url_for('family.respond', cid=connection.id) }}">{{ m.csrf() }}<button name="action" value="block">Block {{ other.name.split()[0] }}</button></form>
+      </div>
+    </details>
+  </header>
+
+  <div class="chat-log" id="log" aria-live="polite">
+    {% for msg in messages %}
+      <div class="bubble {{ 'mine' if msg.mine }}" data-id="{{ msg.id }}">{{ msg.body }}<time datetime="{{ msg.at }}"></time></div>
+    {% else %}
+      <div class="chat-empty" id="chat-empty">
+        <strong>You're connected.</strong>
+        <span>Say hello, share a memory, or ask about that old photo nobody can name.</span>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form method="post" class="chat-form" id="chat-form">
+    {{ m.csrf() }}
+    <label for="body" class="sr-only">Message</label>
+    <textarea id="body" name="body" maxlength="2000" rows="1" placeholder="Write a message…" required></textarea>
+    <button class="btn-primary">Send</button>
+  </form>
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}" defer></script>
+{% endblock %}

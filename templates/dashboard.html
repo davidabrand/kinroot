@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}My trees · Kinroot{% endblock %}
+{% block content %}
+<main class="page">
+  <div class="page-head">
+    <p class="eyebrow">{{ greeting }}, {{ me.name.split()[0] }}</p>
+    <h1>{% if cards %}Your family trees{% else %}Let's plant your first tree{% endif %}</h1>
+  </div>
+
+  <div class="dash-grid">
+    <div class="section">
+      {% if cards %}
+        <ul class="tree-cards">
+          {% for c in cards %}{% set t = c.tree %}
+            <li>
+              <a class="tree-card" href="{{ url_for('trees.tree_view', tree_id=t.id) }}">
+                <div class="preview">{{ m.mini_tree(c.shape) }}</div>
+                <div class="body">
+                  <span class="name">{{ t.name }}</span>
+                  <span class="meta num">
+                    {{ t.people_count }} {{ 'person' if t.people_count == 1 else 'people' }}
+                    {% if c.shape %}· {{ c.shape | length }} generation{{ '' if c.shape | length == 1 else 's' }}{% endif %}
+                  </span>
+                  <span class="meta">{{ m.role_pill(t.role, role_label) }}{% if t.role != 'owner' %}<span>from {{ t.owner_name }}</span>{% endif %}</span>
+                </div>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="lede">Start with yourself, or with the oldest relative you know about. You can add everyone else from there.</p>
+      {% endif %}
+
+      <div class="two-col" style="gap: 16px">
+        <form method="post" action="{{ url_for('trees.new_tree') }}" class="card flat stack">
+          {{ m.csrf() }}
+          <h2>Plant a new tree</h2>
+          <div class="field"><label for="tree-name">Name it</label>
+            <input id="tree-name" name="name" placeholder="The {{ me.name.split()[-1] if me.name.split()|length > 1 else 'Smith' }} family" required maxlength="120"></div>
+          <button class="btn-primary">Create tree</button>
+        </form>
+        <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="card flat stack">
+          {{ m.csrf() }}
+          <h2>Import a GEDCOM file</h2>
+          <p class="hint">Export one from Ancestry, FamilySearch, MyHeritage or most genealogy apps. It becomes a new tree.</p>
+          <div class="field"><label for="gedcom">File</label>
+            <input id="gedcom" name="gedcom" type="file" accept=".ged,.gedcom,text/plain" required></div>
+          <button>{{ m.icon("upload") }} Import</button>
+        </form>
+      </div>
+    </div>
+
+    <aside class="side-stack">
+      <section class="card stack" aria-labelledby="family-title">
+        <div class="section-head"><h2 id="family-title">Family</h2><a href="{{ url_for('family.hub') }}">Open</a></div>
+        {% if family.requests or family.unread %}
+          <p>
+            {%- if family.requests %}<strong>{{ family.requests }}</strong> connection request{{ '' if family.requests == 1 else 's' }} waiting{% endif -%}
+            {%- if family.requests and family.unread %} and {% endif -%}
+            {%- if family.unread %}<strong>{{ family.unread }}</strong> unread message{{ '' if family.unread == 1 else 's' }}{% endif -%}
+            .</p>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('family.hub') }}">{{ m.icon("message") }} See them</a>
+        {% else %}
+          <p class="muted small">When relatives claim their leaf on your tree, you can connect and message each other here.</p>
+        {% endif %}
+      </section>
+
+      <section class="card stack" aria-labelledby="upcoming-title">
+        <h2 id="upcoming-title">Coming up</h2>
+        {% if upcoming %}
+          <ul class="event-list">
+            {% for e in upcoming %}
+              <li>
+                <span class="date-chip {{ '' if e.living else 'remember' }}"><span class="m">{{ e.date.strftime('%b') }}</span><span class="d">{{ e.date.day }}</span></span>
+                <span>
+                  {% if e.living %}
+                    <strong>{{ e.person.first_name }}</strong> turns {{ e.age }}
+                  {% else %}
+                    Remembering <strong>{{ e.person.first_name }}</strong>, born {{ e.age }} years ago
+                  {% endif %}
+                  <br><span class="muted small">{% if e.days == 0 %}Today{% elif e.days == 1 %}Tomorrow{% else %}In {{ e.days }} days{% endif %} · {{ e.tree_name }}</span>
+                </span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted small">Birthdays in the next 30 days show up here once people have full birth dates.</p>
+        {% endif %}
+      </section>
+    </aside>
+  </div>
+</main>
+{% endblock %}

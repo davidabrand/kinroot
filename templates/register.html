@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% set next_url = request.args.get('next') %}
+{% block title %}Start your tree · Kinroot{% endblock %}
+{% block head %}{% include "partials/auth_head.html" %}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block flashes %}{% endblock %}
+{% block content %}
+<main class="auth-scene">
+  {% include "partials/auth_scene.html" %}
+  {# The #sign-up on the switch links brings phones straight to the card; so does the script below after an error. #}
+  <section class="auth-card" id="sign-up" aria-labelledby="auth-title">
+    <div class="stack-sm">
+      <p class="eyebrow">Start your tree</p>
+      <h1 id="auth-title">Plant your family tree</h1>
+      <p class="muted">Make an account, add the people you know, then invite relatives to fill in the rest.</p>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, text in messages %}<p class="flash {{ category }}" role="alert">{{ text }}</p>{% endfor %}
+      {% if messages %}<script>document.getElementById("sign-up").scrollIntoView()</script>{% endif %}
+    {% endwith %}
+    <form method="post" class="stack" action="{{ url_for('auth.register', next=next_url) }}">
+      {{ m.csrf() }}
+      <div class="field"><label for="name">Your name</label>
+        <input id="name" name="name" required autocomplete="name" value="{{ form.name }}"></div>
+      <div class="field"><label for="email">Email</label>
+        <input id="email" name="email" type="email" required autocomplete="email" value="{{ form.email }}"></div>
+      <div class="field"><label for="password">Password <span class="hint">at least 8 characters</span></label>
+        <input id="password" name="password" type="password" minlength="8" required autocomplete="new-password"></div>
+      <button class="btn-primary btn-lg" data-busy="Planting your tree…">Create account</button>
+    </form>
+    <p class="auth-switch">Already have an account?</p>
+    <a class="btn btn-ghost wide" href="{{ url_for('auth.login', next=next_url) }}#sign-in">Log in</a>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
+{% endblock %}

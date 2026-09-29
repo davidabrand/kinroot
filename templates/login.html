@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% set next_url = request.args.get('next') %}
+{% block title %}Log in · Kinroot{% endblock %}
+{% block head %}{% include "partials/auth_head.html" %}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block flashes %}{% endblock %}
+{% block content %}
+<main class="auth-scene">
+  {% include "partials/auth_scene.html" %}
+  {# The #sign-in on the switch links brings phones straight to the card; so does the script below after an error. #}
+  <section class="auth-card" id="sign-in" aria-labelledby="auth-title">
+    <div class="stack-sm">
+      <p class="eyebrow">Welcome back</p>
+      <h1 id="auth-title">Your family has been waiting</h1>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, text in messages %}<p class="flash {{ category }}" role="alert">{{ text }}</p>{% endfor %}
+      {% if messages %}<script>document.getElementById("sign-in").scrollIntoView()</script>{% endif %}
+    {% endwith %}
+    <form method="post" class="stack" action="{{ url_for('auth.login', next=next_url) }}">
+      {{ m.csrf() }}
+      <div class="field"><label for="email">Email</label>
+        <input id="email" name="email" type="email" required autocomplete="email" value="{{ email }}"></div>
+      <div class="field"><label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password"></div>
+      <button class="btn-primary btn-lg" data-busy="Opening your tree…">Log in</button>
+    </form>
+    <p class="auth-switch">New to Kinroot?</p>
+    <a class="btn btn-ghost wide" href="{{ url_for('auth.register', next=next_url) }}#sign-up">Plant your family tree</a>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
+{% endblock %}

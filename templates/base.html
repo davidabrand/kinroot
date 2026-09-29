@@ -1,0 +1,50 @@
+{% import "_macros.html" as m with context %}<!doctype html>
+<html lang="en" class="{% block html_class %}{% endblock %}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}Kinroot{% endblock %}</title>
+  <meta name="description" content="Kinroot turns your family history into a living 3D tree your whole family can explore, add to and talk around.">
+  <meta name="theme-color" content="#1b3326">
+  <meta property="og:title" content="Kinroot — your family tree, in its best light">
+  <meta property="og:description" content="A living 3D family tree your whole family can explore, add to and talk around.">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;0,800;1,700&family=Alegreya+Sans:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('landing') }}" aria-label="Kinroot home">{{ m.mark() }}{{ m.wordmark() }}</a>
+    <nav class="topnav" aria-label="Main">
+      {% if me %}
+        <a href="{{ url_for('trees.dashboard') }}" {% if request.endpoint in ('trees.dashboard',) %}aria-current="page"{% endif %}>My trees</a>
+        <a href="{{ url_for('family.hub') }}" {% if request.endpoint and request.endpoint.startswith('family.') %}aria-current="page"{% endif %}>
+          Family{% if nav_counts and nav_counts.total %} <span class="badge" aria-label="{{ nav_counts.total }} new">{{ nav_counts.total }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('auth.account') }}" {% if request.endpoint == 'auth.account' %}aria-current="page"{% endif %}>{{ me.name.split()[0] }}</a>
+        <form method="post" action="{{ url_for('auth.logout') }}">{{ m.csrf() }}<button class="navbtn">Log out</button></form>
+      {% else %}
+        {# No link to the page you're on, and hopping between log in and sign up keeps where you were headed. #}
+        {% set on_auth = request.endpoint in ('auth.login', 'auth.register') %}
+        {% set next_url = request.args.get('next') if on_auth else None %}
+        {% if request.endpoint != 'auth.login' %}<a href="{{ url_for('auth.login', next=next_url) }}">Log in</a>{% endif %}
+        {% if request.endpoint != 'auth.register' %}<a class="btn btn-primary btn-sm" href="{{ url_for('auth.register', next=next_url) }}">Start your tree</a>{% endif %}
+      {% endif %}
+    </nav>
+  </header>
+  {% block flashes %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes" role="status">
+          {% for category, text in messages %}<p class="flash {{ category }}">{{ text }}</p>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+  {% endblock %}
+  {% block content %}{% endblock %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,21 @@
+{# Log in and sign up are one scene. Hopping between them (or retrying a password) keeps the world
+   still: the tree doesn't regrow, the parallax stays where it was, and browsers that can morph the
+   glass card from one form into the other instead of blinking the whole page. #}
+{# Side-by-side layout only: on a phone the two pages scroll differently, so a plain switch looks cleaner. #}
+<style>@media (prefers-reduced-motion: no-preference) and (min-width: 861px) { @view-transition { navigation: auto; } }</style>
+<script>
+  (() => {
+    const html = document.documentElement;
+    const authPages = ["{{ url_for('auth.login') }}", "{{ url_for('auth.register') }}"];
+    try {
+      const from = new URL(document.referrer);
+      if (from.origin === location.origin && authPages.includes(from.pathname)) {
+        html.classList.add("auth-continue");
+        const [px, py] = (sessionStorage.getItem("kinroot-parallax") || "").split(",");
+        if (py) { html.style.setProperty("--px", px); html.style.setProperty("--py", py); }
+      }
+    } catch (e) { /* first visit (or storage blocked): let the tree grow */ }
+    // The browser is morphing this page in from the last one, so the card needn't fade in itself.
+    window.addEventListener("pagereveal", (e) => { if (e.viewTransition) html.classList.add("auth-morph"); });
+  })();
+</script>

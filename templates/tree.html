@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}{{ tree.name }} · Kinroot{% endblock %}
+{% block html_class %}tree-html{% endblock %}
+{% block body_class %}tree-page{% endblock %}
+{% block head %}
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+{% endblock %}
+{% block content %}
+<div class="tree-layout">
+  <section class="scene-wrap" aria-label="3D family tree">
+    <div id="scene"></div>
+    <div id="scene-loading" class="scene-loading">Growing your tree…</div>
+    <div id="scene-error" class="empty-scene" hidden>
+      <div class="glass"><h2>The 3D view couldn't start</h2>
+        <p>Your family is all still here in the panel. The 3D tree needs an internet connection the first time, and a browser with graphics turned on (Chrome, Edge, Firefox or Safari).</p></div>
+    </div>
+
+    <div class="scene-toolbar">
+      <span class="scene-title">{{ tree.name }}</span>
+      <div class="search">
+        {{ m.icon("search") }}
+        <label for="search-input" class="sr-only">Find someone</label>
+        <input id="search-input" class="glass" type="search" placeholder="Find someone" autocomplete="off">
+        <ul id="search-results" class="search-results" hidden></ul>
+      </div>
+      <button type="button" class="tool glass" id="btn-grow" title="Watch your family grow">{{ m.icon("clock") }}<span class="label">Watch it grow</span></button>
+      <button type="button" class="tool glass" id="btn-relate" title="How are we related?">{{ m.icon("route") }}<span class="label">Related?</span></button>
+      <button type="button" class="tool glass" id="btn-flat" aria-pressed="false" title="Switch between 3D and a flat view">{{ m.icon("layers") }}<span class="label">Flat view</span></button>
+      <button type="button" class="tool glass" id="btn-reset" title="Show the whole tree">{{ m.icon("target") }}<span class="sr-only">Show the whole tree</span></button>
+      {% if role in ('editor', 'owner') %}
+        <button type="button" class="tool" id="btn-add" style="background: var(--honey); color: var(--on-honey); border: 1px solid var(--honey)">{{ m.icon("plus") }}<span class="label">Add person</span></button>
+      {% endif %}
+      <details class="menu" id="more-menu">
+        <summary class="tool glass" title="More">{{ m.icon("dots") }}<span class="sr-only">More</span></summary>
+        <div class="menu-list">
+          <button type="button" id="btn-picture">{{ m.icon("download") }} Save a picture</button>
+          <button type="button" id="btn-blender">{{ m.icon("leaf") }} Export for a Blender poster</button>
+          {% if role in ('editor', 'owner') %}<a href="{{ url_for('trees.export_gedcom', tree_id=tree.id) }}">{{ m.icon("download") }} Download GEDCOM</a>{% endif %}
+          {% if role == 'owner' %}<a href="{{ url_for('trees.share', tree_id=tree.id) }}">{{ m.icon("sliders") }} Sharing &amp; settings</a>{% endif %}
+        </div>
+      </details>
+    </div>
+
+    <div id="empty-scene" class="empty-scene" hidden>
+      <div class="glass">
+        <h2>Plant the first leaf</h2>
+        <p>{% if role in ('editor', 'owner') %}Add yourself or your oldest known relative, and the tree grows from there.{% else %}Nobody has been added yet.{% endif %}</p>
+      </div>
+    </div>
+
+    <div id="timelapse" class="timelapse glass" hidden>
+      <div class="tl-row">
+        <button type="button" class="tl-btn" id="tl-play" aria-label="Pause">❚❚</button>
+        <span class="tl-year" id="tl-year" aria-live="off">1900</span>
+        <label for="tl-slider" class="sr-only">Year</label>
+        <input type="range" id="tl-slider" min="1900" max="2026" value="1900">
+        <button type="button" class="tl-close" id="tl-close" aria-label="Close the time-lapse">{{ m.icon("x") }}</button>
+      </div>
+      <ul class="tl-events" id="tl-events" aria-live="polite"></ul>
+    </div>
+
+    <p class="scene-hint glass">Drag to turn · scroll to zoom · click a name</p>
+  </section>
+
+  <aside class="side-panel" id="panel" aria-live="polite"><p class="muted">Loading your family…</p></aside>
+</div>
+<script>
+  window.KINROOT = {
+    treeId: {{ tree.id }},
+    modelsBase: "{{ url_for('static', filename='models/') }}",
+    shareUrl: "{{ url_for('trees.share', tree_id=tree.id) }}"
+  };
+</script>
+<script type="module" src="{{ url_for('static', filename='js/tree3d.js') }}"></script>
+{% endblock %}

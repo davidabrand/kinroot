@@ -1,0 +1,19 @@
+{# The living background shared by the log-in and sign-up pages. Purely decorative. #}
+<div class="scene-sky" aria-hidden="true"></div>
+<div class="scene-sun" aria-hidden="true"></div>
+<svg class="scene-hills" viewBox="0 0 1440 360" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="hill-near-fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color:var(--hill-near)"/>
+      <stop offset="1" style="stop-color:var(--hill-deep)"/>
+    </linearGradient>
+  </defs>
+  <path class="hill-far" d="M0 128C150 96 330 104 520 132S880 104 1080 116 1350 144 1440 134V360H0Z"/>
+  <path class="hill-mid" d="M0 196C210 164 430 176 650 204S1030 166 1240 184 1400 204 1440 198V360H0Z"/>
+  <path d="M0 262C240 232 520 246 780 270S1200 236 1440 258V360H0Z" fill="url(#hill-near-fill)"/>
+</svg>
+<div class="scene-tree" aria-hidden="true">
+  <p class="scene-caption"><b id="grow-year">{{ this_year }}</b><span>Every leaf is someone's story.</span></p>
+  {% include "partials/grow_tree.svg" %}
+</div>
+<div class="scene-particles" aria-hidden="true">{% include "partials/auth_particles.html" %}</div>

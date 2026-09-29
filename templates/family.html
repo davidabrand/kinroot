@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}Family · Kinroot{% endblock %}
+{% block content %}
+<main class="page">
+  <div class="page-head">
+    <p class="eyebrow">Family</p>
+    <h1>Talk to the people on your tree</h1>
+    <p class="lede">Connect with relatives who've claimed their leaf, or with families who share your ancestors. You can message each other once a request is accepted.</p>
+  </div>
+
+  <div class="family-grid">
+    <div class="side-stack">
+      {% if incoming %}
+        <section class="section" aria-labelledby="incoming-title">
+          <h2 id="incoming-title">Waiting for you <span class="badge">{{ incoming | length }}</span></h2>
+          {% for r in incoming %}
+            <article class="request">
+              <div class="who">
+                {{ m.avatar(r.other_name) }}
+                <div>
+                  <strong>{{ r.other_name }}</strong>
+                  {% set rel = incoming_relations.get(r.requester_id) %}
+                  {% if rel %}<div class="relation">Your {{ rel.term }} · {{ rel.tree_name }}</div>
+                  {% elif r.tree_name %}<div class="muted small">On “{{ r.tree_name }}”</div>{% endif %}
+                  {% if r.via_first %}<div class="muted small">Found {{ r.via_first }} {{ r.via_last }}{% if r.via_year %} (born {{ r.via_year }}){% endif %} in both your trees</div>{% endif %}
+                  <div class="muted small">{{ r.created_at | ago }}</div>
+                </div>
+              </div>
+              {% if r.note %}<blockquote>{{ r.note }}</blockquote>{% endif %}
+              <form method="post" action="{{ url_for('family.respond', cid=r.id) }}" class="btn-row">
+                {{ m.csrf() }}
+                <button class="btn-primary" name="action" value="accept">{{ m.icon("check") }} Accept</button>
+                <button name="action" value="decline">Decline</button>
+                <button class="btn-ghost" name="action" value="block">Block</button>
+              </form>
+            </article>
+          {% endfor %}
+        </section>
+      {% endif %}
+
+      <section class="card stack" aria-labelledby="convos-title">
+        <h2 id="convos-title">Conversations</h2>
+        {% if connected %}
+          <div class="stack-sm">
+            {% for c in connected %}
+              <a class="convo" href="{{ url_for('family.chat', cid=c.id) }}">
+                {{ m.avatar(c.other_name) }}
+                <span class="grow">
+                  <strong>{{ c.other_name }}</strong>
+                  {% set rel = relations.get(c.other_id) %}{% if rel %}<span class="relation">Your {{ rel.term }}</span>{% endif %}
+                  <span class="preview">{{ c.last_body or 'Say hello' }}</span>
+                </span>
+                {% if c.unread %}<span class="badge">{{ c.unread }}</span>{% elif c.last_at %}<span class="muted small">{{ c.last_at | ago }}</span>{% endif %}
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="empty">No conversations yet. Connect with someone on the right to start one.</p>
+        {% endif %}
+      </section>
+
+      {% if outgoing %}
+        <section class="card stack" aria-labelledby="sent-title">
+          <h2 id="sent-title">Requests you've sent</h2>
+          <ul class="list">
+            {% for r in outgoing %}
+              <li>{{ m.avatar(r.other_name) }}<span class="grow"><strong>{{ r.other_name }}</strong><br><span class="muted small">Sent {{ r.created_at | ago }}</span></span>
+                <form method="post" action="{{ url_for('family.withdraw', cid=r.id) }}">{{ m.csrf() }}<button class="linklike">Cancel</button></form></li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+    </div>
+
+    <div class="side-stack">
+      <section class="card stack" aria-labelledby="suggest-title">
+        <h2 id="suggest-title">Relatives on your trees</h2>
+        {% if suggestions %}
+          <ul class="list">
+            {% for s in suggestions %}
+              <li>
+                {{ m.avatar(s.name) }}
+                <div class="grow"><strong>{{ s.name }}</strong><br>
+                  {% if s.relation %}<span class="relation">Your {{ s.relation.term }}</span>{% else %}<span class="muted small">On “{{ s.tree_name }}”</span>{% endif %}</div>
+                <details style="flex-basis: 100%">
+                  <summary>Connect</summary>
+                  <form method="post" action="{{ url_for('family.request_form') }}" class="stack" style="margin-top: 10px">
+                    {{ m.csrf() }}
+                    <input type="hidden" name="user_id" value="{{ s.id }}"><input type="hidden" name="via_tree_id" value="{{ s.tree_id }}">
+                    <label for="note-{{ s.id }}">Add a note <span class="hint">optional</span></label>
+                    <textarea id="note-{{ s.id }}" name="note" maxlength="300" placeholder="Hi! I'm Sam's grandson, found you on the family tree."></textarea>
+                    <div><button class="btn-primary btn-sm">Send request</button></div>
+                  </form>
+                </details>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted small">When relatives join your trees, they'll show up here. Invite them from a tree's <em>Share</em> page.</p>
+        {% endif %}
+      </section>
+
+      <section class="card stack" aria-labelledby="matches-title">
+        <h2 id="matches-title">{{ m.icon("route") }} Relatives you may have</h2>
+        <p class="muted small">Ancestors on your trees who also appear in another family's tree. Only people who've passed away are matched, and only in trees whose owners allow it.</p>
+        {% if matches %}
+          <ul class="list">
+            {% for mt in matches %}
+              <li>
+                {{ m.avatar(mt.owner_name) }}
+                <div class="grow"><strong>{{ mt.owner_name }}</strong> <span class="muted small">keeps “{{ mt.their_tree_name }}”</span>
+                  <ul class="match-people">
+                    {% for p in mt.people %}<li>{{ p.first_name }} {{ p.last_name }}, born {{ p.birth_year }} <span class="muted">(your “{{ p.my_tree_name }}”)</span></li>{% endfor %}
+                  </ul>
+                </div>
+                <details style="flex-basis: 100%">
+                  <summary>Send a request</summary>
+                  <form method="post" action="{{ url_for('family.request_form') }}" class="stack" style="margin-top: 10px">
+                    {{ m.csrf() }}
+                    <input type="hidden" name="user_id" value="{{ mt.owner_id }}">
+                    <input type="hidden" name="via_person_id" value="{{ mt.people[0].my_person_id }}">
+                    <input type="hidden" name="match_person_id" value="{{ mt.people[0].their_person_id }}">
+                    <label for="mnote-{{ mt.owner_id }}">Introduce yourself</label>
+                    <textarea id="mnote-{{ mt.owner_id }}" name="note" maxlength="300" placeholder="Hello! I think we share {{ mt.people[0].first_name }} {{ mt.people[0].last_name }}. Would you like to compare notes?"></textarea>
+                    <div><button class="btn-primary btn-sm">Send request</button></div>
+                  </form>
+                </details>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="empty">No matches yet. Matches need a first name, last name and birth year on ancestors who've passed away.</p>
+        {% endif %}
+      </section>
+
+      {% if blocked %}
+        <section class="card stack" aria-labelledby="blocked-title">
+          <h2 id="blocked-title">Blocked</h2>
+          <ul class="list">
+            {% for b in blocked %}
+              <li><span class="grow">{{ b.other_name }}</span>
+                <form method="post" action="{{ url_for('family.withdraw', cid=b.id) }}">{{ m.csrf() }}<button class="linklike">Unblock</button></form></li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

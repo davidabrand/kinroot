@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}Your account · Kinroot{% endblock %}
+{% block content %}
+<main class="page narrow">
+  <div class="page-head">
+    <p class="eyebrow">Account</p>
+    <h1>{{ me.name }}</h1>
+    <p class="muted">{{ me.email }}</p>
+  </div>
+  <form method="post" class="card stack">
+    {{ m.csrf() }}<input type="hidden" name="action" value="name">
+    <h2>Your name</h2>
+    <p class="hint">This is how relatives see you in requests and messages.</p>
+    <div class="inline-form">
+      <div class="field"><label for="name">Name</label><input id="name" name="name" value="{{ me.name }}" required maxlength="80" autocomplete="name"></div>
+      <button>Save</button>
+    </div>
+  </form>
+  <form method="post" class="card stack">
+    {{ m.csrf() }}<input type="hidden" name="action" value="password">
+    <h2>Change password</h2>
+    <div class="field"><label for="current_password">Current password</label>
+      <input id="current_password" name="current_password" type="password" required autocomplete="current-password"></div>
+    <div class="field"><label for="new_password">New password <span class="hint">at least 8 characters</span></label>
+      <input id="new_password" name="new_password" type="password" minlength="8" required autocomplete="new-password"></div>
+    <div><button>Change password</button></div>
+  </form>
+  <form method="post" action="{{ url_for('auth.logout') }}">{{ m.csrf() }}<button class="btn-ghost">Log out</button></form>
+</main>
+{% endblock %}
