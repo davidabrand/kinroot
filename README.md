@@ -8,9 +8,9 @@ It's a Python (Flask) web app with a golden-hour 3D view built with Three.js, an
 ## Start it (Windows)
 
 1. Double-click **`run.bat`**. The first time, it sets itself up (about a minute).
-2. Your browser opens **http://127.0.0.1:5000**. Make an account and plant your tree.
+2. Your browser opens ****. Make an account and plant your tree.
 3. Want to see it full of people first? Double-click **`load_demo.bat`**, then log in as
-   `demo@example.com` / `password123`. You're David Brand, with five generations,
+. You're David Brand, with five generations,
    a chat with your sister Mia and a request from cousin Leo waiting.
 
 To stop Kinroot, close the black window (or press Ctrl+C in it).
