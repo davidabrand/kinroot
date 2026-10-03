@@ -53,3 +53,33 @@ Open items include: photos & stories per person (multiple photos, dated
 memories), undo for more actions, merge a GEDCOM into an existing tree,
 password reset + email verification (needs an email provider — see DEPLOY.md),
 and performance for very large trees.
+
+## Standards — what "better" means here
+
+**Definition of done** for any change:
+- `python -m pytest -q` passes, and new/changed behavior has a test.
+- Works at phone width and desktop; keyboard-accessible; correct in light AND dark mode.
+- No secrets printed or committed; `instance/` untouched; no new runtime dependency
+  without calling it out (it must also work on PythonAnywhere's free tier — no paid APIs).
+- Security preserved: parameterized SQL, CSRF, rate limits, `require_role`, living-person privacy.
+- Uses the existing design tokens in `style.css`; keeps the warm "golden-hour" identity.
+- Done on a git branch, with a short written summary of what changed and why.
+
+**UI/UX principles:**
+- Clarity over cleverness. Every screen should answer: where am I, what can I do,
+  what's the main action, what just happened, what next.
+- Reuse components; keep spacing, radii and colours consistent with the system.
+- Confirm only destructive actions; prefer an Undo over a confirm dialog.
+- Every new area needs empty, loading and error states — never a blank screen.
+- Treat mobile as a real product, not a shrunk desktop.
+
+**Using competitors (Ancestry, MyHeritage, FamilySearch, Geni, WikiTree):**
+- Adapt *ideas*, never clone their UI, copy proprietary content, or scrape paywalled data.
+- Skip anything needing data/DNA partnerships or paid services — out of scope for a solo app.
+- Keep Kinroot's privacy-first stance and its own look.
+
+## Working autonomously (supervised)
+Work in cycles. Each cycle: pick ONE high-value item from `BACKLOG.md` (or add a new,
+well-justified one first), branch `feat/<name>`, implement to the Definition of Done,
+run the tests, then STOP and summarize for review. Never deploy — that's a human step.
+Keep `BACKLOG.md` updated: mark items done, add new ideas with a one-line rationale.
