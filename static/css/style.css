@@ -555,6 +555,14 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .error:empty { display: none; }
 details > summary { cursor: pointer; font-weight: 600; color: var(--leaf); }
 .date-hint { font-size: .82rem; color: var(--ink-soft); }
+/* consistency checks: "worth a second look" */
+.issues { padding: 12px 14px; border-radius: 12px; background: var(--surface-2); border-left: 3px solid var(--honey); }
+.issues .rel-list li:hover { background: var(--surface); }
+.issue-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.issue-list li { display: flex; gap: 8px; align-items: baseline; }
+.issue-tag { flex: none; padding: 1px 7px; border-radius: 6px; font-size: var(--fs-tiny); font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  background: var(--honey-soft); color: var(--honey-ink); }
+.issue-tag.impossible { background: var(--danger-soft); color: var(--danger); }
 
 @media (max-width: 860px) {
   body.tree-page { overflow: auto; height: auto; }

@@ -11,6 +11,7 @@ from flask import (Blueprint, Response, abort, current_app, flash, jsonify, redi
 from . import gedcom
 from .access import ROLE_LABEL, ROLE_RANK, can, require_role, tree_role
 from .auth import current_user, login_required
+from .checks import find_issues
 from .dates import DateError, format_date, month_day, parse_date, utc_now, year_of
 from .db import get_db
 from .family import connection_states, counts as family_counts
@@ -62,7 +63,7 @@ def clean_person(data, partial=False):
     return fields, None
 
 
-def person_payload(p, tree, role, me, states, accounts):
+def person_payload(p, tree, role, me, states, accounts, issues=None):
     hide = viewer_must_hide(tree, role, p)
     d = {
         "id": p["id"], "first_name": p["first_name"], "last_name": p["last_name"], "gender": p["gender"],
@@ -73,6 +74,7 @@ def person_payload(p, tree, role, me, states, accounts):
         "living": is_living(p), "private": hide,
         "photo_url": url_for("trees.photo", filename=p["photo"]) if p["photo"] else "",
         "account": None,
+        "issues": issues or [],
     }
     d["birth_display"] = format_date(d["birth_date"])
     d["death_display"] = format_date(d["death_date"])
@@ -499,11 +501,13 @@ def api_tree(tree_id):
         accounts = {r["id"]: r["name"] for r in db.execute(f"SELECT id, name FROM users WHERE id IN ({marks})", claimed)}
     states = connection_states(me)
     my_leaf = next((p["id"] for p in people if p["user_id"] == me), None)
+    # Consistency hints go only to people who can fix them (and who see every date anyway).
+    issues = find_issues(people, rels) if can(role, "editor") else {}
     return jsonify(
         tree={"id": tree["id"], "name": tree["name"], "hide_living": bool(tree["hide_living"]),
               "discoverable": bool(tree["discoverable"])},
         role=role, me={"id": me, "person_id": my_leaf},
-        people=[person_payload(p, tree, role, me, states, accounts) for p in people],
+        people=[person_payload(p, tree, role, me, states, accounts, issues.get(p["id"])) for p in people],
         relationships=[dict(r) for r in rels])
 
 

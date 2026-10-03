@@ -5,6 +5,8 @@ import { lifespan } from "./util.js";
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const fullName = (p) => [p.first_name, p.last_name].filter(Boolean).join(" ");
 const initials = (p) => ((p.first_name || "?")[0] + (p.last_name ? p.last_name[0] : "")).toUpperCase();
+const ISSUE_TAG = { impossible: "Impossible", unlikely: "Unlikely" };
+const issueItem = (i) => `<li><span class="issue-tag ${i.level === "impossible" ? "impossible" : ""}">${ISSUE_TAG[i.level] || "Check"}<span class="sr-only">:</span></span><span>${esc(i.text)}</span></li>`;
 
 export class Panel {
   constructor(app, el) {
@@ -51,6 +53,7 @@ export class Panel {
     const years = people.map((p) => p.birth_year).filter(Boolean);
     const gens = people.length ? layout.maxGen + 1 : 0;
     const sorted = [...people].sort((a, b) => fullName(a).localeCompare(fullName(b)));
+    const flagged = sorted.filter((p) => p.issues?.length);
     this.render(`
       <div class="panel-head">
         <p class="eyebrow">${esc(tree.name)}</p>
@@ -72,6 +75,14 @@ export class Panel {
       ${people.length && !me.person_id ? `
         <div class="account-card"><div class="grow"><strong>Which leaf is you?</strong><br>
           <span class="small muted">Click yourself on the tree and choose “This is me” so relatives can find and message you.</span></div></div>` : ""}
+      ${canEdit && flagged.length ? `
+        <details class="issues">
+          <summary>${flagged.length === 1 ? "1 person has" : `${flagged.length} people have`} dates worth a second look</summary>
+          <ul class="rel-list" style="margin-top:8px">
+            ${flagged.map((p) => `<li><span><button class="who" data-goto="${p.id}">${esc(fullName(p))}</button>
+              <span class="small muted" style="display:block">${esc(p.issues[0].text)}${p.issues.length > 1 ? ` (+${p.issues.length - 1} more)` : ""}</span></span></li>`).join("")}
+          </ul>
+        </details>` : ""}
       ${isOwner ? `<p class="small muted">Want help filling it in? <a href="${esc(this.app.CFG.shareUrl)}">Invite family with a link</a>.</p>` : ""}
       ${people.length ? `
         <details>
@@ -132,6 +143,12 @@ export class Panel {
       ${this.accountCard(p)}
       ${facts ? `<dl class="facts">${facts}</dl>` : ""}
       ${p.private ? `<p class="small muted">${esc(p.first_name)} is living, so their dates and places are only shown to people who can edit this tree.</p>` : ""}
+      ${p.issues?.length ? `
+        <section class="issues stack-sm" aria-labelledby="issues-h">
+          <h3 id="issues-h">Worth a second look</h3>
+          <ul class="issue-list">${p.issues.map(issueItem).join("")}</ul>
+          <p class="small muted">Fix a date with <b>Edit details</b>, or leave it if the records really say so. Only people who can edit this tree see these notes.</p>
+        </section>` : ""}
       ${p.notes ? `<p>${esc(p.notes).replace(/\n/g, "<br>")}</p>` : ""}
       <section class="stack-sm">
         <h3>Family</h3>

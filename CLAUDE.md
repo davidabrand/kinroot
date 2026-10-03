@@ -27,6 +27,7 @@ for the `register` / `make_tree` / `add` helpers).
 - `kinroot/family.py` — connection requests and messages between relatives.
 - `kinroot/relationships.py` — "how are we related?".
 - `kinroot/dates.py` — genealogy dates ("about 1921").
+- `kinroot/checks.py` — consistency checks ("born before their parent"), shown to editors.
 - `kinroot/privacy.py` — what view-only guests may see about living people.
 - `kinroot/db.py` — SQLite schema via append-only MIGRATIONS (never edit an old
   migration; add a new numbered one at the end).
