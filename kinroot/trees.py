@@ -11,7 +11,7 @@ from flask import (Blueprint, Response, abort, current_app, flash, jsonify, redi
 from . import gedcom
 from .access import ROLE_LABEL, ROLE_RANK, can, require_role, tree_role
 from .auth import current_user, login_required
-from .dates import DateError, format_date, month_day, parse_date, year_of
+from .dates import DateError, format_date, month_day, parse_date, utc_now, year_of
 from .db import get_db
 from .family import connection_states, counts as family_counts
 from .privacy import is_living, viewer_must_hide
@@ -201,7 +201,7 @@ def valid_invite(token):
         LEFT JOIN people p ON p.id = i.person_id WHERE i.token = ?""", (token,)).fetchone()
     if not inv or inv["revoked"]:
         return None
-    if datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") > inv["expires_at"]:
+    if utc_now().strftime("%Y-%m-%d %H:%M:%S") > inv["expires_at"]:
         return None
     if inv["max_uses"] is not None and inv["uses"] >= inv["max_uses"]:
         return None
@@ -359,7 +359,7 @@ def share(tree_id):
                 if person["user_id"]:
                     flash(f"{person['first_name']} has already claimed their leaf.", "error")
                     return redirect(url_for("trees.share", tree_id=tree_id))
-            expires = (datetime.utcnow() + timedelta(days=INVITE_DAYS)).strftime("%Y-%m-%d %H:%M:%S")
+            expires = (utc_now() + timedelta(days=INVITE_DAYS)).strftime("%Y-%m-%d %H:%M:%S")
             db.execute("""INSERT INTO invites (tree_id, token, role, person_id, created_by, expires_at, max_uses)
                           VALUES (?, ?, ?, ?, ?, ?, ?)""",
                        (tree_id, secrets.token_urlsafe(18), inv_role, person_id, me["id"], expires,
@@ -432,7 +432,7 @@ def share(tree_id):
     invites = db.execute("""
         SELECT i.*, p.first_name AS person_first FROM invites i LEFT JOIN people p ON p.id = i.person_id
         WHERE i.tree_id = ? AND i.revoked = 0 AND i.expires_at > ? AND (i.max_uses IS NULL OR i.uses < i.max_uses)
-        ORDER BY i.created_at DESC""", (tree_id, datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))).fetchall()
+        ORDER BY i.created_at DESC""", (tree_id, utc_now().strftime("%Y-%m-%d %H:%M:%S"))).fetchall()
     unclaimed = db.execute("SELECT id, first_name, last_name FROM people WHERE tree_id = ? AND user_id IS NULL "
                            "ORDER BY first_name, last_name", (tree_id,)).fetchall()
     return render_template("share.html", tree=tree, members=members, invites=invites, unclaimed=unclaimed,

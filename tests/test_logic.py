@@ -1,10 +1,10 @@
 """Dates, relationship names and GEDCOM files (no web server needed)."""
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
 from kinroot import gedcom
-from kinroot.dates import DateError, format_date, parse_date, to_gedcom
+from kinroot.dates import DateError, format_date, parse_date, to_gedcom, utc_now
 from kinroot.relationships import FamilyGraph, blood_term
 
 TODAY = date(2026, 9, 28)
@@ -120,3 +120,10 @@ def test_gedcom_parse_and_export():
 def test_not_a_gedcom_file():
     with pytest.raises(gedcom.GedcomError):
         gedcom.parse(b"hello world")
+
+
+def test_utc_now_is_naive_utc():
+    # Stored timestamps are timezone-free UTC strings, so utc_now() must be too.
+    now = utc_now()
+    assert now.tzinfo is None
+    assert abs(now - datetime.now(timezone.utc).replace(tzinfo=None)) < timedelta(seconds=5)

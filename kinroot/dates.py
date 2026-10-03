@@ -15,7 +15,18 @@ into one of those. format_date() turns it back into friendly text.
 """
 import calendar
 import re
-from datetime import date
+from datetime import date, datetime, timezone
+
+
+def utc_now():
+    """The current UTC time as a plain (timezone-free) datetime.
+
+    Kinroot stores timestamps as "YYYY-MM-DD HH:MM:SS" UTC strings without a
+    timezone, so we drop tzinfo to keep comparisons with parsed stamps working.
+    (Replaces datetime.utcnow(), which Python has deprecated.)
+    """
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
 
 MONTH_ABBR = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
 MONTH_SHOW = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]

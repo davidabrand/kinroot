@@ -13,6 +13,7 @@ from datetime import date, datetime, timedelta
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, url_for
 
 from .auth import current_user, login_required
+from .dates import utc_now
 from .db import get_db
 from .privacy import PRESUMED_DECEASED_AFTER_YEARS
 from .relationships import FamilyGraph
@@ -28,7 +29,7 @@ RETRY_AFTER_DAYS = 30
 # ------------------------------------------------------------------ state helpers
 
 def _now():
-    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    return utc_now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def connection_between(a, b):
@@ -185,7 +186,7 @@ def send_request(me, other, note="", via_tree_id=None, via_person_id=None, match
             return existing["id"], "connected"
         if existing["status"] == "declined" and existing["requester_id"] == me:
             answered = datetime.strptime(existing["responded_at"], "%Y-%m-%d %H:%M:%S")
-            if datetime.utcnow() - answered < timedelta(days=RETRY_AFTER_DAYS):
+            if utc_now() - answered < timedelta(days=RETRY_AFTER_DAYS):
                 return existing["id"], "pending_out"   # silent: still looks "sent"
         if existing["status"] == "pending" and existing["requester_id"] == me:
             return existing["id"], "pending_out"

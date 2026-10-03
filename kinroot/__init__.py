@@ -8,7 +8,7 @@ from markupsafe import Markup, escape
 from werkzeug.exceptions import HTTPException
 
 from . import auth, db, family, trees
-from .dates import format_date
+from .dates import format_date, utc_now
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 API_HEADER = ("X-Requested-With", "Kinroot")
@@ -132,7 +132,7 @@ def _ago(stamp):
         then = datetime.strptime(stamp[:19], "%Y-%m-%d %H:%M:%S")
     except ValueError:
         return stamp
-    secs = (datetime.utcnow() - then).total_seconds()
+    secs = (utc_now() - then).total_seconds()
     if secs < 60:
         return "just now"
     if secs < 3600:
