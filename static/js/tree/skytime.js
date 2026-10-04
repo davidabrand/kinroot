@@ -18,11 +18,11 @@ export const KEYFRAMES = [
     glow: 0, stars: 1, light: "#9fb4e0", lightI: 0.6, hemiSky: "#4a5470", hemiGround: "#0d0e0b", hemiI: 0.45, fillI: 0.3, motes: "#e7cb8e" },
   { alt: -9, top: "#07080b", mid: "#100f14", horizon: "#241b19", ground: "#0d0c0a", sun: "#c4643a",
     glow: 0.25, stars: 0.35, light: "#c9a3c0", lightI: 0.85, hemiSky: "#6f6888", hemiGround: "#14120e", hemiI: 0.5, fillI: 0.35, motes: "#e7cb8e" },
-  { alt: -1, top: "#0b0a0b", mid: "#1d1612", horizon: "#3c2a1c", ground: "#120f0b", sun: "#d98a4a",
+  { alt: -1, top: "#0a090a", mid: "#16110e", horizon: "#2b1f16", ground: "#120f0b", sun: "#d98a4a",
     glow: 0.45, stars: 0, light: "#ffb27a", lightI: 1.8, hemiSky: "#d9b48a", hemiGround: "#17130d", hemiI: 0.55, fillI: 0.45, motes: "#f3ddaa" },
-  { alt: 8, top: "#0d0c0a", mid: "#1f1a12", horizon: "#3f3220", ground: "#14110c", sun: "#d2b77d",
+  { alt: 8, top: "#0b0a09", mid: "#17130e", horizon: "#2c2318", ground: "#14110c", sun: "#d2b77d",
     glow: 0.4, stars: 0, light: "#ffd39a", lightI: 2.6, hemiSky: "#f1dcb4", hemiGround: "#1a170f", hemiI: 0.65, fillI: 0.6, motes: "#f3ddaa" },
-  { alt: 30, top: "#10110e", mid: "#1d1e19", horizon: "#34322a", ground: "#151510", sun: "#f1ebdd",
+  { alt: 30, top: "#0c0d0b", mid: "#141511", horizon: "#1f1d17", ground: "#151510", sun: "#f1ebdd",
     glow: 0.2, stars: 0, light: "#fff1dc", lightI: 2.9, hemiSky: "#ece4d4", hemiGround: "#1a1914", hemiI: 0.75, fillI: 0.6, motes: "#f1ebdd" },
 ];
 

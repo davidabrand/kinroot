@@ -157,27 +157,24 @@ export function applySky(scene, state) {
 export { srgb };
 
 export function addLandscape(scene) {
+  // A stage, not a landscape: an unlit near-black floor that stays dark at any hour, a shadow
+  // catcher so the tree still grounds itself, and a faint warm pool of light under the trunk.
   const group = new THREE.Group();
-  const ground = new THREE.Mesh(new THREE.CircleGeometry(400, 64),
-    new THREE.MeshStandardMaterial({ color: 0x0f100d, roughness: 1, envMapIntensity: 0.3 }));
-  ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
-  group.add(ground);
-
-  // Low dark hills: silhouettes that give the stage depth without competing with the tree.
-  const hillMat = [0x161712, 0x1b1c16, 0x131410].map((c) =>
-    new THREE.MeshStandardMaterial({ color: c, roughness: 1, envMapIntensity: 0.4 }));
-  const hills = [
-    [-120, -170, 90, 22, 60, 0], [40, -210, 120, 30, 70, 1], [170, -160, 80, 18, 55, 2],
-    [-230, -60, 70, 16, 70, 1], [240, -40, 80, 20, 70, 0],
-  ];
-  for (const [x, z, sx, sy, sz, m] of hills) {
-    const hill = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16), hillMat[m]);
-    hill.scale.set(sx, sy, sz);
-    hill.position.set(x, -sy * 0.35, z);
-    hill.userData.hill = true;
-    group.add(hill);
-  }
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(400, 64), new THREE.MeshBasicMaterial({ color: 0x070807 }));
+  floor.rotation.x = -Math.PI / 2;
+  group.add(floor);
+  const shadows = new THREE.Mesh(new THREE.CircleGeometry(70, 64), new THREE.ShadowMaterial({ opacity: 0.5 }));
+  shadows.rotation.x = -Math.PI / 2;
+  shadows.position.y = 0.01;
+  shadows.receiveShadow = true;
+  group.add(shadows);
+  const pool = new THREE.Mesh(new THREE.CircleGeometry(24, 48), new THREE.MeshBasicMaterial({
+    map: glowTexture("rgba(214,186,132,0.55)", "rgba(214,186,132,0)"), transparent: true, opacity: 0.32,
+    depthWrite: false, blending: THREE.AdditiveBlending,
+  }));
+  pool.rotation.x = -Math.PI / 2;
+  pool.position.y = 0.02;
+  group.add(pool);
   scene.add(group);
   return group;
 }
