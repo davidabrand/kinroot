@@ -39,7 +39,8 @@ document.querySelectorAll(".flash:not(.error)").forEach((el) => {
 // Just made an invite link? The page opens on it (#invite-row-N, highlighted by CSS):
 // put the Copy button in focus, so Enter copies it.
 (() => {
-  const row = location.hash.startsWith("#invite-row-") && document.querySelector(location.hash);
+  // (A ternary, not `&&`: `false?.querySelector` would throw and stop the rest of this file.)
+  const row = location.hash.startsWith("#invite-row-") ? document.querySelector(location.hash) : null;
   row?.querySelector("[data-copy]")?.focus({ preventScroll: true });
 })();
 
