@@ -83,9 +83,9 @@
                 {{ m.avatar(s.name) }}
                 <div class="grow"><strong>{{ s.name }}</strong><br>
                   {% if s.relation %}<span class="relation">Your {{ s.relation.term }}</span>{% else %}<span class="muted small">On “{{ s.tree_name }}”</span>{% endif %}</div>
-                <details style="flex-basis: 100%">
+                <details class="full-row">
                   <summary>Connect</summary>
-                  <form method="post" action="{{ url_for('family.request_form') }}" class="stack" style="margin-top: 10px">
+                  <form method="post" action="{{ url_for('family.request_form') }}" class="stack">
                     {{ m.csrf() }}
                     <input type="hidden" name="user_id" value="{{ s.id }}"><input type="hidden" name="via_tree_id" value="{{ s.tree_id }}">
                     <label for="note-{{ s.id }}">Add a note <span class="hint">optional</span></label>
@@ -115,9 +115,9 @@
                     {% for p in mt.people %}<li>{{ p.first_name }} {{ p.last_name }}, born {{ p.birth_year }} <span class="muted">(your “{{ p.my_tree_name }}”)</span></li>{% endfor %}
                   </ul>
                 </div>
-                <details style="flex-basis: 100%">
+                <details class="full-row">
                   <summary>Send a request</summary>
-                  <form method="post" action="{{ url_for('family.request_form') }}" class="stack" style="margin-top: 10px">
+                  <form method="post" action="{{ url_for('family.request_form') }}" class="stack">
                     {{ m.csrf() }}
                     <input type="hidden" name="user_id" value="{{ mt.owner_id }}">
                     <input type="hidden" name="via_person_id" value="{{ mt.people[0].my_person_id }}">

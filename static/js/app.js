@@ -25,6 +25,17 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
   });
 });
 
+// Success messages step aside once read; errors stay until they're dealt with.
+// (Not while the pointer rests on one, so nobody loses a message mid-read.)
+document.querySelectorAll(".flash:not(.error)").forEach((el) => {
+  const leave = () => {
+    if (el.matches(":hover")) return setTimeout(leave, 2000);
+    el.classList.add("leaving");
+    setTimeout(() => el.remove(), 300);
+  };
+  setTimeout(leave, 8000);
+});
+
 // Just made an invite link? The page opens on it (#invite-row-N, highlighted by CSS):
 // put the Copy button in focus, so Enter copies it.
 (() => {

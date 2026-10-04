@@ -6,8 +6,8 @@
   <header class="chat-head">
     <a href="{{ url_for('family.hub') }}" class="btn btn-ghost btn-sm" aria-label="Back to Family">←</a>
     {{ m.avatar(other.name) }}
-    <div class="grow" style="flex: 1; min-width: 0">
-      <h1 style="font-size: 1.4rem">{{ other.name }}</h1>
+    <div class="grow">
+      <h1>{{ other.name }}</h1>
       {% if relation %}<span class="relation">Your {{ relation.term }} · {{ relation.tree_name }}</span>
       {% elif via %}<span class="muted small">Connected through “{{ via.name }}”</span>{% endif %}
     </div>

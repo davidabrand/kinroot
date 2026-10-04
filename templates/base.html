@@ -20,7 +20,7 @@
     <a class="brand" href="{{ url_for('landing') }}" aria-label="Kinroot home">{{ m.mark() }}{{ m.wordmark() }}</a>
     <nav class="topnav" aria-label="Main">
       {% if me %}
-        <a href="{{ url_for('trees.dashboard') }}" {% if request.endpoint in ('trees.dashboard',) %}aria-current="page"{% endif %}>My trees</a>
+        <a href="{{ url_for('trees.dashboard') }}" {% if request.endpoint in ('trees.dashboard', 'trees.tree_view', 'trees.share') %}aria-current="{{ 'page' if request.endpoint == 'trees.dashboard' else 'true' }}"{% endif %}>My trees</a>
         <a href="{{ url_for('family.hub') }}" {% if request.endpoint and request.endpoint.startswith('family.') %}aria-current="page"{% endif %}>
           Family{% if nav_counts and nav_counts.total %} <span class="badge" aria-label="{{ nav_counts.total }} new">{{ nav_counts.total }}</span>{% endif %}
         </a>

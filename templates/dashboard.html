@@ -30,7 +30,7 @@
 
   <details class="onboard-import">
     <summary>Already have a tree elsewhere? Import a GEDCOM file</summary>
-    <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="stack" style="margin-top: 12px">
+    <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="stack">
       {{ m.csrf() }}
       <p class="hint">Export one from Ancestry, FamilySearch, MyHeritage or most genealogy apps. It becomes a new tree.</p>
       <div class="field"><label for="gedcom">GEDCOM file</label>
@@ -72,7 +72,7 @@
               <div class="body">
                 <label for="tree-name" class="name">Plant a new tree</label>
                 <input id="tree-name" name="name" placeholder="The {{ me.name.split()[-1] if me.name.split()|length > 1 else 'Smith' }} family" required maxlength="120">
-                <button class="btn-primary btn-sm">Create tree</button>
+                <button class="btn-primary btn-sm">Plant tree</button>
               </div>
             </form>
           </li>

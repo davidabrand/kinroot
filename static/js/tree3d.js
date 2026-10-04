@@ -74,8 +74,13 @@ const app = {
       btn.addEventListener("click", async () => {
         clearTimeout(this._toastTimer);
         btn.disabled = true;
-        try { await onAction(); } catch (e) { /* leave the toast; the panel shows errors */ }
-        this.dismissToast();
+        try {
+          await onAction();
+          this.dismissToast();
+        } catch (e) {
+          // Never let a failed Undo look like it worked: say so, and say what to do.
+          this.toast(`Couldn't undo that: ${e.message}`);
+        }
       });
       host.appendChild(btn);
     }
@@ -87,7 +92,8 @@ const app = {
     close.addEventListener("click", () => this.dismissToast());
     host.appendChild(close);
     host.classList.add("show");
-    this._toastTimer = setTimeout(() => this.dismissToast(), 8000);
+    // Long enough to reach Undo; plain confirmations get out of the way sooner.
+    this._toastTimer = setTimeout(() => this.dismissToast(), actionLabel ? 8000 : 4000);
   },
 
   dismissToast() {
@@ -217,7 +223,7 @@ async function boot() {
     panel.removeAttribute("aria-busy");
     panel.innerHTML = `<div class="empty" role="alert"><strong>Your family couldn't load</strong>
       <span data-msg></span><span>Nothing has been lost. Check your connection, then try again.</span>
-      <button type="button" class="btn-sm" data-retry style="margin-top:8px">Try again</button></div>`;
+      <button type="button" class="btn-sm" data-retry>Try again</button></div>`;
     panel.querySelector("[data-msg]").textContent = err.message;
     panel.querySelector("[data-retry]").addEventListener("click", () => location.reload());
   } finally {

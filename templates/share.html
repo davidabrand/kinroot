@@ -63,7 +63,7 @@
             <form method="post" class="btn-row">
               {{ m.csrf() }}<input type="hidden" name="action" value="set_role"><input type="hidden" name="user_id" value="{{ mem.id }}">
               <label class="sr-only" for="role-{{ mem.id }}">Access for {{ mem.name }}</label>
-              <select id="role-{{ mem.id }}" name="role" onchange="this.form.submit()" style="width:auto">
+              <select id="role-{{ mem.id }}" name="role" onchange="this.form.submit()" class="select-auto">
                 <option value="viewer" {{ 'selected' if mem.role == 'viewer' }}>Can view</option>
                 <option value="editor" {{ 'selected' if mem.role == 'editor' }}>Can edit</option>
               </select>
@@ -76,10 +76,10 @@
     </ul>
     <details>
       <summary>Add someone who already has a Kinroot account</summary>
-      <form method="post" class="inline-form" style="margin-top: 12px">
+      <form method="post" class="inline-form">
         {{ m.csrf() }}<input type="hidden" name="action" value="add_member">
         <div class="field"><label for="add-email">Their email</label><input id="add-email" name="email" type="email" required></div>
-        <div class="field" style="flex: 0 1 160px"><label for="add-role">Access</label>
+        <div class="field select-auto"><label for="add-role">Access</label>
           <select id="add-role" name="role"><option value="viewer">Can view</option><option value="editor">Can edit</option></select></div>
         <button>Add</button>
       </form>

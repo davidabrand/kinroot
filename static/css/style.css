@@ -136,7 +136,8 @@ a:focus-visible { border-radius: var(--r-xs); }
   transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 .topnav a:hover, .topnav .navbtn:hover { background: var(--hover); color: var(--ink); }
-.topnav a[aria-current="page"] { background: var(--leaf-soft); color: var(--ink); font-weight: 600; }
+/* "page" = you're on it; "true" = you're inside it (a tree, its settings): same highlight either way. */
+.topnav a[aria-current] { background: var(--leaf-soft); color: var(--ink); font-weight: 600; }
 .topnav form { margin: 0; }
 .badge {
   min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--r-pill); background: var(--honey); color: var(--on-honey);
@@ -164,6 +165,7 @@ a:focus-visible { border-radius: var(--r-xs); }
 .flash::before { content: "✓"; font-weight: 800; color: var(--leaf); }
 .flash.error { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
 .flash.error::before { content: "!"; color: var(--danger); }
+.flash.leaving { opacity: 0; transform: translateY(-4px); transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease); }
 @keyframes rise-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
 /* ---------- buttons ----------
@@ -197,7 +199,7 @@ a:focus-visible { border-radius: var(--r-xs); }
 
 /* "Working…" feedback while a form submits: a small spinner after the label.
    Auth buttons keep their own shimmer; the reduced-motion rule stops this. */
-button[aria-busy="true"] { cursor: progress; }
+button[aria-busy="true"], button[aria-busy="true"]:disabled { cursor: progress; opacity: 1; }
 button[aria-busy="true"]::after {
   content: ""; width: 1em; height: 1em; flex: none;
   border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
@@ -257,6 +259,7 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--leaf); m
   background: var(--surface-2); color: var(--ink-soft); text-align: center; font-size: var(--fs-small); }
 .empty .icon { width: 26px; height: 26px; color: var(--leaf); margin-bottom: 4px; }
 .empty strong { color: var(--ink); font-size: 1rem; }
+.empty > button { margin-top: var(--sp-2); }
 
 /* Disclosures: a chevron that turns, and content that eases in. Menus style their own trigger. */
 details:not(.menu) > summary { list-style: none; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: var(--leaf);
@@ -268,6 +271,14 @@ details:not(.menu) > summary::before { content: ""; width: 7px; height: 7px; fle
 details[open]:not(.menu) > summary::before { transform: rotate(45deg); }
 details:not(.menu) > summary:hover { color: var(--ink); }
 details[open] > :not(summary) { animation: rise-in var(--dur) var(--ease) both; }
+details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one consistent gap under every disclosure */
+
+/* Small layout helpers, so templates never need inline styles. */
+.full-row { flex-basis: 100%; }
+.center-card { text-align: center; justify-items: center; gap: var(--sp-4); }
+.center-card .btn-row { justify-content: center; }
+.select-auto { width: auto; }
+.text-danger { color: var(--danger); }
 
 /* Loading skeletons */
 .skel { display: block; border-radius: var(--r-xs); background: linear-gradient(90deg, var(--surface-2) 25%, color-mix(in srgb, var(--surface-2) 40%, var(--line)) 50%, var(--surface-2) 75%);
@@ -650,10 +661,12 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .stat { display: flex; flex-direction: column-reverse; gap: 2px; }
 .stat dd { margin: 0; font: 800 1.75rem/1 var(--display); font-variant-numeric: tabular-nums; }
 .stat dt { font-size: var(--fs-small); color: var(--ink-soft); }
+.issue-summary { display: block; }
 .rel-group { display: grid; gap: 2px; }
 .rel-group > .kind { padding-inline: 8px; font-size: var(--fs-small); color: var(--ink-soft); }
 .rel-group + .rel-group { margin-top: var(--sp-2); }
 .touch-tip { display: none; }
+.side-panel.entering > * { animation: rise-in var(--dur) var(--ease) both; }
 .rel-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .rel-list li { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 6px 8px; border-radius: var(--r-sm); }
 .rel-list li:hover { background: var(--surface-2); }
@@ -708,6 +721,8 @@ details.menu > summary::-webkit-details-marker { display: none; }
 
 .chat { max-width: 760px; margin: 0 auto; width: 100%; display: grid; grid-template-rows: auto 1fr auto; height: calc(100vh - 64px); height: calc(100dvh - 64px); padding: 0 clamp(12px, 3vw, 24px); }
 .chat-head { display: flex; gap: 12px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.chat-head .grow { flex: 1; min-width: 0; }
+.chat-head h1 { font-size: var(--fs-h2); }
 .chat-log { overflow-y: auto; padding: 18px 2px; display: flex; flex-direction: column; gap: 8px; }
 .bubble { max-width: min(78%, 520px); padding: 9px 14px 10px; border-radius: 18px 18px 18px 6px; background: var(--surface); border: 1px solid var(--line); align-self: flex-start; white-space: pre-wrap; overflow-wrap: anywhere; }
 .bubble.mine { align-self: flex-end; border-radius: 18px 18px 6px 18px; background: var(--honey-soft); border-color: color-mix(in srgb, var(--honey) 40%, transparent); }

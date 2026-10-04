@@ -21,6 +21,14 @@ export class Panel {
     this.el.removeAttribute("aria-busy");
     this.el.innerHTML = html;
     this.el.scrollTop = 0;
+    // A soft fade when you move to a different view or person; a refresh of the same view stays still.
+    const key = `${this.view}:${this.store.selected ?? ""}`;
+    if (key !== this._lastKey) {
+      this.el.classList.remove("entering");
+      void this.el.offsetWidth;            // restart the animation
+      this.el.classList.add("entering");
+      this._lastKey = key;
+    }
   }
 
   on(selector, event, fn) {
@@ -34,7 +42,7 @@ export class Panel {
       const err = this.el.querySelector(".error");
       if (err) err.textContent = "";
       const button = e?.submitter || (e?.currentTarget instanceof HTMLButtonElement ? e.currentTarget : null);
-      if (button) button.disabled = true;
+      if (button) { button.disabled = true; button.setAttribute("aria-busy", "true"); }   // same spinner as page forms
       try {
         await fn(e);
       } catch (ex) {
@@ -42,7 +50,7 @@ export class Panel {
         if (line) line.textContent = ex.message;
         else alertInline(this.el, ex.message);
       } finally {
-        if (button && button.isConnected) button.disabled = false;
+        if (button && button.isConnected) { button.disabled = false; button.removeAttribute("aria-busy"); }
       }
     };
   }
@@ -77,16 +85,16 @@ export class Panel {
       ${canEdit && flagged.length ? `
         <details class="issues">
           <summary>${flagged.length === 1 ? "1 person has" : `${flagged.length} people have`} dates worth a second look</summary>
-          <ul class="rel-list" style="margin-top:8px">
+          <ul class="rel-list">
             ${flagged.map((p) => `<li><span><button class="who" data-goto="${p.id}">${esc(fullName(p))}</button>
-              <span class="small muted" style="display:block">${esc(p.issues[0].text)}${p.issues.length > 1 ? ` (+${p.issues.length - 1} more)` : ""}</span></span></li>`).join("")}
+              <span class="small muted issue-summary">${esc(p.issues[0].text)}${p.issues.length > 1 ? ` (+${p.issues.length - 1} more)` : ""}</span></span></li>`).join("")}
           </ul>
         </details>` : ""}
       ${isOwner ? `<p class="small muted">Want help filling it in? <a href="${esc(this.app.CFG.shareUrl)}">Invite family with a link</a>.</p>` : ""}
       ${people.length ? `
         <details>
           <summary>Everyone on this tree (${people.length})</summary>
-          <ul class="rel-list" style="margin-top:8px">
+          <ul class="rel-list">
             ${sorted.map((p) => `<li><button class="who" data-goto="${p.id}">${esc(fullName(p))}</button><span class="muted small">${esc(lifespan(p))}</span></li>`).join("")}
           </ul>
         </details>
@@ -172,7 +180,7 @@ export class Panel {
           ${this.store.people.length > 1 ? `
           <details>
             <summary>Link someone already on the tree</summary>
-            <div class="stack" style="margin-top:10px">
+            <div class="stack">
               <div class="field"><label for="link-kind">${esc(p.first_name)} is the…</label>
                 <select id="link-kind"><option value="parent">parent of</option><option value="child">child of</option><option value="spouse">partner of</option></select></div>
               <div class="field"><label for="link-other">Person</label>
@@ -184,7 +192,7 @@ export class Panel {
         </section>
         <div class="btn-row">
           <button data-act="edit">Edit details</button>
-          <button class="btn-ghost danger" data-act="delete" style="color:var(--danger)">Remove from tree</button>
+          <button class="btn-ghost text-danger" data-act="delete">Remove from tree</button>
         </div>` : ""}
       ${isOwner && !p.account ? `<p class="small muted"><a href="${esc(this.app.CFG.shareUrl)}?person=${id}">Invite ${esc(p.first_name)} to claim this leaf</a></p>` : ""}
       <p class="error" role="alert"></p>`);
@@ -229,6 +237,7 @@ export class Panel {
       await this.app.api.link(id, other, this.el.querySelector("#link-kind").value);
       await this.app.refresh();
       this.person(id);
+      this.app.toast(`Linked ${fullName(p)} and ${fullName(byId.get(other) || { first_name: "them" })}.`);
     }));
     this.wireAccountCard(p);
   }
@@ -258,7 +267,7 @@ export class Panel {
     return `<div class="account-card"><div class="grow"><strong>${esc(a.name)} is on Kinroot</strong><br>
         <span class="small muted">${a.connection === "connected" ? "You're connected." : `Connect to message ${first}.`}</span></div>
         ${action}
-        <form class="stack" data-connect-form hidden style="flex-basis:100%">
+        <form class="stack full-row" data-connect-form hidden>
           <label for="connect-note">Add a note <span class="hint">optional</span></label>
           <textarea id="connect-note" maxlength="300" placeholder="Hi ${first}! I found you on the family tree."></textarea>
           <div class="btn-row"><button class="btn-primary btn-sm">Send request</button><button type="button" class="btn-sm btn-ghost" data-act="connect-cancel">Cancel</button></div>
@@ -322,7 +331,7 @@ export class Panel {
           <datalist id="gender-options">${genders.map((g) => `<option value="${g}">`).join("")}</datalist></div>
         <details class="more-details" ${extrasOpen ? "open" : ""}>
           <summary>More details <span class="hint">birthplace, photo, stories</span></summary>
-          <div class="stack" style="margin-top:12px">
+          <div class="stack">
             <div class="field"><label for="f-place">Birthplace</label><input id="f-place" name="birth_place" maxlength="200" value="${mode === "edit" ? v("birth_place") : ""}" placeholder="Brooklyn, New York"></div>
             <div class="field"><label for="f-photo">Photo</label><input id="f-photo" name="photo" type="file" accept="image/jpeg,image/png,image/gif,image/webp">
               ${mode === "edit" && person.photo_url ? `<label class="check small"><input type="checkbox" id="f-photo-remove"> Remove the current photo</label>` : ""}</div>
@@ -366,6 +375,7 @@ export class Panel {
       // parent or more children without accidentally chaining generations.
       const focusId = (mode === "add" && link && (link.as === "parent" || link.as === "child")) ? other.id : saved.id;
       this.app.select(focusId, { fly: mode === "add" });
+      this.app.toast(mode === "edit" ? `Saved ${fullName(saved)}.` : `Added ${fullName(saved)} to the tree.`);
     }));
     form.querySelector(self && presetFirst ? "#f-born" : "#f-first").focus();   // name already filled? start at the date
   }

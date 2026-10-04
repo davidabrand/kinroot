@@ -34,6 +34,10 @@ a date; add new ideas with a one-line "why".
 - [ ] **Large-tree performance** — instanced leaves, label culling for 500+ people.
 
 ## Done
+- [x] 2026-10-04 **Consistency & feedback sweep** — no inline styles left; "My trees" stays
+      highlighted inside a tree; saves and links confirm with a toast; a failed Undo says so;
+      panel buttons show the same busy spinner as page forms; success messages fade after 8s
+      (errors stay); panel fades between views; "Plant tree" wording everywhere.
 - [x] 2026-10-04 **Faster workflows** (owner request) — tree name and "Add myself" prefilled;
       optional fields behind "More details"; Remove is one click with Undo (no confirm);
       Unlink gets Undo; relationship finder answers immediately; empty trees hide tools that
