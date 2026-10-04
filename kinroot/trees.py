@@ -257,9 +257,16 @@ def create_tree(name, owner_id):
     return cur.lastrowid
 
 
-@bp.route("/trees/import", methods=["POST"])
+@bp.route("/trees/import", methods=["GET", "POST"])
 @login_required
 def import_tree():
+    if request.method == "GET":
+        # The Import & export page: bring a GEDCOM in (always as a new tree), or take each tree out.
+        trees = get_db().execute("""
+            SELECT t.id, t.name, m.role, (SELECT COUNT(*) FROM people p WHERE p.tree_id = t.id) AS people_count
+            FROM trees t JOIN tree_members m ON m.tree_id = t.id AND m.user_id = ?
+            ORDER BY t.created_at DESC, t.id DESC""", (current_user()["id"],)).fetchall()
+        return render_template("import.html", trees=trees, max_people=MAX_IMPORT_PEOPLE)
     file = request.files.get("gedcom")
     if not file or not file.filename:
         flash("Choose a GEDCOM file (it usually ends in .ged).", "error")

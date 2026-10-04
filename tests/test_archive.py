@@ -63,3 +63,11 @@ def test_strangers_are_kept_out(app):
     register(stranger, "stranger@example.com")
     for path in ("people", "relationships", "timeline"):
         assert stranger.get(f"/trees/{tid}/{path}").status_code in (403, 404)
+
+
+def test_import_page_explains_and_offers_exports(app):
+    owner, tid, _ = _family(app)
+    page = owner.get("/trees/import").get_data(as_text=True)
+    assert "Bring your family history" in page and 'enctype="multipart/form-data"' in page
+    assert "Nothing is overwritten" in page and "Notes and photos stay in Kinroot" in page
+    assert f"/trees/{tid}/export.ged" in page                      # each tree you can edit can be exported

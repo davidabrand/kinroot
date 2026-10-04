@@ -454,6 +454,23 @@ details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one con
 @media (max-width: 640px) { .decade { grid-template-columns: 1fr; gap: var(--sp-3); } .decade-year { position: static; } }
 @media (prefers-reduced-motion: reduce) { .lineage li { animation: none; } }
 
+/* ---------- Import & export ---------- */
+.display-sm { font: 500 clamp(1.9rem, 1.2vw + 1.4rem, 2.5rem)/1.05 var(--display); }
+.display-sm em { font-style: italic; color: var(--honey-ink); }
+.dropzone { display: grid; gap: var(--sp-4); justify-items: start; }
+.dropzone-target { display: grid; justify-items: center; gap: 8px; width: 100%; padding: var(--sp-7) var(--sp-5); text-align: center; cursor: pointer;
+  border: 1.5px dashed color-mix(in srgb, var(--honey) 55%, var(--line)); border-radius: var(--r-lg); background: var(--surface);
+  transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease); font-weight: 400; }
+.dropzone-target .icon { width: 28px; height: 28px; color: var(--honey); }
+.dropzone-title { font: 500 1.5rem/1.1 var(--display); color: var(--ink); }
+.dropzone.is-over .dropzone-target, .dropzone-target:hover { border-color: var(--honey); background: var(--honey-soft); }
+.dropzone.has-file .dropzone-target { border-style: solid; }
+.dropzone:has(input:focus-visible) .dropzone-target { outline: 2.5px solid var(--honey); outline-offset: 2px; }
+.assurances { list-style: none; margin: var(--sp-2) 0 0; padding: 0; display: grid; gap: 10px; }
+.assurances li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; font-size: var(--fs-small); color: var(--ink-soft); }
+.assurances .icon { color: var(--honey); margin-top: 2px; }
+.assurances b { color: var(--ink); font-weight: 600; }
+
 /* ---------- settings pages: sections divided by hairlines, not boxed ---------- */
 .settings { display: grid; }
 .settings > section { display: grid; gap: var(--sp-3); align-content: start; padding-block: var(--sp-6); border-top: 1px solid var(--line); }

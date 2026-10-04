@@ -31,6 +31,7 @@
       </div>
       <nav class="sb-nav" aria-label="Main">
         <a href="{{ url_for('trees.dashboard') }}" title="My trees" {% if request.endpoint == 'trees.dashboard' %}aria-current="page"{% endif %}>{{ m.icon("tree") }}<span>My trees</span></a>
+        <a href="{{ url_for('trees.import_tree') }}" title="Import &amp; export" {% if request.endpoint == 'trees.import_tree' %}aria-current="page"{% endif %}>{{ m.icon("upload") }}<span>Import &amp; export</span></a>
         {% if ctx_tree %}
           <div class="sb-group">
             <p class="sb-label" title="{{ ctx_tree.name }}">{{ ctx_tree.name }}</p>

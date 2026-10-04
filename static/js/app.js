@@ -35,6 +35,22 @@
   app.querySelectorAll(".sb-nav a").forEach((a) => a.addEventListener("click", () => setOpen(false)));
 })();
 
+// ---- Import page: drop a GEDCOM file onto the zone (the file field still works on its own) ----
+(() => {
+  const zone = document.querySelector("[data-dropzone]");
+  if (!zone) return;
+  const input = zone.querySelector("input[type=file]");
+  const name = zone.querySelector("[data-dropzone-name]");
+  const show = () => { if (input.files[0]) { name.textContent = input.files[0].name; zone.classList.add("has-file"); } };
+  input.addEventListener("change", show);
+  ["dragenter", "dragover"].forEach((t) => zone.addEventListener(t, (e) => { e.preventDefault(); zone.classList.add("is-over"); }));
+  ["dragleave", "drop"].forEach((t) => zone.addEventListener(t, () => zone.classList.remove("is-over")));
+  zone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    if (e.dataTransfer?.files?.length) { input.files = e.dataTransfer.files; show(); }
+  });
+})();
+
 // ---- People page: instant search -------------------------------------------
 (() => {
   const input = document.querySelector("[data-people-search]");

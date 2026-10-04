@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}Import &amp; export · Kinroot{% endblock %}
+{% block app_title %}<span class="here">Import &amp; export</span>{% endblock %}
+{% block content %}
+<main class="page narrow">
+  <div class="page-head">
+    <p class="eyebrow">Import</p>
+    <h1 class="display">Bring your family history <em>with you.</em></h1>
+    <p class="lede">Export a GEDCOM file from Ancestry, FamilySearch, MyHeritage or most genealogy apps, and Kinroot turns it into a new tree.</p>
+  </div>
+
+  <div class="settings">
+    <section aria-labelledby="import-title">
+      <h2 id="import-title" class="sr-only">Import a GEDCOM file</h2>
+      <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="dropzone" data-dropzone>
+        {{ m.csrf() }}
+        <label for="gedcom" class="dropzone-target">
+          {{ m.icon("upload") }}
+          <span class="dropzone-title">Drop a GEDCOM file here</span>
+          <span class="muted small" data-dropzone-name>or choose one from your computer (.ged)</span>
+        </label>
+        <input id="gedcom" name="gedcom" type="file" accept=".ged,.gedcom,text/plain" required class="sr-only">
+        <button class="btn-primary" data-busy>Import as a new tree</button>
+      </form>
+      <ul class="assurances">
+        <li>{{ m.icon("check") }}<span><b>Nothing is overwritten.</b> Every import becomes a brand-new tree; your existing trees aren't touched.</span></li>
+        <li>{{ m.icon("check") }}<span><b>You'll see exactly what came in:</b> how many people were imported, and any links Kinroot couldn't keep.</span></li>
+        <li>{{ m.icon("check") }}<span><b>One rule to know:</b> Kinroot keeps two parents per person, so extra parent links (such as adoptive families) are skipped and counted.</span></li>
+        <li>{{ m.icon("check") }}<span>Files can hold up to {{ '{:,}'.format(max_people) }} people.</span></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="export-title">
+      <p class="eyebrow">Export</p>
+      <h2 id="export-title" class="display-sm">Your research stays <em>yours.</em></h2>
+      <p class="muted">A GEDCOM export includes names, genders, birth and death dates, birthplaces, and who is related to whom. Notes and photos stay in Kinroot.</p>
+      {% set exportable = trees | selectattr('role', 'in', ['owner', 'editor']) | list %}
+      {% if exportable %}
+        <ul class="tree-list">
+          {% for t in exportable %}
+            <li><a href="{{ url_for('trees.export_gedcom', tree_id=t.id) }}">
+              <span class="tree-list-art theme-ink" aria-hidden="true">{{ m.mini_tree([t.people_count] if t.people_count else none) }}</span>
+              <span class="tree-list-name">{{ t.name }}</span>
+              <span class="meta num">{{ t.people_count }} {{ 'person' if t.people_count == 1 else 'people' }}</span>
+              {{ m.icon("download") }}</a></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty"><strong>Nothing to export yet</strong><span>You can export trees you own or can edit.</span></div>
+      {% endif %}
+    </section>
+  </div>
+</main>
+{% endblock %}
