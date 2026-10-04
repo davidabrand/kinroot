@@ -306,10 +306,16 @@ details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one con
 /* ==========================================================================
    Landing page
    ========================================================================== */
-.landing .topbar { background: transparent; border-bottom-color: transparent; position: absolute; left: 0; right: 0; backdrop-filter: none; }
+/* On the landing page the bar sits on the hero, aligned to the same content column as everything below it. */
+.landing .topbar { background: transparent; border-bottom-color: transparent; position: absolute; left: 0; right: 0; backdrop-filter: none;
+  padding-inline: max(var(--gutter), calc((100% - var(--content-max)) / 2)); padding-block: var(--sp-4); }
+.landing p { text-wrap: pretty; }   /* no one-word last lines */
+html:has(body.landing) { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html:has(body.landing) { scroll-behavior: auto; } }
 .hero {
   position: relative; overflow: hidden;
   background:
+    linear-gradient(180deg, transparent 72%, var(--bg) 100%),   /* the glow fades into the page: no seam */
     radial-gradient(120% 80% at 78% 62%, color-mix(in srgb, var(--honey) 38%, transparent) 0%, transparent 60%),
     linear-gradient(180deg, var(--hero-top, #f6ecd2) 0%, var(--hero-bottom, #eef1e6) 100%);
   padding: 110px var(--gutter) var(--sp-7);
@@ -325,6 +331,13 @@ details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one con
 .hero .btn-row { margin-top: var(--sp-5); }
 .hero-art { width: 100%; height: auto; display: block; max-width: 640px; justify-self: center; }
 .hero-note { margin-top: var(--sp-4); font-size: var(--fs-small); color: var(--ink-soft); max-width: 46ch; }
+.hero .btn-row { gap: var(--sp-5); }
+/* The quiet secondary action: text, not a second button competing with "Start your tree". */
+.text-cta { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ink); text-decoration: none;
+  border-radius: var(--r-xs); transition: color var(--dur-fast) var(--ease); }
+.text-cta span { transition: transform var(--dur) var(--ease); }
+.text-cta:hover { color: var(--honey-ink); }
+.text-cta:hover span { transform: translateY(2px); }
 @media (max-width: 860px) {
   .hero-inner { grid-template-columns: 1fr; }
   .hero { padding-top: 96px; }
@@ -334,7 +347,7 @@ details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one con
 /* "Made for the people in it": an editorial grid set in type. Each feature is a gold numeral,
    a serif title and a short paragraph under a hairline: no cards, no icons, no shadows. */
 .features { padding: var(--sp-8) var(--gutter); display: grid; gap: var(--sp-7); }
-.section-intro { display: grid; gap: var(--sp-3); max-width: 40rem; }
+.section-intro { display: grid; gap: var(--sp-3); max-width: 48rem; }
 .section-intro h2 { font-size: var(--fs-h1); }
 .section-intro .lede { font-size: 1.125rem; }
 .feature-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-7) var(--sp-6); }
@@ -349,9 +362,15 @@ details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one con
 }
 
 .promise { background: var(--surface); border-block: 1px solid var(--line); padding-inline: var(--gutter); }
-.promise-inner { padding-block: var(--sp-7); display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-5) var(--sp-6); align-items: start; }
-.promise h2 { font-size: var(--fs-h2); max-width: 30ch; }
-.promise p { max-width: 60ch; line-height: 1.6; }
+/* Same three columns as the features grid: the statement in the first, the detail across the other two. */
+.promise-inner { padding-block: var(--sp-7); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-5) var(--sp-6); align-items: start; }
+.promise h2 { font-size: clamp(1.45rem, .6vw + 1.2rem, 1.75rem); line-height: 1.2; }
+.promise h2 em { font-style: italic; color: var(--honey-ink); }
+.promise p { grid-column: span 2; max-width: 62ch; line-height: 1.65; padding-top: 4px; }
+@media (max-width: 860px) {
+  .promise-inner { grid-template-columns: 1fr; }
+  .promise p { grid-column: auto; }
+}
 .site-footer { padding: var(--sp-5) var(--gutter) var(--sp-7); display: flex; gap: var(--sp-3); justify-content: space-between; align-items: center; flex-wrap: wrap; color: var(--ink-soft); font-size: var(--fs-small); }
 @media (prefers-reduced-motion: no-preference) {
   .mote { animation: drift 9s ease-in-out infinite alternate; }

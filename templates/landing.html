@@ -10,7 +10,7 @@
       <p class="lede">Kinroot turns names, dates and old photos into a living 3D tree that your whole family can explore, add to and talk around.</p>
       <div class="btn-row">
         <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}">Start your tree</a>
-        <a class="btn btn-ghost btn-lg" href="{{ url_for('auth.login') }}">Log in</a>
+        <a class="text-cta" href="#features">See how it works <span aria-hidden="true">↓</span></a>
       </div>
       <p class="hero-note">Already researching? Bring your tree from Ancestry, FamilySearch or MyHeritage as a GEDCOM file.</p>
     </div>
@@ -18,7 +18,7 @@
   </div>
 </section>
 
-<section class="features" aria-labelledby="features-title">
+<section class="features" id="features" aria-labelledby="features-title">
   <header class="section-intro">
     <h2 id="features-title">Made for the people in it</h2>
     <p class="lede">Everything your family needs to gather its story in one place, and nothing that gets in the way.</p>
@@ -46,13 +46,13 @@
 </section>
 <section class="promise" aria-labelledby="privacy-title">
   <div class="promise-inner">
-    <h2 id="privacy-title">Private by default. Only the people you invite can see your tree.</h2>
+    <h2 id="privacy-title"><em>Private by default.</em> Only the people you invite can see your tree.</h2>
     <p class="muted">Living relatives' birthdays and birthplaces stay hidden from view-only guests, because those are the answers to bank security questions. Other families can only find your ancestors if you switch that on, and only people who have passed away are ever matched.</p>
   </div>
 </section>
 
 <footer class="site-footer">
   <a class="brand" href="{{ url_for('landing') }}">{{ m.mark() }}{{ m.wordmark() }}</a>
-  <span>Your family tree, in its best light.</span>
+  <span>© {{ this_year }} Kinroot</span>
 </footer>
 {% endblock %}
