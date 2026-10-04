@@ -31,9 +31,10 @@ for the `register` / `make_tree` / `add` helpers).
 - `kinroot/privacy.py` — what view-only guests may see about living people.
 - `kinroot/db.py` — SQLite schema via append-only MIGRATIONS (never edit an old
   migration; add a new numbered one at the end).
-- `static/js/tree/` — the 3D view (layout.js is pure math and has tests).
-  `skytime.js` works out the time-of-day sky (preview with `?hour=5.5`); `sky.js` draws it.
-  Its tests are in `tests/js/` and run through pytest when Node is installed.
+- `static/js/tree/` — the 3D view. `layout.js` (who sits where: generation bands, couples,
+  crossing reduction, minimum spacing) and `links.js` (the lines: partner lines, family junctions,
+  child curves, the relationship route) are pure maths with tests in `tests/js/`, run through
+  pytest when Node is installed. `scene.js` only draws: HTML portrait medallions + WebGL lines.
 - `templates/` — Jinja pages; `static/css/style.css` — the design system.
 - Homepage (logged-out `/`): `templates/landing.html` + `partials/landing_tree.svg`, styled only by
   `static/css/landing.css` and driven by `static/js/landing.js`. Its example family lives in
@@ -73,7 +74,8 @@ and performance for very large trees.
 - Uses the design tokens in `style.css`; matches the homepage's identity (rule 4).
   Logged-in pages live in the shell in `base.html` (dark sidebar + paper `.sheet`);
   serif for titles/names, sans for UI, `.eyebrow` / `.kicker` for labels. The 3D tree
-  draws only on change: call `scene.invalidate()` after anything that alters it.
+  draws only on change: call `scene.invalidate()` after anything that alters it. The tree is a
+  restrained constellation (ivory medallions, thin bronze lines, no trunk, leaves or flowers): keep it that way.
   Spacing (`--sp-1…8`), radii (`--r-xs…--r-pill`), motion (`--ease`, `--dur-fast`, `--dur`)
   and shadows (`--shadow-sm`, `--shadow-pop` for floating things only) are tokens too:
   no one-off pixel values. Cards are flat; settings pages use `.settings` sections.

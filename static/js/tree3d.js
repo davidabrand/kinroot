@@ -5,7 +5,7 @@ import { Panel } from "./tree/panel.js";
 import { filterSet, FILTERS } from "./tree/filters.js";
 import { Search } from "./tree/search.js";
 import { Timelapse } from "./tree/timelapse.js";
-import { download, sleep, slug } from "./tree/util.js";
+import { download, slug } from "./tree/util.js";
 
 const CFG = window.KINROOT;
 const $ = (id) => document.getElementById(id);
@@ -26,20 +26,24 @@ const app = {
       byId: new Map(data.people.map((p) => [p.id, p])),
       canEdit: data.role === "editor" || data.role === "owner", isOwner: data.role === "owner",
     });
-    s.layout = computeLayout(s.people, s.rels);
+    // "Unknown" parent slots beside you and your parents, where a parent can be added (editors only).
+    const mine = s.me.person_id;
+    const parentsOf = (id) => s.rels.filter((r) => r.kind === "parent" && r.person_b === id).map((r) => r.person_a);
+    const unknownFor = s.canEdit && mine && s.byId.has(mine) ? [mine, ...parentsOf(mine)] : [];
+    s.layout = computeLayout(s.people, s.rels, { meId: mine, unknownFor });
     s.fam = s.layout.fam;
     if (s.selected && !s.byId.has(s.selected)) s.selected = null;
     if (this.focusId && !s.byId.has(this.focusId)) this.focusId = null;
     $("empty-scene").hidden = s.people.length > 0;
     // Search, time-lapse, relationships and views have nothing to work on in an empty tree: show them once someone's there.
-    for (const el of [$("btn-grow"), $("btn-relate"), $("btn-flat"), document.querySelector(".cam-controls"), document.querySelector(".scene-toolbar .search"), document.querySelector(".tool-select")]) {
+    for (const el of [$("btn-grow"), $("btn-relate"), $("btn-flat"), document.querySelector(".cam-controls"), document.querySelector(".tree-bar .search"), document.querySelector(".tool-select")]) {
       if (el) el.hidden = s.people.length === 0;
     }
     $("btn-me").hidden = !s.me.person_id;   // "Centre on me" once you've claimed your leaf
     this.search.update(s.people);
     if (this.timelapse.isOpen) this.timelapse.close();
     if (this.scene) {
-      this.scene.build({ people: s.people, layout: s.layout, meId: s.me.id });
+      this.scene.build({ people: s.people, layout: s.layout, meId: mine, canEdit: s.canEdit });
       if (reframe) this.scene.frameAll();
       this.emphasize();
     }
@@ -62,7 +66,7 @@ const app = {
     if (keep) this.toast(`Showing ${FILTERS[mode].toLowerCase()} of ${this.store.byId.get(anchor)?.first_name || "this person"}.`);
   },
 
-  // Hovering a name lights that person's immediate family (after a beat, so sweeping across names doesn't flicker).
+  // Hovering a portrait brightens that person's lines (after a beat, so sweeping across them doesn't flicker).
   hover(id) {
     clearTimeout(this._hoverTimer);
     this._hoverTimer = setTimeout(() => {
@@ -76,9 +80,9 @@ const app = {
     if (!this.scene) return;
     const anchor = this.store.selected ?? this.store.me?.person_id;
     const filtered = this.filter !== "all" ? filterSet(this.filter, anchor, this.store.fam, this.store.byId) : null;
-    const keep = this.pathIds ? new Set(this.pathIds) : filtered ? filtered : this.focusId ? branchOf(this.focusId, this.store.fam)
-      : this.hoverId ? immediateFamily(this.hoverId, this.store.fam) : null;
-    this.scene.emphasize({ keep, selected: this.store.selected, path: this.pathIds });
+    const keep = this.pathIds ? new Set(this.pathIds) : filtered ? filtered : this.focusId ? branchOf(this.focusId, this.store.fam) : null;
+    // Hover only brightens that person's own lines a little; it never dims the rest of the family.
+    this.scene.emphasize({ keep, selected: this.store.selected, path: this.pathIds, hover: this.hoverId });
   },
 
   // A brief message at the bottom of the screen, optionally with one action
@@ -199,6 +203,7 @@ function branchOf(id, fam) {
 
 function wireToolbar() {
   $("btn-reset").addEventListener("click", () => app.scene?.frameAll());
+  $("btn-orient").addEventListener("click", () => app.scene?.resetView());
   $("branch-filter").addEventListener("change", (e) => app.setFilter(e.target.value));
   $("btn-zoom-in").addEventListener("click", () => app.scene?.zoomBy(0.72));
   $("btn-zoom-out").addEventListener("click", () => app.scene?.zoomBy(1.38));
@@ -211,7 +216,8 @@ function wireToolbar() {
     if (!app.scene) return;
     const on = flat.getAttribute("aria-pressed") !== "true";
     flat.setAttribute("aria-pressed", on);
-    flat.querySelector(".label").textContent = on ? "3D view" : "Flat view";
+    flat.querySelector(".label").textContent = on ? "3D" : "2D";
+    flat.title = on ? "Back to the 3D tree" : "A flat, 2D view of the tree";
     app.scene.setFlat(on);
   });
   $("btn-picture").addEventListener("click", async () => {
@@ -247,10 +253,12 @@ async function boot() {
 
   try {
     const { TreeScene } = await import("./tree/scene.js");
-    app.scene = new TreeScene($("scene"), { onPick: (id) => (id ? app.select(id, { fly: true }) : null), onHover: (id) => app.hover(id) });
-    // Wait (briefly) for the Alegreya font so initials on the medallions use it.
-    await Promise.race([document.fonts?.load?.('800 100px "Alegreya"'), sleep(1500)]).catch(() => {});
-    await app.scene.loadModels(CFG.modelsBase);
+    app.scene = new TreeScene($("scene"), {
+      onPick: (id) => (id ? app.select(id, { fly: true }) : null),
+      onHover: (id) => app.hover(id),
+      // An "Unknown" parent slot: add that parent right there.
+      onUnknown: (childId) => app.store.canEdit && app.panel.personForm({ mode: "add", link: { to: childId, as: "parent" } }),
+    });
   } catch (err) {
     console.error("Kinroot: 3D view unavailable", err);
     app.scene = null;
@@ -285,10 +293,6 @@ async function boot() {
   openMode();
   addEventListener("hashchange", openMode);
   window.kinroot = app;   // handy for poking around in the browser console
-}
-
-function immediateFamily(id, fam) {
-  return new Set([id, ...(fam.parents.get(id) || []), ...(fam.children.get(id) || []), ...(fam.spouses.get(id) || [])]);
 }
 
 boot();

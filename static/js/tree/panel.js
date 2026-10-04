@@ -114,7 +114,7 @@ export class Panel {
       <p class="grow-year num" data-grow-year>—</p>
       <p class="grow-count" data-grow-count></p>
       <ol class="grow-events" data-grow-events aria-live="polite"></ol>
-      <p class="small muted">Leaves turn warm gold in remembrance of relatives who have passed. Drag the year to move through time.</p>`);
+      <p class="small muted">A second, finer ring marks relatives who have passed. Drag the year to move through time.</p>`);
   }
 
   growUpdate({ year, born, total, recent }) {

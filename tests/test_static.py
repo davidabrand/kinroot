@@ -38,3 +38,15 @@ def test_tree_modules_are_in_the_import_map(app):
     assert re.fullmatch(r"/static/js/tree/panel\.js\?v=[0-9a-f]{10}", imports["/static/js/tree/panel.js"])
     assert imports["three"].startswith("https://cdn.jsdelivr.net/")
     assert re.search(r'/static/js/tree3d\.js\?v=[0-9a-f]{10}"', page)
+
+
+def test_tree_page_has_one_toolbar_and_camera_controls(app):
+    """The tree stage: one floating toolbar, and camera controls including fit and reset orientation."""
+    c = app.test_client()
+    register(c, "stage@example.com")
+    page = c.get(f"/trees/{make_tree(c)}").get_data(as_text=True)
+    assert page.count('class="tree-bar"') == 1 and 'role="toolbar"' in page
+    for control in ("btn-zoom-in", "btn-zoom-out", "btn-reset", "btn-me", "btn-orient", "search-input"):
+        assert f'id="{control}"' in page
+    assert "/static/js/tree/links.js" in page                       # the line geometry module is mapped
+    assert "sky.js" not in page and "wood.js" not in page            # the old landscape and wooden branches are gone

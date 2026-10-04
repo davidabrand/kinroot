@@ -1,6 +1,6 @@
 // "Watch your family grow": a century of the family in about twenty seconds.
-// Each person appears in the year they were born, branches grow toward them,
-// and leaves turn gold in the year someone passes away.
+// Each person appears in the year they were born, a line extends to them from their parents,
+// and a fine second ring appears around someone in the year they pass away.
 import { estimateYears } from "./layout.js";
 import { fullName } from "./util.js";
 

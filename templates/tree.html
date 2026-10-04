@@ -18,34 +18,36 @@
 <div class="tree-layout">
   <section class="scene-wrap" aria-label="3D family tree">
     <div id="scene"></div>
-    <div id="scene-loading" class="scene-loading">Growing your tree…</div>
+    <div id="scene-loading" class="scene-loading">Gathering your family…</div>
     <div id="scene-error" class="empty-scene" hidden>
       <div class="glass"><h2>The 3D view couldn't start</h2>
         <p>Your family is all still here in the panel. The 3D tree needs an internet connection the first time, and a browser with graphics turned on (Chrome, Edge, Firefox or Safari).</p></div>
     </div>
 
-    <div class="scene-toolbar">
-      <span class="scene-title">{{ tree.name }}</span>
+    {# One quiet floating toolbar. Labels fold away as the stage narrows; on phones it sits at the bottom. #}
+    <div class="tree-bar" role="toolbar" aria-label="Tree tools">
       <div class="search">
         {{ m.icon("search") }}
         <label for="search-input" class="sr-only">Find someone</label>
-        <input id="search-input" class="glass" type="search" placeholder="Find someone" autocomplete="off">
+        <input id="search-input" type="search" placeholder="Find someone" autocomplete="off" aria-keyshortcuts="/">
         <ul id="search-results" class="search-results" hidden></ul>
       </div>
-      <button type="button" class="tool glass" id="btn-grow" title="Watch your family grow">{{ m.icon("clock") }}<span class="label">Watch it grow</span></button>
-      <button type="button" class="tool glass" id="btn-relate" title="How are we related?">{{ m.icon("route") }}<span class="label">Related?</span></button>
-      <label class="tool glass tool-select" title="Show part of the family">{{ m.icon("sliders") }}<span class="sr-only">Show</span>
+      <span class="bar-sep" aria-hidden="true"></span>
+      {% if role in ('editor', 'owner') %}
+        <button type="button" class="bar-btn bar-primary" id="btn-add">{{ m.icon("plus") }}<span class="label">Add person</span></button>
+      {% endif %}
+      <button type="button" class="bar-btn" id="btn-relate" title="How are two people related?">{{ m.icon("route") }}<span class="label">Relationship</span></button>
+      <button type="button" class="bar-btn" id="btn-grow" aria-pressed="false" title="Watch your family grow over time">{{ m.icon("clock") }}<span class="label">Watch it grow</span></button>
+      <span class="bar-sep" aria-hidden="true"></span>
+      <label class="bar-btn tool-select" title="Show part of the family">{{ m.icon("sliders") }}<span class="sr-only">Show</span>
         <select id="branch-filter" aria-label="Show part of the family">
           <option value="all">Everyone</option><option value="immediate">Immediate family</option>
           <option value="ancestors">Ancestors</option><option value="descendants">Descendants</option>
           <option value="paternal">Father's side</option><option value="maternal">Mother's side</option>
         </select></label>
-      <button type="button" class="tool glass" id="btn-flat" aria-pressed="false" title="Switch between 3D and a flat view">{{ m.icon("layers") }}<span class="label">Flat view</span></button>
-      {% if role in ('editor', 'owner') %}
-        <button type="button" class="tool tool-primary" id="btn-add">{{ m.icon("plus") }}<span class="label">Add person</span></button>
-      {% endif %}
+      <button type="button" class="bar-btn" id="btn-flat" aria-pressed="false" title="A flat, 2D view of the tree">{{ m.icon("layers") }}<span class="label">2D</span></button>
       <details class="menu" id="more-menu">
-        <summary class="tool glass" title="More">{{ m.icon("dots") }}<span class="sr-only">More</span></summary>
+        <summary class="bar-btn" title="More">{{ m.icon("dots") }}<span class="sr-only">More</span></summary>
         <div class="menu-list">
           <button type="button" id="btn-picture">{{ m.icon("download") }} Save a picture</button>
           <button type="button" id="btn-blender">{{ m.icon("leaf") }} Export for a Blender poster</button>
@@ -78,10 +80,11 @@
     <div class="cam-controls glass" role="group" aria-label="View">
       <button type="button" id="btn-zoom-in" title="Zoom in">{{ m.icon("plus") }}<span class="sr-only">Zoom in</span></button>
       <button type="button" id="btn-zoom-out" title="Zoom out">{{ m.icon("minus") }}<span class="sr-only">Zoom out</span></button>
-      <button type="button" id="btn-reset" title="Fit the whole family">{{ m.icon("target") }}<span class="sr-only">Fit the whole family</span></button>
+      <button type="button" id="btn-reset" title="Fit the whole family">{{ m.icon("frame") }}<span class="sr-only">Fit the whole family</span></button>
       <button type="button" id="btn-me" title="Centre on me" hidden>{{ m.icon("user") }}<span class="sr-only">Centre on me</span></button>
+      <button type="button" id="btn-orient" title="Face the tree straight on">{{ m.icon("compass") }}<span class="sr-only">Reset orientation</span></button>
     </div>
-    <p class="scene-hint glass">Drag to turn · scroll to zoom · click a name</p>
+    <p class="scene-hint">Drag to move · scroll to zoom · right-drag to tilt · double-click a portrait to come close</p>
   </section>
 
   <aside class="side-panel theme-paper" id="panel" aria-label="Details" aria-busy="true">
