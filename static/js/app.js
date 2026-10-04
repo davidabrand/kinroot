@@ -4,6 +4,37 @@
 //   2. Double-submit protection on forms (double-click / impatient tap / slow network)
 //   3. A typed-confirmation guard on "Delete this tree"
 
+// ---- 0. The app shell's sidebar ---------------------------------------------
+// Desktop: collapse to icons (remembered on this device). Phones/tablets: a drawer.
+(() => {
+  const app = document.getElementById("app");
+  if (!app) return;
+  const collapse = app.querySelector("[data-sidebar-collapse]");
+  const openBtn = app.querySelector("[data-sidebar-open]");
+  const scrim = app.querySelector("[data-sidebar-close]");
+  const setCollapsed = (on) => {
+    app.classList.toggle("sb-collapsed", on);
+    collapse?.setAttribute("aria-expanded", String(!on));
+    collapse?.setAttribute("title", on ? "Expand the sidebar" : "Collapse the sidebar");
+  };
+  try { setCollapsed(localStorage.getItem("kinroot-sidebar") === "collapsed"); } catch { /* storage blocked */ }
+  collapse?.addEventListener("click", () => {
+    const on = !app.classList.contains("sb-collapsed");
+    setCollapsed(on);
+    try { localStorage.setItem("kinroot-sidebar", on ? "collapsed" : "open"); } catch { /* storage blocked */ }
+  });
+  const setOpen = (on) => {
+    app.classList.toggle("nav-open", on);
+    openBtn?.setAttribute("aria-expanded", String(on));
+    if (scrim) scrim.hidden = !on;
+    if (on) app.querySelector(".sb-nav a")?.focus();
+  };
+  openBtn?.addEventListener("click", () => setOpen(true));
+  scrim?.addEventListener("click", () => setOpen(false));
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && app.classList.contains("nav-open")) { setOpen(false); openBtn?.focus(); } });
+  app.querySelectorAll(".sb-nav a").forEach((a) => a.addEventListener("click", () => setOpen(false)));
+})();
+
 // ---- 1. Copy buttons -------------------------------------------------------
 document.querySelectorAll("[data-copy]").forEach((button) => {
   button.addEventListener("click", async () => {
@@ -46,11 +77,16 @@ document.querySelectorAll(".flash:not(.error)").forEach((el) => {
 
 // Arrived from the homepage's "Import a GEDCOM" (/trees#import)? Open the import option.
 (() => {
-  const target = location.hash === "#import" ? document.getElementById("import") : null;
-  if (target && target.tagName === "DETAILS") {
-    target.open = true;
-    target.scrollIntoView({ block: "center" });
-  }
+  const openImport = () => {
+    const target = document.getElementById("import");
+    if (target && target.tagName === "DETAILS") {
+      target.open = true;
+      target.scrollIntoView({ block: "center", behavior: "smooth" });
+      target.querySelector("input[type=file]")?.focus({ preventScroll: true });
+    }
+  };
+  if (location.hash === "#import") openImport();
+  document.querySelectorAll("[data-open-import]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); openImport(); }));
 })();
 
 // ---- 2. Stop a form being submitted twice ----------------------------------

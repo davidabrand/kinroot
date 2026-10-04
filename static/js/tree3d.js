@@ -229,6 +229,14 @@ async function boot() {
   } finally {
     $("scene-loading").hidden = true;
   }
+  // The sidebar's Timeline / Relationships links open those modes (#timeline, #relate), also mid-visit.
+  const openMode = () => {
+    if (location.hash === "#timeline" && app.store.people.length) app.timelapse.open();
+    else if (location.hash === "#relate" && app.store.people.length) app.panel.relate();
+    else if (location.hash === "#add" && app.store.canEdit) app.panel.personForm({ mode: "add" });
+  };
+  openMode();
+  addEventListener("hashchange", openMode);
   window.kinroot = app;   // handy for poking around in the browser console
 }
 

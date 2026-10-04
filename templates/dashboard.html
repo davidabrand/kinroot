@@ -1,97 +1,116 @@
 {% extends "base.html" %}
 {% import "_macros.html" as m with context %}
 {% block title %}My trees · Kinroot{% endblock %}
+{% block app_title %}<span class="here">My trees</span>{% endblock %}
+{% set suggested = 'The ' ~ me.name.split()[-1] ~ ' family' if me.name.split()|length > 1 else '' %}
+
+{% macro import_form() %}
+  <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="inline-form">
+    {{ m.csrf() }}
+    <div class="field"><label for="gedcom">GEDCOM file <span class="hint">from Ancestry, FamilySearch, MyHeritage or most genealogy apps. It becomes a new tree.</span></label>
+      <input id="gedcom" name="gedcom" type="file" accept=".ged,.gedcom,text/plain" required></div>
+    <button>{{ m.icon("upload") }} Import</button>
+  </form>
+{% endmacro %}
+
 {% block content %}
 {% if not cards %}
-{# First run: one clear path — name a tree and plant it. #}
+{# First run: every tree begins with one person. One clear path, and a second for researchers. #}
 <main class="page narrow onboard">
-  <div class="onboard-art">{{ m.mini_tree(none) }}</div>
+  <div class="onboard-art" aria-hidden="true">{{ m.mini_tree(none) }}</div>
   <div class="page-head center">
     <p class="eyebrow">{{ greeting }}, {{ me.name.split()[0] }}</p>
-    <h1>Let's plant your first tree</h1>
-    <p class="lede">Start with yourself, or the oldest relative you know about. You can add everyone else from there, then invite family to fill in the rest.</p>
+    <h1 class="display">Every tree begins with <em>one person.</em></h1>
+    <p class="lede">Start with yourself, or the oldest relative you know about. Add everyone else from there, then invite family to fill in the rest.</p>
   </div>
 
-  <form method="post" action="{{ url_for('trees.new_tree') }}" class="card stack onboard-form">
+  <form method="post" action="{{ url_for('trees.new_tree') }}" class="onboard-form">
     {{ m.csrf() }}
     <div class="field">
       <label for="tree-name">Name your tree</label>
       {# A ready-made name, so planting is one click; it's selected on focus, so typing replaces it. #}
-      <input id="tree-name" name="name" value="{{ 'The ' ~ me.name.split()[-1] ~ ' family' if me.name.split()|length > 1 else '' }}" placeholder="The Smith family" required maxlength="120" autofocus onfocus="this.select()">
+      <input id="tree-name" name="name" value="{{ suggested }}" placeholder="The Smith family" required maxlength="120" autofocus onfocus="this.select()">
     </div>
-    <button class="btn-primary btn-lg">{{ m.icon("sprout") }} Plant my tree</button>
+    <button class="btn-primary btn-lg">Start with me {{ m.icon("arrow") }}</button>
   </form>
 
-  <ol class="onboard-steps">
-    <li><div class="s-body"><strong>Add the people you know</strong><span class="muted small">Names and dates — rough ones like “about 1950” are fine.</span></div></li>
-    <li><div class="s-body"><strong>Watch your tree grow</strong><span class="muted small">Everyone appears in a golden-hour 3D tree you can explore.</span></div></li>
-    <li><div class="s-body"><strong>Invite your family</strong><span class="muted small">Share a link so relatives can claim their leaf and add their side.</span></div></li>
-  </ol>
-
   <details class="onboard-import" id="import">
-    <summary>Already have a tree elsewhere? Import a GEDCOM file</summary>
-    <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="stack">
-      {{ m.csrf() }}
-      <p class="hint">Export one from Ancestry, FamilySearch, MyHeritage or most genealogy apps. It becomes a new tree.</p>
-      <div class="field"><label for="gedcom">GEDCOM file</label>
-        <input id="gedcom" name="gedcom" type="file" accept=".ged,.gedcom,text/plain" required></div>
-      <div><button>{{ m.icon("upload") }} Import file</button></div>
-    </form>
+    <summary>Already researching? Import a tree</summary>
+    {{ import_form() }}
   </details>
 </main>
 
 {% else %}
-<main class="page">
+{% set lead = cards[0] %}{% set t = lead.tree %}
+<main class="page dash">
   <div class="page-head">
-    <h1>{{ greeting }}, {{ me.name.split()[0] }}</h1>
+    <p class="eyebrow">Your family archive</p>
+    <h1 class="display">{{ greeting }}, {{ me.name.split()[0] }}.</h1>
   </div>
 
   <div class="dash-grid">
-    <div class="section">
-      <ul class="tree-cards">
-        {% for c in cards %}{% set t = c.tree %}
-          <li>
-            <a class="tree-card" href="{{ url_for('trees.tree_view', tree_id=t.id) }}">
-              <div class="preview">{{ m.mini_tree(c.shape) }}</div>
-              <div class="body">
-                <span class="name">{{ t.name }}</span>
-                <span class="meta num">
-                  {{ t.people_count }} {{ 'person' if t.people_count == 1 else 'people' }}
-                  {% if c.shape %}· {{ c.shape | length }} generation{{ '' if c.shape | length == 1 else 's' }}{% endif %}
-                </span>
-                {# Your own trees need no label; shared ones say whose they are and what you can do. #}
-                {% if t.role != 'owner' %}<span class="meta">Shared by {{ t.owner_name }} · {{ 'can edit' if t.role == 'editor' else 'view only' }}</span>{% endif %}
-              </div>
-            </a>
-          </li>
-        {% endfor %}
-          {# Planting a new tree sits in the same grid, the same size as a tree. #}
-          <li>
-            <form method="post" action="{{ url_for('trees.new_tree') }}" class="tree-card new-tree">
-              {{ m.csrf() }}
-              <div class="body">
-                <label for="tree-name" class="name">Plant a new tree</label>
-                <input id="tree-name" name="name" placeholder="The {{ me.name.split()[-1] if me.name.split()|length > 1 else 'Smith' }} family" required maxlength="120">
-                <button class="btn-primary btn-sm">Plant tree</button>
-              </div>
-            </form>
-          </li>
-      </ul>
+    <div class="dash-main">
+      {# Continue exploring: the most recent tree, as a window into the dark world. #}
+      <section class="continue" aria-labelledby="continue-title">
+        <p class="label">Continue exploring</p>
+        <a class="continue-stage theme-ink" href="{{ url_for('trees.tree_view', tree_id=t.id) }}" aria-label="Open {{ t.name }}">
+          <span class="continue-art">{{ m.mini_tree(lead.shape) }}</span>
+        </a>
+        <div class="continue-body">
+          <div>
+            <h2 id="continue-title" class="continue-name"><a href="{{ url_for('trees.tree_view', tree_id=t.id) }}">{{ t.name }}</a></h2>
+            <p class="meta num">
+              {{ t.people_count }} {{ 'person' if t.people_count == 1 else 'people' }}
+              {% if lead.shape %}<span class="dot" aria-hidden="true">·</span>{{ lead.shape | length }} generation{{ '' if lead.shape | length == 1 else 's' }}{% endif %}
+              {% if t.role != 'owner' %}<span class="dot" aria-hidden="true">·</span>Shared by {{ t.owner_name }}, {{ 'can edit' if t.role == 'editor' else 'view only' }}{% endif %}
+            </p>
+          </div>
+          <a class="btn btn-primary" href="{{ url_for('trees.tree_view', tree_id=t.id) }}">Open tree {{ m.icon("arrow") }}</a>
+        </div>
+        <nav class="quick" aria-label="Quick actions">
+          {% if t.role in ('owner', 'editor') %}<a href="{{ url_for('trees.tree_view', tree_id=t.id) }}#add">{{ m.icon("plus-circle") }}Add a relative</a>{% endif %}
+          {% if t.role == 'owner' %}<a href="{{ url_for('trees.share', tree_id=t.id) }}">{{ m.icon("user-plus") }}Invite family</a>{% endif %}
+          <a href="{{ url_for('trees.tree_view', tree_id=t.id) }}#timeline">{{ m.icon("clock") }}Watch it grow</a>
+          <a href="#import" data-open-import>{{ m.icon("upload") }}Import GEDCOM</a>
+        </nav>
+      </section>
 
-      <details class="dash-import" id="import">
-        <summary>Have a tree elsewhere? Import a GEDCOM file</summary>
-        <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="inline-form">
+      {% if cards | length > 1 %}
+        <section class="ruled-section" aria-labelledby="others-title">
+          <h2 id="others-title" class="label">Your other trees</h2>
+          <ul class="tree-list">
+            {% for c in cards[1:] %}{% set o = c.tree %}
+              <li>
+                <a href="{{ url_for('trees.tree_view', tree_id=o.id) }}">
+                  <span class="tree-list-art theme-ink" aria-hidden="true">{{ m.mini_tree(c.shape) }}</span>
+                  <span class="tree-list-name">{{ o.name }}</span>
+                  <span class="meta num">{{ o.people_count }} {{ 'person' if o.people_count == 1 else 'people' }}{% if o.role != 'owner' %} · shared by {{ o.owner_name }}{% endif %}</span>
+                  {{ m.icon("arrow") }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      <section class="ruled-section plant" aria-labelledby="plant-title">
+        <h2 id="plant-title" class="label">Plant another tree</h2>
+        <form method="post" action="{{ url_for('trees.new_tree') }}" class="inline-form">
           {{ m.csrf() }}
-          <div class="field"><label for="gedcom">GEDCOM file <span class="hint">from Ancestry, FamilySearch, MyHeritage or most genealogy apps. It becomes a new tree.</span></label>
-            <input id="gedcom" name="gedcom" type="file" accept=".ged,.gedcom,text/plain" required></div>
-          <button>Import</button>
+          <div class="field"><label for="tree-name" class="sr-only">Name your new tree</label>
+            <input id="tree-name" name="name" placeholder="The Smith family" required maxlength="120"></div>
+          <button>Plant tree</button>
         </form>
-      </details>
+        <details class="dash-import" id="import">
+          <summary>Or import a GEDCOM file</summary>
+          {{ import_form() }}
+        </details>
+      </section>
     </div>
 
     <aside class="side-stack">
       <section class="ruled-section" aria-labelledby="family-title">
-        <div class="section-head"><h2 id="family-title">Family</h2><a href="{{ url_for('family.hub') }}">Open</a></div>
+        <div class="section-head"><h2 id="family-title" class="label">Family</h2><a class="small" href="{{ url_for('family.hub') }}">Open</a></div>
         {% if family.requests or family.unread %}
           <p>
             {%- if family.requests %}<strong>{{ family.requests }}</strong> connection request{{ '' if family.requests == 1 else 's' }} waiting{% endif -%}
@@ -105,7 +124,7 @@
       </section>
 
       <section class="ruled-section" aria-labelledby="upcoming-title">
-        <h2 id="upcoming-title">Coming up</h2>
+        <h2 id="upcoming-title" class="label">Coming up</h2>
         {% if upcoming %}
           <ul class="event-list">
             {% for e in upcoming %}

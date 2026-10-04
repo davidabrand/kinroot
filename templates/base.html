@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{% block title %}Kinroot{% endblock %}</title>
   <meta name="description" content="Kinroot turns your family history into a living 3D tree your whole family can explore, add to and talk around.">
-  <meta name="theme-color" content="#EEE7D9" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#090A09" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#090A09">
   <meta property="og:title" content="Kinroot — your family tree, in its best light">
   <meta property="og:description" content="A living 3D family tree your whole family can explore, add to and talk around.">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
@@ -16,38 +15,84 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   {% block head %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
+{# Logged in, the product lives inside one shell: the dark Kinroot world (sidebar + bar) around a
+   warm paper sheet. The homepage and the sign-in pages keep their own cinematic layouts. #}
+{% set use_shell = me and request.endpoint not in ('landing', 'auth.login', 'auth.register') %}
+{% set ctx_tree = tree if (tree is defined and tree) else none %}
+{% set ctx_role = role if (role is defined and role) else ('owner' if request.endpoint == 'trees.share' else none) %}
+<body class="{% block body_class %}{% endblock %}{{ ' has-shell' if use_shell }}">
+{% if use_shell %}
+  <div class="app" id="app">
+    <aside class="sidebar theme-ink" id="sidebar" aria-label="Kinroot">
+      <div class="sb-top">
+        <a class="sb-brand" href="{{ url_for('trees.dashboard') }}" aria-label="Kinroot: my trees">{{ m.mark() }}<span class="sb-word">Kinroot</span></a>
+        <button type="button" class="sb-collapse" data-sidebar-collapse aria-expanded="true" aria-controls="sidebar" title="Collapse the sidebar">
+          {{ m.icon("chevrons") }}<span class="sr-only">Collapse the sidebar</span></button>
+      </div>
+      <nav class="sb-nav" aria-label="Main">
+        <a href="{{ url_for('trees.dashboard') }}" title="My trees" {% if request.endpoint == 'trees.dashboard' %}aria-current="page"{% endif %}>{{ m.icon("tree") }}<span>My trees</span></a>
+        {% if ctx_tree %}
+          <div class="sb-group">
+            <p class="sb-label" title="{{ ctx_tree.name }}">{{ ctx_tree.name }}</p>
+            <a href="{{ url_for('trees.tree_view', tree_id=ctx_tree.id) }}" title="Family tree" {% if request.endpoint == 'trees.tree_view' %}aria-current="page"{% endif %} data-tree-mode="tree">{{ m.icon("leaf") }}<span>Family tree</span></a>
+            <a href="{{ url_for('trees.tree_view', tree_id=ctx_tree.id) }}#timeline" title="Timeline" data-tree-mode="timeline">{{ m.icon("clock") }}<span>Timeline</span></a>
+            <a href="{{ url_for('trees.tree_view', tree_id=ctx_tree.id) }}#relate" title="Relationships" data-tree-mode="relate">{{ m.icon("route") }}<span>Relationships</span></a>
+            {% if ctx_role == 'owner' %}
+              <a href="{{ url_for('trees.share', tree_id=ctx_tree.id) }}" title="Invite & settings" {% if request.endpoint == 'trees.share' %}aria-current="page"{% endif %}>{{ m.icon("user-plus") }}<span>Invite &amp; settings</span></a>
+            {% endif %}
+            {% if ctx_role in ('owner', 'editor') %}
+              <a href="{{ url_for('trees.export_gedcom', tree_id=ctx_tree.id) }}" title="Export GEDCOM">{{ m.icon("download") }}<span>Export GEDCOM</span></a>
+            {% endif %}
+          </div>
+        {% endif %}
+        <a href="{{ url_for('family.hub') }}" title="Family &amp; messages" {% if request.endpoint and request.endpoint.startswith('family.') %}aria-current="page"{% endif %}>
+          {{ m.icon("message") }}<span>Family &amp; messages</span>{% if nav_counts and nav_counts.total %}<b class="badge" aria-label="{{ nav_counts.total }} new">{{ nav_counts.total }}</b>{% endif %}</a>
+      </nav>
+      <div class="sb-bottom">
+        <a class="sb-me" href="{{ url_for('auth.account') }}" title="Account &amp; settings" {% if request.endpoint == 'auth.account' %}aria-current="page"{% endif %}>
+          {{ m.avatar(me.name, "sm") }}<span><b>{{ me.name }}</b><small>Account &amp; settings</small></span></a>
+        <form method="post" action="{{ url_for('auth.logout') }}">{{ m.csrf() }}<button class="sb-logout" title="Log out">{{ m.icon("logout") }}<span>Log out</span></button></form>
+      </div>
+    </aside>
+    <div class="sb-scrim" data-sidebar-close hidden></div>
+
+    <div class="app-main">
+      <header class="app-bar theme-ink">
+        <button type="button" class="app-menu" data-sidebar-open aria-controls="sidebar" aria-expanded="false">{{ m.icon("menu") }}<span class="sr-only">Open the menu</span></button>
+        <a class="app-bar-brand" href="{{ url_for('trees.dashboard') }}" aria-label="Kinroot: my trees">{{ m.mark() }}</a>
+        <div class="app-bar-title">{% block app_title %}{% endblock %}</div>
+        <div class="app-bar-actions">{% block app_actions %}{% endblock %}</div>
+      </header>
+      {% block flashes %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flashes" role="status">
+              {% for category, text in messages %}<p class="flash {{ category }}">{{ text }}</p>{% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+      {% endblock %}
+      <div class="sheet {% block sheet_class %}theme-paper{% endblock %}">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+{% else %}
   {% block topbar %}
   <header class="topbar">
     <a class="brand" href="{{ url_for('landing') }}" aria-label="Kinroot home">{{ m.mark() }}{{ m.wordmark() }}</a>
     <nav class="topnav" aria-label="Main">
-      {% if me %}
-        <a href="{{ url_for('trees.dashboard') }}" {% if request.endpoint in ('trees.dashboard', 'trees.tree_view', 'trees.share') %}aria-current="{{ 'page' if request.endpoint == 'trees.dashboard' else 'true' }}"{% endif %}>My trees</a>
-        <a href="{{ url_for('family.hub') }}" {% if request.endpoint and request.endpoint.startswith('family.') %}aria-current="page"{% endif %}>
-          Family{% if nav_counts and nav_counts.total %} <span class="badge" aria-label="{{ nav_counts.total }} new">{{ nav_counts.total }}</span>{% endif %}
-        </a>
-        <a href="{{ url_for('auth.account') }}" {% if request.endpoint == 'auth.account' %}aria-current="page"{% endif %}>{{ me.name.split()[0] }}</a>
-        <form method="post" action="{{ url_for('auth.logout') }}">{{ m.csrf() }}<button class="navbtn">Log out</button></form>
-      {% else %}
-        {# No link to the page you're on, and hopping between log in and sign up keeps where you were headed. #}
-        {% set on_auth = request.endpoint in ('auth.login', 'auth.register') %}
-        {% set next_url = request.args.get('next') if on_auth else None %}
-        {% if request.endpoint != 'auth.login' %}<a href="{{ url_for('auth.login', next=next_url) }}">Log in</a>{% endif %}
-        {% if request.endpoint != 'auth.register' %}<a class="btn btn-primary btn-sm" href="{{ url_for('auth.register', next=next_url) }}">Start your tree</a>{% endif %}
-      {% endif %}
+      {# No link to the page you're on, and hopping between log in and sign up keeps where you were headed. #}
+      {% set on_auth = request.endpoint in ('auth.login', 'auth.register') %}
+      {% set next_url = request.args.get('next') if on_auth else None %}
+      {% if request.endpoint != 'auth.login' %}<a href="{{ url_for('auth.login', next=next_url) }}">Log in</a>{% endif %}
+      {% if request.endpoint != 'auth.register' %}<a class="btn btn-primary btn-sm" href="{{ url_for('auth.register', next=next_url) }}">Start your tree</a>{% endif %}
     </nav>
   </header>
   {% endblock %}
-  {% block flashes %}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flashes" role="status">
-          {% for category, text in messages %}<p class="flash {{ category }}">{{ text }}</p>{% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-  {% endblock %}
-  {% block content %}{% endblock %}
+  {{ self.flashes() }}
+  {{ self.content() }}
+{% endif %}
   <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>

@@ -3,6 +3,8 @@
 {% block title %}{{ tree.name }} · Kinroot{% endblock %}
 {% block html_class %}tree-html{% endblock %}
 {% block body_class %}tree-page{% endblock %}
+{% block sheet_class %}stage theme-ink{% endblock %}
+{% block app_title %}<a href="{{ url_for('trees.dashboard') }}">My trees</a><span class="sep">/</span><span class="here">{{ tree.name }}</span>{% endblock %}
 {% block head %}
 {# Our own modules are listed too, mapped to fingerprinted URLs, so a deploy never mixes old and new files. #}
 {% set modules = versioned_modules("js/tree") %}
@@ -69,7 +71,7 @@
     <p class="scene-hint glass">Drag to turn · scroll to zoom · click a name</p>
   </section>
 
-  <aside class="side-panel" id="panel" aria-label="Details" aria-busy="true">
+  <aside class="side-panel theme-paper" id="panel" aria-label="Details" aria-busy="true">
     <span class="sr-only">Loading your family…</span>
     <span class="skel title" aria-hidden="true"></span>
     <span class="skel" aria-hidden="true"></span>

@@ -7,6 +7,66 @@
    ========================================================================== */
 
 :root {
+
+
+  /* Spacing scale: use these instead of one-off pixel values. */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+
+  /* Corner radii: small controls, fields, cards, sheets, pills. */
+  --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
+
+  --radius: var(--r-md);
+  --radius-sm: var(--r-sm);
+
+  /* Motion: quick and calm. Everything interactive uses these. */
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --dur-fast: 150ms;
+  --dur: 200ms;
+
+  --display: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --body: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --fs-hero: clamp(2.8rem, 4.2vw + 1.2rem, 4.75rem);
+  --fs-h1: clamp(2.2rem, 1.6vw + 1.55rem, 3rem);
+  --fs-h2: 1.65rem;
+  --fs-h3: 1.25rem;
+  --fs-small: .875rem;
+  --fs-tiny: .74rem;
+}
+
+/* Two fixed moods, applied by surface rather than by device setting:
+   .theme-ink   = the dark Kinroot world: the page itself, the sidebar, the tree stage.
+   .theme-paper = the archival sheet: the warm workspace pages sit on.
+   Everything below reads these tokens, so any component looks right on either. */
+:root, .theme-ink {
+  --bg: #090A09;
+  --bg-deep: #050605;
+  --surface: #11120F;
+  --surface-2: #181914;
+  --ink: #F1EBDD;
+  --ink-soft: #A8A397;
+  --line: #2A2924;
+  --leaf: #D2B77D;
+  --leaf-vein: #F3DDAA;
+  --leaf-soft: #1F1C15;
+  --honey: #BE9B5E;
+  --honey-hover: #D2B77D;
+  --honey-soft: #221E15;
+  --honey-ink: #D2B77D;
+  --bark: #8E7349;
+  --danger: #E28A72;
+  --danger-soft: #2A1712;
+  --on-honey: #090A09;
+  --primary-bg: #F1EBDD;  /* ivory on ink */
+  --primary-ink: #090A09;
+  --primary-hover: #FFF8EA;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px -14px rgb(0 0 0 / 60%);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-pop: 0 2px 6px rgb(0 0 0 / 30%), 0 18px 44px -14px rgb(0 0 0 / 70%);
+  --hover: color-mix(in srgb, var(--ink) 6%, transparent);
+  --ring: 0 0 0 3px color-mix(in srgb, var(--honey) 32%, transparent);
+  color-scheme: dark;
+}
+.theme-paper {
   --bg: #EEE7D9;
   --bg-deep: #E5DCCA;
   --surface: #F6F1E7;
@@ -31,62 +91,12 @@
   --shadow: 0 1px 2px rgb(20 19 15 / 6%), 0 10px 30px -12px rgb(20 19 15 / 20%);
   --shadow-sm: 0 1px 2px rgb(20 19 15 / 7%);
   --shadow-pop: 0 2px 6px rgb(20 19 15 / 8%), 0 16px 40px -14px rgb(20 19 15 / 32%);   /* menus, popovers, toasts */
-  --hover: color-mix(in srgb, var(--ink) 6%, transparent);                              /* quiet hover wash */
-  --ring: 0 0 0 3px color-mix(in srgb, var(--honey) 32%, transparent);                  /* focus halo on fields */
-
-  /* Spacing scale: use these instead of one-off pixel values. */
-  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
-
-  /* Corner radii: small controls, fields, cards, sheets, pills. */
-  --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
-
-  --radius: var(--r-md);
-  --radius-sm: var(--r-sm);
-
-  /* Motion: quick and calm. Everything interactive uses these. */
-  --ease: cubic-bezier(.2, .8, .2, 1);
-  --dur-fast: 150ms;
-  --dur: 200ms;
-
-  --display: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  --body: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --fs-hero: clamp(2.8rem, 4.2vw + 1.2rem, 4.75rem);
-  --fs-h1: clamp(2.2rem, 1.6vw + 1.55rem, 3rem);
-  --fs-h2: 1.65rem;
-  --fs-h3: 1.25rem;
-  --fs-small: .875rem;
-  --fs-tiny: .74rem;
+  --hover: color-mix(in srgb, var(--ink) 6%, transparent);
+  --ring: 0 0 0 3px color-mix(in srgb, var(--honey) 32%, transparent);
   color-scheme: light;
+  color: var(--ink);
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #090A09;
-    --bg-deep: #050605;
-    --surface: #11120F;
-    --surface-2: #181914;
-    --ink: #F1EBDD;
-    --ink-soft: #A8A397;
-    --line: #2A2924;
-    --leaf: #D2B77D;
-    --leaf-vein: #F3DDAA;
-    --leaf-soft: #1F1C15;
-    --honey: #BE9B5E;
-    --honey-hover: #D2B77D;
-    --honey-soft: #221E15;
-    --honey-ink: #D2B77D;
-    --bark: #8E7349;
-    --danger: #E28A72;
-    --danger-soft: #2A1712;
-    --on-honey: #090A09;
-    --primary-bg: #F1EBDD;  /* ivory on ink */
-    --primary-ink: #090A09;
-    --primary-hover: #FFF8EA;
-    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px -14px rgb(0 0 0 / 60%);
-    --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
-    --shadow-pop: 0 2px 6px rgb(0 0 0 / 30%), 0 18px 44px -14px rgb(0 0 0 / 70%);
-    color-scheme: dark;
-  }
-}
+.theme-ink { color: var(--ink); }
 
 /* ---------- base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -111,6 +121,13 @@ p { margin: 0; }
 .muted { color: var(--ink-soft); }
 .small { font-size: var(--fs-small); }
 .eyebrow { font-size: var(--fs-tiny); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--honey-ink); }
+/* Serif for the emotional moments (page titles, names), small spaced capitals for section labels. */
+.display { font: 500 clamp(2.6rem, 2.4vw + 1.6rem, 3.9rem)/1 var(--display); letter-spacing: -.02em; }
+.display em { font-style: italic; color: var(--honey-ink); }
+.label, h2.label, h3.label, .ruled-section h2.label { margin: 0; font: 600 .7rem/1.3 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--honey-ink); }
+.eyebrow { display: flex; align-items: center; gap: 12px; }
+.eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--honey); flex: none; }
+.page-head.center .eyebrow { justify-content: center; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .num { font-variant-numeric: tabular-nums; }
 [hidden] { display: none !important; }
@@ -153,6 +170,90 @@ a:focus-visible { border-radius: var(--r-xs); }
 .badge {
   min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--r-pill); background: var(--honey); color: var(--on-honey);
   font-size: .72rem; font-weight: 700; letter-spacing: 0; text-transform: none; display: inline-grid; place-items: center; font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   The app shell (logged in): dark sidebar and bar around a warm paper sheet.
+   ========================================================================== */
+.app { --sb-w: 256px; display: grid; grid-template-columns: var(--sb-w) minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; background: #090A09; }
+.app.sb-collapsed { --sb-w: 72px; }
+.sidebar { position: sticky; top: 0; z-index: 30; height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: var(--sp-5);
+  padding: 18px 14px 16px; background: var(--bg); border-right: 1px solid var(--line); overflow: hidden auto; }
+.sb-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 40px; padding-left: 8px; }
+.sb-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
+.sb-brand .mark { width: 24px; height: 24px; }
+.sb-word { font: 500 1.25rem/1 var(--display); letter-spacing: .16em; text-transform: uppercase; }
+.sb-collapse { padding: 7px; border: none; background: none; color: var(--ink-soft); border-radius: var(--r-sm); }
+.sb-collapse .icon { transition: transform var(--dur) var(--ease); }
+.sb-collapse:hover { background: var(--hover); color: var(--ink); box-shadow: none; transform: none; }
+.sb-nav { display: grid; gap: 2px; align-content: start; flex: 1; }
+.sb-nav a, .sb-me, .sb-logout {
+  position: relative; display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: none; border-radius: var(--r-sm);
+  background: none; color: var(--ink-soft); text-decoration: none; text-align: left; font: 500 .88rem/1.2 var(--body); letter-spacing: 0;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+.sb-nav a .icon, .sb-logout .icon { width: 18px; height: 18px; }
+.sb-nav a:hover, .sb-me:hover, .sb-logout:hover { background: var(--hover); color: var(--ink); box-shadow: none; transform: none; }
+/* Active: a warmer surface, ivory text and a small gold line, like a branch marking the place. */
+.sb-nav a[aria-current], .sb-me[aria-current] { color: var(--ink); background: color-mix(in srgb, var(--honey) 11%, transparent); }
+.sb-nav a[aria-current]::before { content: ""; position: absolute; left: -14px; top: 10px; bottom: 10px; width: 2px; border-radius: 2px; background: var(--honey); }
+.sb-nav a[aria-current] .icon { color: var(--honey-ink); }
+.sb-nav .badge { margin-left: auto; }
+.sb-group { display: grid; gap: 2px; margin-top: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+.sb-label { padding: 0 12px 8px; font: 600 .66rem/1.3 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--honey-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-bottom { display: grid; gap: 2px; padding-top: 14px; border-top: 1px solid var(--line); }
+.sb-bottom form { margin: 0; }
+.sb-me { padding: 8px 10px; }
+.sb-me span { display: grid; min-width: 0; }
+.sb-me b { color: var(--ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-me small { font-size: .74rem; color: var(--ink-soft); }
+.avatar.sm { width: 32px; height: 32px; font-size: .85rem; }
+
+/* Collapsed (desktop): icons only, with a label on hover or keyboard focus. */
+.sb-collapsed .sb-word, .sb-collapsed .sb-label, .sb-collapsed .sb-nav a > span, .sb-collapsed .sb-me > span,
+.sb-collapsed .sb-logout > span { display: none; }
+.sb-collapsed .sb-top { flex-direction: column; padding-left: 0; gap: 10px; }
+.sb-collapsed .sb-collapse .icon { transform: rotate(180deg); }
+.sb-collapsed .sb-nav a, .sb-collapsed .sb-logout, .sb-collapsed .sb-me { justify-content: center; padding-inline: 0; }
+.sb-collapsed .sb-nav .badge { position: absolute; top: 3px; right: 6px; min-width: 16px; height: 16px; font-size: .62rem; padding: 0 4px; }
+.sb-collapsed .sb-group { margin-top: 6px; }
+.sb-collapsed :is(.sb-nav a, .sb-me, .sb-logout):is(:hover, :focus-visible)::after {
+  content: attr(title); position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%); z-index: 40; white-space: nowrap;
+  padding: 6px 10px; border-radius: var(--r-xs); background: var(--surface-2); color: var(--ink); border: 1px solid var(--line);
+  font: 500 .8rem/1 var(--body); box-shadow: var(--shadow-pop); pointer-events: none; }
+.sb-collapsed .sidebar { overflow: visible; }
+
+.app-main { min-width: 0; display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.app-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 10px clamp(16px, 2.5vw, 32px);
+  background: color-mix(in srgb, var(--bg) 84%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.app-bar-title { min-width: 0; display: flex; align-items: center; gap: 10px; font: 600 .7rem/1.2 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+.app-bar-title a { color: var(--ink-soft); text-decoration: none; }
+.app-bar-title a:hover { color: var(--ink); }
+.app-bar-title .sep { color: var(--line); }
+.app-bar-title .here { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-bar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.app-menu, .app-bar-brand { display: none; }
+.app-menu { padding: 8px; border: none; background: none; color: var(--ink); }
+.app-bar-brand .mark { width: 24px; height: 24px; display: block; }
+.app-main > .flashes { width: 100%; max-width: none; margin: 0 0 12px; padding-inline: clamp(16px, 2.5vw, 32px); }
+/* The archival sheet: warm paper rising inside the dark world, like the homepage's last page. */
+.sheet { flex: 1; min-width: 0; margin-right: clamp(0px, 1vw, 14px); border-radius: 24px 24px 0 0; background: var(--bg); }
+.sheet.theme-paper { box-shadow: 0 -24px 60px -40px rgb(0 0 0 / 70%); }
+
+@media (max-width: 1023px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: fixed; inset: 0 auto 0 0; width: min(300px, 84vw); transform: translateX(-102%); transition: transform .3s var(--ease); box-shadow: var(--shadow-pop); }
+  .app.nav-open .sidebar { transform: none; }
+  .app.sb-collapsed { --sb-w: 0px; }
+  .sb-collapse { display: none; }
+  .sb-scrim { position: fixed; inset: 0; z-index: 25; background: rgb(0 0 0 / 55%); }
+  .app-menu, .app-bar-brand { display: inline-flex; }
+  .app-bar { min-height: 56px; }
+  .sheet { margin-right: 0; border-radius: 18px 18px 0 0; }
+  /* Collapsed on a desktop shouldn't leave phones with an icon-only drawer. */
+  .sb-collapsed .sb-word, .sb-collapsed .sb-label, .sb-collapsed .sb-nav a > span, .sb-collapsed .sb-me > span, .sb-collapsed .sb-logout > span { display: revert; }
+  .sb-collapsed .sb-nav a, .sb-collapsed .sb-logout, .sb-collapsed .sb-me { justify-content: flex-start; padding-inline: 12px; }
+  .sb-collapsed .sb-top { flex-direction: row; }
 }
 
 /* ---------- page containers ---------- */
@@ -313,27 +414,47 @@ details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one con
    ========================================================================== */
 .dash-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: start; }
 @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
-.tree-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-.tree-card { display: grid; grid-template-rows: auto 1fr; height: 100%; border-radius: var(--radius); overflow: hidden; text-decoration: none; color: var(--ink);
-  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
-  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
-a.tree-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--honey) 60%, var(--line)); color: var(--ink); box-shadow: var(--shadow); }
-.tree-card .preview { display: grid; place-items: end center; height: 118px; border-bottom: 1px solid var(--line);
-  background: radial-gradient(60% 80% at 50% 70%, color-mix(in srgb, var(--honey) 16%, transparent), transparent 70%), var(--bg-deep); }
-.tree-card .preview svg { width: 100%; height: 100%; }
 /* The little lineage drawing (macro mini_tree): thin gold lines, brass rings, the eldest filled. */
 .mt-trunk { stroke: var(--bark); stroke-width: 2.4; stroke-linecap: round; fill: none; opacity: .8; }
 .mt-line { stroke: var(--honey); stroke-width: 1; fill: none; opacity: .6; }
 .mt-node { fill: var(--surface); stroke: var(--honey); stroke-width: 1.3; }
 .mt-node.is-root { fill: var(--honey); }
-.tree-card .body { padding: 14px 16px 16px; display: grid; gap: 6px; align-content: start; }
-.tree-card .name { font: 800 1.3rem/1.15 var(--display); }
-.tree-card .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; color: var(--ink-soft); font-size: var(--fs-small); }
-/* "Plant a new tree": a dashed tile in the same grid as the trees */
-.tree-card.new-tree { margin: 0; grid-template-rows: 1fr; align-content: center; border-style: dashed; border-width: 1.5px; box-shadow: none; background: transparent; }
-.tree-card.new-tree:hover, .tree-card.new-tree:focus-within { transform: none; border-color: var(--honey); }
-.tree-card.new-tree .body { gap: 10px; align-content: center; }
-.tree-card.new-tree label.name { font-size: 1.3rem; font-weight: 800; }
+.mt-line, .mt-node, .mt-trunk { vector-effect: non-scaling-stroke; }
+/* Inside a dark frame the drawing glows a little: brass rings, warm lines. */
+.theme-ink .mt-node { fill: #15140F; stroke: #D2B77D; stroke-width: 1.3; }
+.theme-ink .mt-node.is-root { fill: #BE9B5E; }
+.theme-ink .mt-line { stroke: #BE9B5E; opacity: .75; stroke-width: 1.1; }
+.theme-ink .mt-trunk { stroke: #8E7349; stroke-width: 2.5; }
+.dash .page-head { margin-bottom: var(--sp-2); }
+.dash-main { display: grid; gap: var(--sp-6); align-content: start; }
+/* Continue exploring: a framed window into the dark world, the tree inside it. */
+.continue { display: grid; gap: var(--sp-4); }
+.continue-stage { position: relative; display: grid; place-items: end center; height: clamp(220px, 26vw, 320px); border-radius: var(--r-lg); overflow: hidden;
+  background: radial-gradient(55% 75% at 50% 78%, rgb(214 186 132 / 16%), transparent 70%), #090A09; border: 1px solid var(--line);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.continue-stage:hover { border-color: color-mix(in srgb, var(--honey) 55%, var(--line)); }
+.continue-art { display: block; width: min(560px, 92%); height: 92%; }
+.continue-art svg { width: 100%; height: 100%; }
+.continue-body { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; }
+.continue-name { font-size: clamp(1.9rem, 1.4vw + 1.3rem, 2.4rem); }
+.continue-name a { color: inherit; text-decoration: none; }
+.continue-name a:hover { color: var(--honey-ink); }
+.meta { margin-top: 4px; color: var(--ink-soft); font-size: var(--fs-small); }
+.meta .dot { margin: 0 .5em; color: var(--line); }
+.quick { display: flex; flex-wrap: wrap; gap: 4px 22px; padding-top: var(--sp-4); border-top: 1px solid var(--line); }
+.quick a { display: inline-flex; align-items: center; gap: 8px; padding: 6px 0; font-weight: 600; font-size: var(--fs-small); color: var(--ink); text-decoration: none; }
+.quick a .icon { color: var(--honey); }
+.quick a:hover { color: var(--honey-ink); }
+.tree-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.tree-list li + li { border-top: 1px solid var(--line); }
+.tree-list a { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto auto; align-items: center; gap: var(--sp-4); padding: 12px 0; color: var(--ink); text-decoration: none; }
+.tree-list-art { display: block; height: 48px; border-radius: var(--r-sm); background: #090A09; overflow: hidden; }
+.tree-list-art svg { width: 100%; height: 100%; }
+.tree-list-name { font: 500 1.35rem/1.1 var(--display); }
+.tree-list a .icon { color: var(--ink-soft); transition: transform var(--dur) var(--ease), color var(--dur) var(--ease); }
+.tree-list a:hover .tree-list-name { color: var(--honey-ink); }
+.tree-list a:hover .icon { transform: translateX(3px); color: var(--honey-ink); }
+.plant .inline-form { max-width: 520px; }
 .dash-import[open] > summary { margin-bottom: var(--sp-3); }
 /* Sidebar sections: a hairline and a small heading, not another box. */
 .ruled-section { display: grid; gap: var(--sp-3); align-content: start; padding-top: var(--sp-4); border-top: 1px solid var(--line); }
@@ -357,6 +478,12 @@ html.tree-html, body.tree-page { height: 100%; }
 body.tree-page { display: flex; flex-direction: column; overflow: hidden; }
 body.tree-page .topbar { position: relative; top: 0; }
 .tree-layout { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: 0; }
+/* Inside the shell the tree page fills the window: the stage is the sheet, the person panel is paper. */
+.has-shell.tree-page .app { flex: 1; height: 100%; min-height: 0; }
+.has-shell.tree-page .app-main { min-height: 0; height: 100%; }
+.has-shell.tree-page .sheet { display: flex; min-height: 0; overflow: hidden; margin-right: 0; border-radius: 24px 0 0 0; }
+.has-shell.tree-page .tree-layout { flex: 1; }
+.has-shell.tree-page .side-panel { border-left: 1px solid var(--line); }
 .scene-wrap { position: relative; min-height: 0; background: #090A09; overflow: hidden; }
 #scene { position: absolute; inset: 0; }
 #scene canvas { display: block; transition: filter .6s; }
