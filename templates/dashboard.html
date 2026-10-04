@@ -64,25 +64,29 @@
             </a>
           </li>
         {% endfor %}
+          {# Planting a new tree sits in the same grid, the same size as a tree. #}
+          <li>
+            <form method="post" action="{{ url_for('trees.new_tree') }}" class="tree-card new-tree">
+              {{ m.csrf() }}
+              <div class="preview" aria-hidden="true"><span class="sprout">{{ m.icon("sprout") }}</span></div>
+              <div class="body">
+                <label for="tree-name" class="name">Plant a new tree</label>
+                <input id="tree-name" name="name" placeholder="The {{ me.name.split()[-1] if me.name.split()|length > 1 else 'Smith' }} family" required maxlength="120">
+                <button class="btn-primary btn-sm">Create tree</button>
+              </div>
+            </form>
+          </li>
       </ul>
 
-      <div class="two-col" style="gap: 16px">
-        <form method="post" action="{{ url_for('trees.new_tree') }}" class="card flat stack">
+      <details class="dash-import">
+        <summary>{{ m.icon("upload") }} Have a tree elsewhere? Import a GEDCOM file</summary>
+        <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="inline-form">
           {{ m.csrf() }}
-          <h2>Plant a new tree</h2>
-          <div class="field"><label for="tree-name">Name it</label>
-            <input id="tree-name" name="name" placeholder="The {{ me.name.split()[-1] if me.name.split()|length > 1 else 'Smith' }} family" required maxlength="120"></div>
-          <button class="btn-primary">Create tree</button>
-        </form>
-        <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="card flat stack">
-          {{ m.csrf() }}
-          <h2>Import a GEDCOM file</h2>
-          <p class="hint">Export one from Ancestry, FamilySearch, MyHeritage or most genealogy apps. It becomes a new tree.</p>
-          <div class="field"><label for="gedcom">File</label>
+          <div class="field"><label for="gedcom">GEDCOM file <span class="hint">from Ancestry, FamilySearch, MyHeritage or most genealogy apps. It becomes a new tree.</span></label>
             <input id="gedcom" name="gedcom" type="file" accept=".ged,.gedcom,text/plain" required></div>
-          <button>{{ m.icon("upload") }} Import</button>
+          <button>Import</button>
         </form>
-      </div>
+      </details>
     </div>
 
     <aside class="side-stack">
