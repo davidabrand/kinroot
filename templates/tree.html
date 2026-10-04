@@ -36,7 +36,7 @@
       <button type="button" class="tool glass" id="btn-flat" aria-pressed="false" title="Switch between 3D and a flat view">{{ m.icon("layers") }}<span class="label">Flat view</span></button>
       <button type="button" class="tool glass" id="btn-reset" title="Show the whole tree">{{ m.icon("target") }}<span class="sr-only">Show the whole tree</span></button>
       {% if role in ('editor', 'owner') %}
-        <button type="button" class="tool" id="btn-add" style="background: var(--honey); color: var(--on-honey); border: 1px solid var(--honey)">{{ m.icon("plus") }}<span class="label">Add person</span></button>
+        <button type="button" class="tool tool-primary" id="btn-add">{{ m.icon("plus") }}<span class="label">Add person</span></button>
       {% endif %}
       <details class="menu" id="more-menu">
         <summary class="tool glass" title="More">{{ m.icon("dots") }}<span class="sr-only">More</span></summary>
@@ -70,7 +70,14 @@
     <p class="scene-hint glass">Drag to turn · scroll to zoom · click a name</p>
   </section>
 
-  <aside class="side-panel" id="panel" aria-live="polite"><p class="muted">Loading your family…</p></aside>
+  <aside class="side-panel" id="panel" aria-label="Details" aria-busy="true">
+    <span class="sr-only">Loading your family…</span>
+    <span class="skel short" aria-hidden="true"></span>
+    <span class="skel title" aria-hidden="true"></span>
+    <div class="stat-row" aria-hidden="true"><span class="skel" style="height:64px"></span><span class="skel" style="height:64px"></span><span class="skel" style="height:64px"></span></div>
+    <span class="skel" aria-hidden="true"></span>
+    <span class="skel short" aria-hidden="true"></span>
+  </aside>
 </div>
 <script>
   window.KINROOT = {

@@ -372,7 +372,7 @@ def share(tree_id):
             db.execute("UPDATE invites SET revoked = 1 WHERE id = ? AND tree_id = ?",
                        (request.form.get("invite_id", type=int), tree_id))
             db.commit()
-            flash("That invite link no longer works.", "success")
+            flash("Invite link turned off. Anyone who has it can no longer join.", "success")
         elif action == "add_member":
             email = request.form.get("email", "").strip().lower()
             new_role = request.form.get("role", "viewer")
@@ -416,7 +416,7 @@ def share(tree_id):
             flash("Privacy settings saved.", "success")
         elif action == "delete":
             if request.form.get("confirm", "").strip() != tree["name"]:
-                flash("Type the tree's exact name to delete it.", "error")
+                flash(f"Nothing was deleted: the name didn't match. Type “{tree['name']}” exactly to confirm.", "error")
             else:
                 for row in db.execute("SELECT photo FROM people WHERE tree_id = ? AND photo != ''", (tree_id,)).fetchall():
                     remove_photo_file(row["photo"])

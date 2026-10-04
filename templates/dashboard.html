@@ -79,7 +79,7 @@
       </ul>
 
       <details class="dash-import">
-        <summary>{{ m.icon("upload") }} Have a tree elsewhere? Import a GEDCOM file</summary>
+        <summary>Have a tree elsewhere? Import a GEDCOM file</summary>
         <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="inline-form">
           {{ m.csrf() }}
           <div class="field"><label for="gedcom">GEDCOM file <span class="hint">from Ancestry, FamilySearch, MyHeritage or most genealogy apps. It becomes a new tree.</span></label>

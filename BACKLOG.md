@@ -34,6 +34,10 @@ a date; add new ideas with a one-line "why".
 - [ ] **Large-tree performance** — instanced leaves, label culling for 500+ people.
 
 ## Done
+- [x] 2026-10-04 **Design polish pass** (owner request) — spacing/radius/motion/shadow tokens,
+      deduplicated CSS, flat cards, hairline-divided settings pages, full button/field states
+      (hover, press, focus, disabled, inline invalid), animated menus and disclosures, skeleton
+      and spinner loading, designed empty states, clearer error messages, tidier dashboard.
 - [x] 2026-10-04 **Time-of-day sky** (owner request) — the sky behind the tree follows the
       visitor's clock: stars + the moon in its real phase at night, a rosy blue hour,
       fiery sunrise, golden hour (unchanged signature colours), brighter midday. Richer

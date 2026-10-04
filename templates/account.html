@@ -3,40 +3,47 @@
 {% block title %}Your account · Kinroot{% endblock %}
 {% block content %}
 <main class="page narrow">
-  <div class="page-head">
+  <div class="page-head with-action">
     <p class="eyebrow">Account</p>
     <h1>{{ me.name }}</h1>
     <p class="muted">{{ me.email }}</p>
+    <form method="post" action="{{ url_for('auth.logout') }}" class="head-action">{{ m.csrf() }}<button class="btn-sm">Log out</button></form>
   </div>
-  <form method="post" class="card stack">
-    {{ m.csrf() }}<input type="hidden" name="action" value="name">
-    <h2>Your name</h2>
-    <p class="hint">This is how relatives see you in requests and messages.</p>
-    <div class="inline-form">
-      <div class="field"><label for="name">Name</label><input id="name" name="name" value="{{ me.name }}" required maxlength="80" autocomplete="name"></div>
-      <button>Save</button>
-    </div>
-  </form>
-  <form method="post" class="card stack">
-    {{ m.csrf() }}<input type="hidden" name="action" value="password">
-    <h2>Change password</h2>
-    <div class="field"><label for="current_password">Current password</label>
-      <input id="current_password" name="current_password" type="password" required autocomplete="current-password"></div>
-    <div class="field"><label for="new_password">New password <span class="hint">at least 8 characters</span></label>
-      <input id="new_password" name="new_password" type="password" minlength="8" required autocomplete="new-password"></div>
-    <div><button>Change password</button></div>
-  </form>
-  <form method="post" action="{{ url_for('auth.logout') }}">{{ m.csrf() }}<button class="btn-ghost">Log out</button></form>
 
-  <section class="card stack danger-zone" aria-labelledby="delete-account-title">
-    <h2 id="delete-account-title">Delete your account</h2>
-    <p class="muted small">This permanently deletes your account and every tree you own, for everyone they're shared with. Trees other people own stay, but you'll be removed from them. This can't be undone.</p>
-    <form method="post" class="inline-form">
-      {{ m.csrf() }}<input type="hidden" name="action" value="delete_account">
-      <div class="field"><label for="del-pw">Your password</label>
-        <input id="del-pw" name="password" type="password" required autocomplete="current-password"></div>
-      <button class="btn-danger">Delete my account</button>
-    </form>
-  </section>
+  <div class="settings">
+    <section aria-labelledby="name-title">
+      <h2 id="name-title">Your name</h2>
+      <p class="hint">This is how relatives see you in requests and messages.</p>
+      <form method="post" class="inline-form">
+        {{ m.csrf() }}<input type="hidden" name="action" value="name">
+        <div class="field"><label for="name">Name</label><input id="name" name="name" value="{{ me.name }}" required maxlength="80" autocomplete="name"></div>
+        <button>Save</button>
+      </form>
+    </section>
+
+    <section aria-labelledby="password-title">
+      <h2 id="password-title">Password</h2>
+      <p class="hint">Changing it signs you out on your other devices.</p>
+      <form method="post" class="stack">
+        {{ m.csrf() }}<input type="hidden" name="action" value="password">
+        <div class="field"><label for="current_password">Current password</label>
+          <input id="current_password" name="current_password" type="password" required autocomplete="current-password"></div>
+        <div class="field"><label for="new_password">New password <span class="hint">at least 8 characters</span></label>
+          <input id="new_password" name="new_password" type="password" minlength="8" required autocomplete="new-password"></div>
+        <div><button>Change password</button></div>
+      </form>
+    </section>
+
+    <section class="danger-zone" aria-labelledby="delete-account-title">
+      <h2 id="delete-account-title">Delete your account</h2>
+      <p class="muted small">This permanently deletes your account and every tree you own, for everyone they're shared with. Trees other people own stay, but you'll be removed from them. This can't be undone.</p>
+      <form method="post" class="inline-form">
+        {{ m.csrf() }}<input type="hidden" name="action" value="delete_account">
+        <div class="field"><label for="del-pw">Your password</label>
+          <input id="del-pw" name="password" type="password" required autocomplete="current-password"></div>
+        <button class="btn-danger">Delete my account</button>
+      </form>
+    </section>
+  </div>
 </main>
 {% endblock %}

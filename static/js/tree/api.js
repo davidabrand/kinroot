@@ -16,7 +16,8 @@ export function createApi(treeId) {
     }
     const data = await res.json().catch(() => ({}));
     if (res.status === 401) window.location.href = "/login?next=" + encodeURIComponent(location.pathname);
-    if (!res.ok) throw new Error(data.error || `Something went wrong (${res.status}).`);
+    if (res.status === 403 && !data.error) throw new Error("You don't have permission to change this tree. Ask its owner for edit access.");
+    if (!res.ok) throw new Error(data.error || `Something went wrong on Kinroot's side (error ${res.status}), so that wasn't saved. Try again in a moment.`);
     return data;
   }
   const t = `/api/trees/${treeId}`;

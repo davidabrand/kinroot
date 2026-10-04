@@ -208,7 +208,14 @@ async function boot() {
     await app.refresh({ reframe: true });
     app.panel.overview();
   } catch (err) {
-    $("panel").innerHTML = `<p class="error">${err.message}</p>`;
+    // Say what happened, that nothing is lost, and offer the obvious next step.
+    const panel = $("panel");
+    panel.removeAttribute("aria-busy");
+    panel.innerHTML = `<div class="empty" role="alert"><strong>Your family couldn't load</strong>
+      <span data-msg></span><span>Nothing has been lost. Check your connection, then try again.</span>
+      <button type="button" class="btn-sm" data-retry style="margin-top:8px">Try again</button></div>`;
+    panel.querySelector("[data-msg]").textContent = err.message;
+    panel.querySelector("[data-retry]").addEventListener("click", () => location.reload());
   } finally {
     $("scene-loading").hidden = true;
   }

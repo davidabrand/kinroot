@@ -56,7 +56,8 @@
             {% endfor %}
           </div>
         {% else %}
-          <p class="empty">No conversations yet. Connect with someone on the right to start one.</p>
+          <div class="empty">{{ m.icon("message") }}<strong>No conversations yet</strong>
+            <span>Connect with a relative from your trees, and once they accept you can message each other here.</span></div>
         {% endif %}
       </section>
 
@@ -97,7 +98,8 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p class="muted small">When relatives join your trees, they'll show up here. Invite them from a tree's <em>Share</em> page.</p>
+          <div class="empty">{{ m.icon("user-plus") }}<strong>No relatives here yet</strong>
+            <span>When family join one of your trees, they'll appear here. Invite them from a tree's <em>Sharing &amp; settings</em>.</span></div>
         {% endif %}
       </section>
 
@@ -130,7 +132,8 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p class="empty">No matches yet. Matches need a first name, last name and birth year on ancestors who've passed away.</p>
+          <div class="empty">{{ m.icon("route") }}<strong>No matches yet</strong>
+            <span>Matches need a first name, last name and birth year on ancestors who've passed away.</span></div>
         {% endif %}
       </section>
 

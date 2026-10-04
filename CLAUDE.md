@@ -66,6 +66,9 @@ and performance for very large trees.
   without calling it out (it must also work on PythonAnywhere's free tier — no paid APIs).
 - Security preserved: parameterized SQL, CSRF, rate limits, `require_role`, living-person privacy.
 - Uses the existing design tokens in `style.css`; keeps the warm "golden-hour" identity.
+  Spacing (`--sp-1…8`), radii (`--r-xs…--r-pill`), motion (`--ease`, `--dur-fast`, `--dur`)
+  and shadows (`--shadow-sm`, `--shadow-pop` for floating things only) are tokens too:
+  no one-off pixel values. Cards are flat; settings pages use `.settings` sections.
 - Done on a git branch, with a short written summary of what changed and why.
 
 **UI/UX principles:**

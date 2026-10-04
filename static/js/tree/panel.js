@@ -18,6 +18,7 @@ export class Panel {
   get store() { return this.app.store; }
 
   render(html) {
+    this.el.removeAttribute("aria-busy");
     this.el.innerHTML = html;
     this.el.scrollTop = 0;
   }

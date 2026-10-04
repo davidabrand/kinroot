@@ -153,7 +153,7 @@ def login():
                 log_in(user["id"])
                 return redirect(safe_next())
             _failed_logins()[key].append(time.time())
-            flash("That email and password don't match.", "error")
+            flash("That email and password don't match. Check for a typo, or sign up if you're new to Kinroot.", "error")
     return render_template("login.html", email=email)
 
 
@@ -181,7 +181,7 @@ def account():
             current = request.form.get("current_password", "")
             new = request.form.get("new_password", "")
             if not check_password_hash(user["password_hash"], current):
-                flash("Your current password isn't right.", "error")
+                flash("Your current password isn't right, so nothing was changed. Type it again and retry.", "error")
             elif len(new) < MIN_PASSWORD:
                 flash(f"Use a new password with at least {MIN_PASSWORD} characters.", "error")
             else:
@@ -193,7 +193,7 @@ def account():
                 flash("Password changed. Other devices have been signed out.", "success")
         elif action == "delete_account":
             if not check_password_hash(user["password_hash"], request.form.get("password", "")):
-                flash("Enter your current password to delete your account.", "error")
+                flash("That password isn't right, so your account was not deleted. Type your current password to confirm.", "error")
                 return redirect(url_for("auth.account"))
             _delete_account(db, user["id"])
             session.clear()

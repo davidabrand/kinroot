@@ -4,12 +4,13 @@
 {% block content %}
 <main class="page narrow">
   <div class="page-head">
-    <a href="{{ url_for('trees.tree_view', tree_id=tree.id) }}">← Back to the tree</a>
+    <a class="back-link" href="{{ url_for('trees.tree_view', tree_id=tree.id) }}">← Back to the tree</a>
     <h1>{{ tree.name }}</h1>
     <p class="muted">Sharing, privacy and settings. Only you, the owner, can see this page.</p>
   </div>
 
-  <section class="card stack" aria-labelledby="invite-title">
+  <div class="settings">
+  <section aria-labelledby="invite-title">
     <h2 id="invite-title">Invite family with a link</h2>
     <p class="muted small">Anyone with the link can join after making an account. If you pick their leaf, the link works once and connects their account to that spot on the tree. Links expire after {{ invite_days }} days.</p>
     <form method="post" class="stack">
@@ -46,7 +47,7 @@
     {% endif %}
   </section>
 
-  <section class="card stack" aria-labelledby="members-title">
+  <section aria-labelledby="members-title">
     <h2 id="members-title">People with access</h2>
     <ul class="list">
       {% for mem in members %}
@@ -85,7 +86,7 @@
     </details>
   </section>
 
-  <section class="card stack" aria-labelledby="privacy-title">
+  <section aria-labelledby="privacy-title">
     <h2 id="privacy-title">{{ m.icon("shield") }} Privacy</h2>
     <form method="post" class="stack">
       {{ m.csrf() }}<input type="hidden" name="action" value="privacy">
@@ -99,7 +100,7 @@
     </form>
   </section>
 
-  <section class="card stack" aria-labelledby="data-title">
+  <section aria-labelledby="data-title">
     <h2 id="data-title">Name and data</h2>
     <form method="post" class="inline-form">
       {{ m.csrf() }}<input type="hidden" name="action" value="rename">
@@ -110,7 +111,7 @@
     <div><a class="btn" href="{{ url_for('trees.export_gedcom', tree_id=tree.id) }}">{{ m.icon("download") }} Download GEDCOM</a></div>
   </section>
 
-  <section class="card stack danger-zone" aria-labelledby="delete-title">
+  <section class="danger-zone" aria-labelledby="delete-title">
     <h2 id="delete-title">Delete this tree</h2>
     <p class="muted small">This removes every person and photo in it, for everyone it's shared with. It can't be undone. Type the tree's name to confirm.</p>
     <form method="post" class="inline-form">
@@ -119,5 +120,6 @@
       <button class="btn-danger">Delete tree</button>
     </form>
   </section>
+  </div>
 </main>
 {% endblock %}
