@@ -21,6 +21,7 @@ const PREVIEW_HOUR = (() => {
   return h >= 0 && h < 24 ? h : null;
 })();
 const TUBE_SEGMENTS = 36;
+const CROWDED = 60;      // above this many people, zooming out switches to the lighter overview
 const TUBE_SIDES = 8;
 
 // Thin a tube gradually from r0 at its start to r1 at its end, so branches taper like real wood.
@@ -270,6 +271,12 @@ export class TreeScene {
       portrait.translate(0, 0, 0.012);
     }
     this.frameGeo = frame;
+    // A light stand-in for the brass frame, used when a big tree is seen from afar.
+    const lowRing = new THREE.TorusGeometry(0.62, 0.085, 6, 24);
+    const lowBack = new THREE.CylinderGeometry(0.6, 0.6, 0.04, 24);
+    lowBack.rotateX(Math.PI / 2);
+    lowBack.translate(0, 0, -0.035);
+    this.frameGeoLow = mergeGeometries([lowRing, lowBack], false);
     this.portraitGeo = portrait;
   }
 
@@ -884,6 +891,17 @@ export class TreeScene {
     this.motes?.update(t);
     const far = this.flat ? this.ortho.zoom < 0.8 : cam.position.distanceTo(this.controls.target) > 40;
     if (far !== this._far) { this._far = far; this.container.classList.toggle("far", far); }
+    // Level of detail for big trees: zoomed out, keep the shape (medallions and branches) and drop
+    // the wreaths and most names, so it stays readable and light. Zooming in brings them back.
+    const crowded = far && this.nodes.size > CROWDED;
+    if (crowded !== this._crowded) {
+      this._crowded = crowded;
+      this.container.classList.toggle("crowded", crowded);
+      for (const node of this.nodes.values()) {
+        node.wreath.visible = !crowded;
+        node.frame.geometry = crowded && this.frameGeoLow ? this.frameGeoLow : this.frameGeo;
+      }
+    }
     this.renderer.render(this.scene, cam);
     this.labels.render(this.scene, cam);
   }

@@ -764,6 +764,8 @@ details.menu > summary::-webkit-details-marker { display: none; }
 /* Zoomed far out: keep first names, drop years and surnames so labels don't pile up
    (the selected or hovered label always shows its full name). */
 #scene.far .label3d small, #scene.far .label3d .last { display: none; }
+/* A big tree seen from afar: only the names that matter right now (selected, on a path, you). */
+#scene.crowded .label3d:not(.selected):not(.on-path):not(:has(.you)) { opacity: 0; pointer-events: none; }
 #scene.far .label3d { font-size: 13px; padding: 3px 8px; }
 .label3d.selected .last, .label3d:hover .last { display: inline !important; }
 .timelapse-on .scene-hint { display: none; }
