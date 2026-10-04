@@ -221,6 +221,7 @@ export class Panel {
               ${parentCount < 2 ? `<button class="btn-sm" data-add="parent">+ Parent</button>` : ""}
               <button class="btn-sm" data-add="spouse">+ Partner</button>
               <button class="btn-sm" data-add="child">+ Child</button>
+              ${parentCount ? `<button class="btn-sm" data-add="sibling">+ Sibling</button>` : ""}
             </div>
             ${this.store.people.length > 1 ? `
             <details>
@@ -379,13 +380,38 @@ export class Panel {
 
   // ------------------------------------------------------------ add / edit form
   personForm({ mode, person = null, link = null, self = false }) {
+    // (`link` may be updated on submit to follow the relationship chosen in the form.)
     this.view = "form";
     const { byId, me } = this.store;
     const other = link ? byId.get(link.to) : null;
     const v = (k) => esc(person?.[k] ?? "");
+    const AS_WORD = { parent: "a parent", child: "a child", spouse: "a partner", sibling: "a sibling" };
     const heading = mode === "edit" ? `Edit ${esc(fullName(person))}`
-      : other ? `Add ${link.as === "spouse" ? "a partner" : `a ${link.as}`} for ${esc(other.first_name)}`
+      : other ? `Add ${AS_WORD[link.as] || "a relative"} for ${esc(other.first_name)}`
       : self ? "Add yourself" : "Add a person";
+    // Who they are to someone already on the tree. Offered on every add; preset when you came from a person's panel.
+    const everyone = [...this.store.people].sort((a, b) => fullName(a).localeCompare(fullName(b)));
+    const relKind = link?.as || "";
+    const relTo = link?.to ?? this.store.selected ?? me.person_id ?? everyone[0]?.id;
+    const relationField = mode === "add" && everyone.length ? `
+        <fieldset class="relation-field">
+          <legend>How are they related?</legend>
+          <div class="two-col">
+            <div class="field"><label for="f-rel-kind">They are the…</label>
+              <select id="f-rel-kind">
+                <option value="" ${relKind ? "" : "selected"}>Not connected yet</option>
+                <option value="parent" ${relKind === "parent" ? "selected" : ""}>parent of</option>
+                <option value="child" ${relKind === "child" ? "selected" : ""}>child of</option>
+                <option value="spouse" ${relKind === "spouse" ? "selected" : ""}>partner of</option>
+                <option value="sibling" ${relKind === "sibling" ? "selected" : ""}>sibling of</option>
+              </select></div>
+            <div class="field"><label for="f-rel-to">Person</label>
+              <select id="f-rel-to">${everyone.map((o) => `<option value="${o.id}" ${o.id === relTo ? "selected" : ""}>${esc(fullName(o))}</option>`).join("")}</select></div>
+          </div>
+          <div class="field" data-other-parent hidden><label for="f-rel-other">Other parent <span class="hint">so the child comes from both</span></label>
+            <select id="f-rel-other"></select></div>
+          <p class="hint" data-rel-hint></p>
+        </fieldset>` : "";
     // Smart defaults: adding yourself starts with your account name; a child starts with the parent's last name.
     const [myFirst, ...myRest] = self ? (me.name || "").trim().split(/\s+/) : [];
     const presetFirst = self ? esc(myFirst || "") : "";
@@ -397,6 +423,7 @@ export class Panel {
       <p><button class="linklike" data-act="back">← Back</button></p>
       <h2>${heading}</h2>
       <form class="stack" data-form>
+        ${relationField}
         <div class="two-col">
           <div class="field"><label for="f-first">First name</label><input id="f-first" name="first_name" required maxlength="100" value="${mode === "edit" ? v("first_name") : presetFirst}" autocomplete="off"></div>
           <div class="field"><label for="f-last">Last name</label><input id="f-last" name="last_name" maxlength="100" value="${mode === "edit" ? v("last_name") : presetLast}" autocomplete="off"></div>
@@ -426,6 +453,33 @@ export class Panel {
 
     const form = this.el.querySelector("[data-form]");
     const died = form.querySelector("#f-died"), deceased = form.querySelector("#f-deceased");
+    const kindSel = form.querySelector("#f-rel-kind"), toSel = form.querySelector("#f-rel-to");
+    const otherWrap = form.querySelector("[data-other-parent]"), otherSel = form.querySelector("#f-rel-other");
+    const relHint = form.querySelector("[data-rel-hint]");
+    const syncRelation = () => {
+      if (!kindSel) return;
+      const kind = kindSel.value, to = Number(toSel.value), target = byId.get(to);
+      toSel.disabled = !kind;
+      const fam = this.store.fam;
+      // A child: also ask for the other parent; preselect when there's exactly one partner.
+      const partners = (fam.spouses.get(to) || []).map((id) => byId.get(id)).filter(Boolean);
+      otherWrap.hidden = kind !== "child";
+      if (kind === "child") {
+        otherSel.innerHTML = `<option value="">Not recorded</option>` +
+          partners.map((o) => `<option value="${o.id}" ${partners.length === 1 ? "selected" : ""}>${esc(fullName(o))}</option>`).join("");
+      }
+      const parents = fam.parents.get(to) || [];
+      relHint.textContent = kind === "sibling"
+        ? (parents.length ? `They'll share ${parents.map((id) => byId.get(id)?.first_name).join(" and ")} as parents.`
+          : `${target?.first_name || "They"} has no parents on the tree yet. Add a parent first, then add siblings.`)
+        : kind === "parent" && parents.length >= 2 ? `${target?.first_name} already has two parents on the tree.` : "";
+      // Pre-fill a child's surname from the parent when it's still empty.
+      const last = form.querySelector("#f-last");
+      if (kind === "child" && !last.value && target?.last_name) last.value = target.last_name;
+    };
+    kindSel?.addEventListener("change", syncRelation);
+    toSel?.addEventListener("change", syncRelation);
+    syncRelation();
     died.addEventListener("input", () => { if (died.value.trim()) deceased.checked = true; });
     this.on("[data-act=back]", "click", () => (person ? this.person(person.id) : other ? this.person(other.id) : this.overview()));
     form.addEventListener("submit", this.guard(async () => {
@@ -436,9 +490,27 @@ export class Panel {
       if (mode === "edit") {
         saved = (await this.app.api.updatePerson(person.id, data)).person;
       } else {
-        if (link) data.link = link;
+        const kind = kindSel?.value || "", to = Number(toSel?.value);
+        const siblingParents = kind === "sibling" ? (this.store.fam.parents.get(to) || []) : [];
+        if (kind === "sibling" && !siblingParents.length) {
+          throw new Error(`${byId.get(to)?.first_name || "They"} has no parents on the tree yet, so there's no one for a sibling to share. Add a parent first.`);
+        }
+        if (kind && kind !== "sibling") data.link = { to, as: kind };
         saved = (await this.app.api.addPerson(data)).person;
-        if (form.querySelector("#f-self")?.checked) await this.app.api.claim(saved.id);
+        // Siblings share the same parents; a child can come from both parents.
+        // The person exists now, so a failed extra link must not leave the form open (saving again would add them twice).
+        const extra = [...siblingParents.map((parent) => [parent, saved.id, "parent"]),
+          ...(kind === "child" && otherSel?.value ? [[Number(otherSel.value), saved.id, "parent"]] : [])];
+        try {
+          for (const [a, b, as] of extra) await this.app.api.link(a, b, as);
+          if (form.querySelector("#f-self")?.checked) await this.app.api.claim(saved.id);
+        } catch (e) {
+          await this.app.refresh();
+          this.app.select(saved.id, { fly: true });
+          this.app.toast(`Added ${fullName(saved)}, but not every link was saved: ${e.message} Use "Link someone already on the tree" to finish.`);
+          return;
+        }
+        link = kind ? { to, as: kind } : null;          // so "return to who you were building around" follows the choice
       }
       const file = form.querySelector("#f-photo").files[0];
       if (file) await this.app.api.uploadPhoto(saved.id, file);
@@ -446,15 +518,16 @@ export class Panel {
       await this.app.refresh({ reframe: mode === "add" && this.store.people.length <= 1 });
       // Adding a second parent? Link the two parents as a couple (the usual
       // case), so they sit together rather than looking like two separate roots.
-      if (mode === "add" && link && link.as === "parent" && other) {
-        const ps = this.store.fam.parents.get(other.id) || [];
+      const anchor = link ? byId.get(link.to) : null;
+      if (mode === "add" && link && link.as === "parent" && anchor) {
+        const ps = this.store.fam.parents.get(anchor.id) || [];
         if (ps.length === 2 && !(this.store.fam.spouses.get(ps[0]) || []).includes(ps[1])) {
           try { await this.app.api.link(ps[0], ps[1], "spouse"); await this.app.refresh(); } catch (e) { /* non-fatal */ }
         }
       }
       // Return to the person you were building around, so you can add the other
       // parent or more children without accidentally chaining generations.
-      const focusId = (mode === "add" && link && (link.as === "parent" || link.as === "child")) ? other.id : saved.id;
+      const focusId = (mode === "add" && link && ["parent", "child", "sibling"].includes(link.as)) ? link.to : saved.id;
       this.app.select(focusId, { fly: mode === "add" });
       this.app.toast(mode === "edit" ? `Saved ${fullName(saved)}.` : `Added ${fullName(saved)} to the tree.`);
     }));
