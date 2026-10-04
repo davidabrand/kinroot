@@ -106,6 +106,26 @@ export class Panel {
     this.on("[data-goto]", "click", (e) => this.app.select(Number(e.currentTarget.dataset.goto), { fly: true }));
   }
 
+  // ------------------------------------------------------------ while the family grows
+  grow() {
+    this.view = "grow";
+    this.render(`
+      <p class="eyebrow">Watch it grow</p>
+      <p class="grow-year num" data-grow-year>—</p>
+      <p class="grow-count" data-grow-count></p>
+      <ol class="grow-events" data-grow-events aria-live="polite"></ol>
+      <p class="small muted">Leaves turn warm gold in remembrance of relatives who have passed. Drag the year to move through time.</p>`);
+  }
+
+  growUpdate({ year, born, total, recent }) {
+    if (this.view !== "grow") return;
+    const q = (s) => this.el.querySelector(s);
+    q("[data-grow-year]").textContent = year;
+    q("[data-grow-count]").textContent = `${born} of ${total} ${total === 1 ? "person" : "people"} born so far`;
+    q("[data-grow-events]").innerHTML = recent.slice().reverse()
+      .map((e) => `<li>${e.year ? `<span class="num">${e.year}</span>` : ""}${esc(e.text)}</li>`).join("");
+  }
+
   // ------------------------------------------------------------ one person
   person(id) {
     const p = this.store.byId.get(id);

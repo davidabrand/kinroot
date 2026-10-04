@@ -562,8 +562,8 @@ export class TreeScene {
   }
 
   // ------------------------------------------------------------ camera
-  frameAll(animate = true) {
-    this.frameBox(this.bounds, animate);
+  frameAll(animate = true, opts = {}) {
+    this.frameBox(this.bounds, animate, opts);
   }
 
   // Frame just some people (for example everyone on a relationship path).
@@ -578,7 +578,8 @@ export class TreeScene {
     this.frameBox(box, animate);
   }
 
-  frameBox(box, animate = true) {
+  // `lift` raises the subject on screen (as a share of its height), e.g. to clear a bar along the bottom.
+  frameBox(box, animate = true, { lift = 0 } = {}) {
     this._lastBox = box === this.bounds ? null : box.clone();
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
@@ -596,9 +597,10 @@ export class TreeScene {
     const fov = (this.camera.fov * Math.PI) / 180;
     const fitH = size.y / 2 / Math.tan(fov / 2);
     const fitW = size.x / 2 / Math.tan(fov / 2) / this.camera.aspect;
-    const dist = Math.max(fitH, fitW, 6) * 1.08 + size.z / 2;
+    const dist = Math.max(fitH, fitW, 6) * (1.08 + lift) + size.z / 2;
     const target = center.clone();
-    const pos = center.clone().add(new THREE.Vector3(dist * 0.18, size.y * 0.06 + 1, dist));
+    target.y -= size.y * lift;
+    const pos = target.clone().add(new THREE.Vector3(dist * 0.18, size.y * 0.06 + 1, dist));
     this.moveCamera(pos, target, animate ? 1100 : 0);
   }
 

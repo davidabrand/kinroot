@@ -53,9 +53,11 @@ export class Timelapse {
     this.root.hidden = false;
     this.app.onTimelapse?.(true);
     this.eventsEl.innerHTML = "";
+    this.recent = [];
+    this._shownYear = null;
     this.year = this.start;
     this.app.scene.setYear(this.start, this.years, false);
-    this.app.scene.frameAll();
+    this.app.scene.frameAll(true, { lift: 0.14 });   // the whole family's space, clear of the playback bar
     this.showYear();
     this.play();
   }
@@ -63,15 +65,16 @@ export class Timelapse {
   play() {
     if (this.year >= this.end) {
       this.year = this.start;
+      this.recent = [];
       this.eventsEl.innerHTML = "";
       this.app.scene.setYear(this.start, this.years, false);
     }
     this.playing = true;
     this.playBtn.setAttribute("aria-label", "Pause");
-    this.playBtn.textContent = "❚❚";
+    this.playBtn.innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 5h2.4v10H6.5zM11.1 5h2.4v10h-2.4z" fill="currentColor"/></svg>`;
     this.app.scene.setAutoRotate(true);
     const span = this.end - this.start;
-    const duration = Math.min(26000, Math.max(9000, span * 150));
+    const duration = Math.min(16000, Math.max(7000, span * 100));   // about a century in ten seconds at 1x
     let last = performance.now();
     const tick = (now) => {
       if (!this.playing) return;
@@ -90,7 +93,7 @@ export class Timelapse {
   pause() {
     this.playing = false;
     this.playBtn.setAttribute("aria-label", "Play");
-    this.playBtn.textContent = "▶";
+    this.playBtn.innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5l8 5-8 5z" fill="currentColor"/></svg>`;
     this.app.scene?.setAutoRotate(false);
   }
 
@@ -111,6 +114,11 @@ export class Timelapse {
     const y = Math.floor(this.year);
     this.yearEl.textContent = y;
     this.slider.value = y;
+    if (y !== this._shownYear) {
+      this._shownYear = y;
+      const born = [...this.years.born.values()].filter((b) => b <= y).length;
+      this.app.panel.growUpdate?.({ year: y, born, total: this.app.store.people.length, recent: this.recent || [] });
+    }
   }
 
   announce(from, to) {
@@ -118,6 +126,8 @@ export class Timelapse {
   }
 
   announceText(text, year) {
+    this.recent = [...(this.recent || []), { text, year }].slice(-6);
+    this._shownYear = null;                  // let the panel pick up the new line
     const li = document.createElement("li");
     if (year) {
       const b = document.createElement("b");

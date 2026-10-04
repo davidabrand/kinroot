@@ -173,7 +173,14 @@ const app = {
 
   onTimelapse(open) {
     document.body.classList.toggle("timelapse-on", open);
-    if (!open) this.emphasize();
+    const grow = document.getElementById("btn-grow");
+    grow?.setAttribute("aria-pressed", String(open));
+    grow?.querySelector(".label")?.replaceChildren(open ? "Stop" : "Watch it grow");
+    if (open) this.panel.grow();
+    else {
+      this.emphasize();
+      this.store.selected ? this.panel.person(this.store.selected) : this.panel.overview();
+    }
   },
 };
 
@@ -196,7 +203,7 @@ function wireToolbar() {
   $("btn-zoom-in").addEventListener("click", () => app.scene?.zoomBy(0.72));
   $("btn-zoom-out").addEventListener("click", () => app.scene?.zoomBy(1.38));
   $("btn-me").addEventListener("click", () => app.store.me.person_id && app.select(app.store.me.person_id, { fly: true }));
-  $("btn-grow").addEventListener("click", () => app.timelapse.open());
+  $("btn-grow").addEventListener("click", () => (app.timelapse.isOpen ? app.timelapse.close() : app.timelapse.open()));
   $("btn-relate").addEventListener("click", () => app.panel.relate());
   $("btn-add")?.addEventListener("click", () => app.panel.personForm({ mode: "add" }));
   const flat = $("btn-flat");
