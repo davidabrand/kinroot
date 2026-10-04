@@ -13,6 +13,14 @@ export class Timelapse {
     this.playBtn = root.querySelector("#tl-play");
     this.eventsEl = root.querySelector("#tl-events");
     this.playing = false;
+    // Playback speed: 1x, 2x, 4x. Takes effect immediately, even mid-play.
+    this.speed = 1;
+    this.speedBtn = root.querySelector("#tl-speed");
+    this.speedBtn?.addEventListener("click", () => {
+      this.speed = this.speed === 4 ? 1 : this.speed * 2;
+      this.speedBtn.textContent = `${this.speed}×`;
+      this.speedBtn.setAttribute("aria-label", `Playback speed: ${this.speed} times`);
+    });
     this.slider.addEventListener("input", () => {
       this.pause();
       this.setYear(Number(this.slider.value), true);
@@ -68,7 +76,7 @@ export class Timelapse {
     const tick = (now) => {
       if (!this.playing) return;
       const before = this.year;
-      this.year = Math.min(this.end, this.year + ((now - last) / duration) * span);
+      this.year = Math.min(this.end, this.year + ((now - last) * this.speed / duration) * span);
       last = now;
       this.app.scene.setYear(this.year, this.years, true);
       this.announce(before, this.year);

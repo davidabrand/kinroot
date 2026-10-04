@@ -46,9 +46,11 @@ for the `register` / `make_tree` / `add` helpers).
    and never commit it — it's git-ignored. Don't print secrets.
 3. **Preserve security:** parameterized SQL only; keep CSRF, the login/registration
    rate limits, access checks (`require_role`), and privacy for living relatives.
-4. **Keep the look.** Kinroot's warm "golden-hour forest" identity is deliberate;
-   don't restyle it toward a generic/corporate look. Work within the existing
-   design tokens in `style.css`.
+4. **Keep the look.** The homepage is the design source of truth: a modern family
+   archive — near-black "ink" world, warm ivory "paper" sheets, brass/gold accents,
+   Cormorant Garamond (history, names, titles) + Manrope (interface). Never drift
+   toward generic SaaS. Work within the tokens in `style.css` (`.theme-ink`,
+   `.theme-paper`) and `landing.css`.
 5. **Schema changes** go in a new `MIGRATIONS` entry; verify the migration runs
    cleanly on an existing database, not just a fresh one.
 6. **Work on a git branch**, run the tests, and summarize what changed. Let a
@@ -64,11 +66,14 @@ and performance for very large trees.
 
 **Definition of done** for any change:
 - `python -m pytest -q` passes, and new/changed behavior has a test.
-- Works at phone width and desktop; keyboard-accessible; correct in light AND dark mode.
+- Works at phone width and desktop; keyboard-accessible; correct on both ink and paper surfaces.
 - No secrets printed or committed; `instance/` untouched; no new runtime dependency
   without calling it out (it must also work on PythonAnywhere's free tier — no paid APIs).
 - Security preserved: parameterized SQL, CSRF, rate limits, `require_role`, living-person privacy.
-- Uses the existing design tokens in `style.css`; keeps the warm "golden-hour" identity.
+- Uses the design tokens in `style.css`; matches the homepage's identity (rule 4).
+  Logged-in pages live in the shell in `base.html` (dark sidebar + paper `.sheet`);
+  serif for titles/names, sans for UI, `.eyebrow` / `.kicker` for labels. The 3D tree
+  draws only on change: call `scene.invalidate()` after anything that alters it.
   Spacing (`--sp-1…8`), radii (`--r-xs…--r-pill`), motion (`--ease`, `--dur-fast`, `--dur`)
   and shadows (`--shadow-sm`, `--shadow-pop` for floating things only) are tokens too:
   no one-off pixel values. Cards are flat; settings pages use `.settings` sections.
