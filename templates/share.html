@@ -5,14 +5,14 @@
 {% block content %}
 <main class="page narrow">
   <div class="page-head">
-    <a class="back-link" href="{{ url_for('trees.tree_view', tree_id=tree.id) }}">← Back to the tree</a>
-    <h1>{{ tree.name }}</h1>
+    <p class="eyebrow">Invite &amp; settings</p>
+    <h1 class="display">{{ tree.name }}</h1>
     <p class="muted">Sharing, privacy and settings. Only you, the owner, can see this page.</p>
   </div>
 
   <div class="settings">
   <section aria-labelledby="invite-title">
-    <h2 id="invite-title">Invite family with a link</h2>
+    <h2 id="invite-title">Bring your family into the tree</h2>
     <p class="muted small">Anyone with the link can join after making an account. If you pick their leaf, the link works once and connects their account to that spot on the tree. Links expire after {{ invite_days }} days.</p>
     <form method="post" class="stack">
       {{ m.csrf() }}<input type="hidden" name="action" value="create_invite">

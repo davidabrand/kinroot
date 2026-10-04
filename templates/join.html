@@ -4,9 +4,9 @@
 {% block app_title %}<span class="here">Invitation</span>{% endblock %}
 {% block content %}
 <main class="page narrow">
-  <div class="card stack center-card">
+  <div class="card stack center-card theme-paper">
     {{ m.mark("mark") }}
-    <h1>{{ invite.inviter_name }} invited you to “{{ invite.tree_name }}”</h1>
+    <h1 class="display">{{ invite.inviter_name }} invited you to “{{ invite.tree_name }}”</h1>
     {% if invite.person_first and not invite.person_user %}
       <p class="lede">They've saved a leaf for you: <strong>{{ invite.person_first }} {{ invite.person_last }}</strong>. Join to claim it.</p>
     {% else %}
