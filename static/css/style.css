@@ -769,7 +769,10 @@ details.menu > summary::-webkit-details-marker { display: none; }
 #scene.far .label3d { font-size: 13px; padding: 3px 8px; }
 .label3d.selected .last, .label3d:hover .last { display: inline !important; }
 .timelapse-on .scene-hint { display: none; }
-@media (max-width: 1440px) { #btn-relate .label, #btn-flat .label { display: none; } }
+/* Toolbar labels fold away by the stage's own width (it shares the window with the sidebar and the panel). */
+.scene-wrap { container-type: inline-size; }
+@container (max-width: 1420px) { #btn-relate .label, #btn-flat .label { display: none; } }
+@container (max-width: 1120px) { #btn-grow .label, #btn-add .label { display: none; } .search input { width: 180px; } }
 
 h2 .icon, h3 .icon { vertical-align: -0.14em; color: var(--leaf); }
 .rel-list .linklike.danger { font-size: .82rem; font-weight: 500; opacity: .75; }
