@@ -25,6 +25,13 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
   });
 });
 
+// Just made an invite link? The page opens on it (#invite-row-N, highlighted by CSS):
+// put the Copy button in focus, so Enter copies it.
+(() => {
+  const row = location.hash.startsWith("#invite-row-") && document.querySelector(location.hash);
+  row?.querySelector("[data-copy]")?.focus({ preventScroll: true });
+})();
+
 // ---- 2. Stop a form being submitted twice ----------------------------------
 // We flag the form rather than disabling the button, so a button's own
 // name/value (e.g. Accept vs Decline) is still included in the submission.
@@ -33,7 +40,7 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
 document.querySelectorAll('form[method="post"]').forEach((form) => {
   if (form.closest(".auth-card")) return;             // handled by auth.js
   if (form.classList.contains("chat-form")) return;   // handled by chat.js (fetch)
-  if (form.querySelector("select[onchange]")) return; // re-selectable dropdown form
+  if (form.querySelector("[onchange]")) return;       // save-on-change forms (role dropdowns, privacy boxes)
 
   form.addEventListener("submit", (e) => {
     if (form.dataset.sent) {

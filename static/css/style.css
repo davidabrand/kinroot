@@ -720,6 +720,9 @@ details.menu > summary::-webkit-details-marker { display: none; }
    Settings / sharing
    ========================================================================== */
 .invite-link { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+/* The link you just made: scrolled into view below the sticky bar and gently highlighted. */
+.list > li[id^="invite-row-"] { scroll-margin-top: 90px; }
+.list > li:target { margin-inline: -12px; padding-inline: 12px; border-radius: var(--r-md); background: var(--honey-soft); border-bottom-color: transparent; }
 .invite-link input { flex: 1 1 260px; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .85rem; }
 .danger-zone { border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
 .setting { display: grid; gap: 4px; }

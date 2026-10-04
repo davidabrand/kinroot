@@ -184,11 +184,7 @@ export class Panel {
         </section>
         <div class="btn-row">
           <button data-act="edit">Edit details</button>
-          <button class="btn-ghost danger" data-act="delete" style="color:var(--danger)">Remove</button>
-        </div>
-        <div class="card flat stack" data-confirm hidden>
-          <p>Remove ${esc(fullName(p))} and their links from the tree?</p>
-          <div class="btn-row"><button class="btn-danger" data-act="delete-yes">Remove</button><button data-act="delete-no">Keep</button></div>
+          <button class="btn-ghost danger" data-act="delete" style="color:var(--danger)">Remove from tree</button>
         </div>` : ""}
       ${isOwner && !p.account ? `<p class="small muted"><a href="${esc(this.app.CFG.shareUrl)}?person=${id}">Invite ${esc(p.first_name)} to claim this leaf</a></p>` : ""}
       <p class="error" role="alert"></p>`);
@@ -200,9 +196,8 @@ export class Panel {
     this.on("[data-act=relate-from]", "click", () => this.relate(id, null));
     this.on("[data-add]", "click", (e) => this.personForm({ mode: "add", link: { to: id, as: e.currentTarget.dataset.add } }));
     this.on("[data-act=edit]", "click", () => this.personForm({ mode: "edit", person: p }));
-    this.on("[data-act=delete]", "click", () => (this.el.querySelector("[data-confirm]").hidden = false));
-    this.on("[data-act=delete-no]", "click", () => (this.el.querySelector("[data-confirm]").hidden = true));
-    this.on("[data-act=delete-yes]", "click", this.guard(async () => {
+    // No "are you sure?": removing is instant and the toast offers Undo, which is faster and just as safe.
+    this.on("[data-act=delete]", "click", this.guard(async () => {
       const removedName = fullName(p);
       const res = await this.app.api.deletePerson(id);
       this.app.store.selected = null;
@@ -217,9 +212,17 @@ export class Panel {
       }
     }));
     this.on("[data-unlink]", "click", this.guard(async (e) => {
-      await this.app.api.unlink(Number(e.currentTarget.dataset.unlink));
+      const rel = rels.find((r) => r.id === Number(e.currentTarget.dataset.unlink));
+      await this.app.api.unlink(rel.id);
       await this.app.refresh();
       this.person(id);
+      // A mis-click shouldn't cost a relationship: offer to put the link straight back.
+      const other = byId.get(rel.person_a === id ? rel.person_b : rel.person_a);
+      this.app.toast(`Unlinked ${other ? fullName(other) : "them"}.`, "Undo", async () => {
+        await this.app.api.link(rel.person_a, rel.person_b, rel.kind === "spouse" ? "spouse" : "parent");
+        await this.app.refresh();
+        if (this.store.selected === id) this.person(id);
+      });
     }));
     this.on("[data-act=link]", "click", this.guard(async () => {
       const other = Number(this.el.querySelector("#link-other").value);
@@ -293,14 +296,19 @@ export class Panel {
     const heading = mode === "edit" ? `Edit ${esc(fullName(person))}`
       : other ? `Add ${link.as === "spouse" ? "a partner" : `a ${link.as}`} for ${esc(other.first_name)}`
       : self ? "Add yourself" : "Add a person";
-    const presetLast = other && link.as === "child" ? esc(other.last_name) : "";
+    // Smart defaults: adding yourself starts with your account name; a child starts with the parent's last name.
+    const [myFirst, ...myRest] = self ? (me.name || "").trim().split(/\s+/) : [];
+    const presetFirst = self ? esc(myFirst || "") : "";
+    const presetLast = self ? esc(myRest.join(" ")) : other && link.as === "child" ? esc(other.last_name) : "";
     const genders = ["female", "male", "non-binary"];
+    // Birthplace, notes and photo are optional extras: tucked away when adding, open when editing someone who has them.
+    const extrasOpen = mode === "edit" && (person.birth_place || person.notes || person.photo_url);
     this.render(`
       <p><button class="linklike" data-act="back">← Back</button></p>
       <h2>${heading}</h2>
       <form class="stack" data-form>
         <div class="two-col">
-          <div class="field"><label for="f-first">First name</label><input id="f-first" name="first_name" required maxlength="100" value="${mode === "edit" ? v("first_name") : ""}" autocomplete="off"></div>
+          <div class="field"><label for="f-first">First name</label><input id="f-first" name="first_name" required maxlength="100" value="${mode === "edit" ? v("first_name") : presetFirst}" autocomplete="off"></div>
           <div class="field"><label for="f-last">Last name</label><input id="f-last" name="last_name" maxlength="100" value="${mode === "edit" ? v("last_name") : presetLast}" autocomplete="off"></div>
         </div>
         <div class="two-col">
@@ -309,13 +317,18 @@ export class Panel {
         </div>
         <p class="date-hint">Exact dates, just a year, or “about 1921” all work.</p>
         <label class="check"><input type="checkbox" name="deceased" id="f-deceased" ${person?.deceased ? "checked" : ""}> Has passed away</label>
-        <div class="field"><label for="f-place">Birthplace</label><input id="f-place" name="birth_place" maxlength="200" value="${mode === "edit" ? v("birth_place") : ""}" placeholder="Brooklyn, New York"></div>
         <div class="field"><label for="f-gender">Gender <span class="hint">helps name relationships (aunt, uncle…)</span></label>
           <input id="f-gender" name="gender" list="gender-options" maxlength="30" value="${mode === "edit" ? v("gender") : ""}">
           <datalist id="gender-options">${genders.map((g) => `<option value="${g}">`).join("")}</datalist></div>
-        <div class="field"><label for="f-notes">Notes and stories</label><textarea id="f-notes" name="notes" maxlength="5000" placeholder="Where they lived, what they did, the stories people tell">${mode === "edit" ? v("notes") : ""}</textarea></div>
-        <div class="field"><label for="f-photo">Photo</label><input id="f-photo" name="photo" type="file" accept="image/jpeg,image/png,image/gif,image/webp">
-          ${mode === "edit" && person.photo_url ? `<label class="check small"><input type="checkbox" id="f-photo-remove"> Remove the current photo</label>` : ""}</div>
+        <details class="more-details" ${extrasOpen ? "open" : ""}>
+          <summary>More details <span class="hint">birthplace, photo, stories</span></summary>
+          <div class="stack" style="margin-top:12px">
+            <div class="field"><label for="f-place">Birthplace</label><input id="f-place" name="birth_place" maxlength="200" value="${mode === "edit" ? v("birth_place") : ""}" placeholder="Brooklyn, New York"></div>
+            <div class="field"><label for="f-photo">Photo</label><input id="f-photo" name="photo" type="file" accept="image/jpeg,image/png,image/gif,image/webp">
+              ${mode === "edit" && person.photo_url ? `<label class="check small"><input type="checkbox" id="f-photo-remove"> Remove the current photo</label>` : ""}</div>
+            <div class="field"><label for="f-notes">Notes and stories</label><textarea id="f-notes" name="notes" maxlength="5000" placeholder="Where they lived, what they did, the stories people tell">${mode === "edit" ? v("notes") : ""}</textarea></div>
+          </div>
+        </details>
         ${mode === "add" && !me.person_id && !link ? `<label class="check"><input type="checkbox" id="f-self" ${self ? "checked" : ""}> This is me</label>` : ""}
         <div class="btn-row"><button class="btn-primary">${mode === "edit" ? "Save changes" : "Add to tree"}</button></div>
         <p class="error" role="alert"></p>
@@ -354,7 +367,7 @@ export class Panel {
       const focusId = (mode === "add" && link && (link.as === "parent" || link.as === "child")) ? other.id : saved.id;
       this.app.select(focusId, { fly: mode === "add" });
     }));
-    form.querySelector("#f-first").focus();
+    form.querySelector(self && presetFirst ? "#f-born" : "#f-first").focus();   // name already filled? start at the date
   }
 
   // ------------------------------------------------------------ how are we related?
@@ -372,7 +385,7 @@ export class Panel {
       <form class="stack" data-relate>
         <div class="field"><label for="rel-a">From</label><select id="rel-a">${options(first)}</select></div>
         <div class="field"><label for="rel-b">To</label><select id="rel-b">${options(second)}</select></div>
-        <div><button class="btn-primary">Show me</button></div>
+        <div><button>Show me</button></div>
       </form>
       <div data-result aria-live="polite"></div>
       <p class="error" role="alert"></p>`);
@@ -395,7 +408,10 @@ export class Panel {
       this.app.showPath(res.path || []);
     });
     form.addEventListener("submit", run);
-    if (auto || (a && b)) run();
+    // Answer straight away when two different people are already picked, and again whenever either changes.
+    const ready = () => form.querySelector("#rel-a").value !== form.querySelector("#rel-b").value;
+    form.addEventListener("change", () => { if (ready()) run(); });
+    if (auto || (first && second && ready())) run();
   }
 }
 

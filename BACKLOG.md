@@ -34,6 +34,11 @@ a date; add new ideas with a one-line "why".
 - [ ] **Large-tree performance** — instanced leaves, label culling for 500+ people.
 
 ## Done
+- [x] 2026-10-04 **Faster workflows** (owner request) — tree name and "Add myself" prefilled;
+      optional fields behind "More details"; Remove is one click with Undo (no confirm);
+      Unlink gets Undo; relationship finder answers immediately; empty trees hide tools that
+      can't work yet; a new invite link is scrolled to, highlighted and its Copy focused;
+      privacy settings save on change.
 - [x] 2026-10-04 **Design polish pass** (owner request) — spacing/radius/motion/shadow tokens,
       deduplicated CSS, flat cards, hairline-divided settings pages, full button/field states
       (hover, press, focus, disabled, inline invalid), animated menus and disclosures, skeleton

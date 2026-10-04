@@ -29,7 +29,7 @@
     {% if invites %}
       <ul class="list">
         {% for inv in invites %}
-          <li>
+          <li id="invite-row-{{ inv.id }}">
             <div class="grow stack-sm">
               <strong>{% if inv.person_first %}For {{ inv.person_first }}{% else %}General family link{% endif %}
                 · {{ 'can edit' if inv.role == 'editor' else 'can view' }}</strong>
@@ -90,13 +90,14 @@
     <h2 id="privacy-title">Privacy</h2>
     <form method="post" class="stack">
       {{ m.csrf() }}<input type="hidden" name="action" value="privacy">
-      <label class="check"><input type="checkbox" name="hide_living" {{ 'checked' if tree.hide_living }}>
+      <label class="check"><input type="checkbox" name="hide_living" {{ 'checked' if tree.hide_living }} onchange="this.form.requestSubmit()">
         <span class="setting">Hide living relatives' details from view-only guests
           <span class="hint">They'll still see names and photos, but not birth dates, birthplaces or notes. Recommended: those are common answers to bank security questions.</span></span></label>
-      <label class="check"><input type="checkbox" name="discoverable" {{ 'checked' if tree.discoverable }}>
+      <label class="check"><input type="checkbox" name="discoverable" {{ 'checked' if tree.discoverable }} onchange="this.form.requestSubmit()">
         <span class="setting">Let other Kinroot families find shared ancestors
           <span class="hint">If someone else's tree has the same ancestor (same name and birth year), they can send you a connection request. Only people who have passed away are matched, and nobody can see your tree unless you invite them.</span></span></label>
-      <div><button>Save privacy settings</button></div>
+      {# Saves as soon as a box changes (like the access dropdowns); the button is only needed without JavaScript. #}
+      <noscript><div><button>Save privacy settings</button></div></noscript>
     </form>
   </section>
 

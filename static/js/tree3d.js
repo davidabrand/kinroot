@@ -30,6 +30,10 @@ const app = {
     if (s.selected && !s.byId.has(s.selected)) s.selected = null;
     if (this.focusId && !s.byId.has(this.focusId)) this.focusId = null;
     $("empty-scene").hidden = s.people.length > 0;
+    // Search, time-lapse, relationships and views have nothing to work on in an empty tree: show them once someone's there.
+    for (const el of [$("btn-grow"), $("btn-relate"), $("btn-flat"), $("btn-reset"), document.querySelector(".scene-toolbar .search")]) {
+      if (el) el.hidden = s.people.length === 0;
+    }
     this.search.update(s.people);
     if (this.timelapse.isOpen) this.timelapse.close();
     if (this.scene) {

@@ -362,12 +362,14 @@ def share(tree_id):
                     flash(f"{person['first_name']} has already claimed their leaf.", "error")
                     return redirect(url_for("trees.share", tree_id=tree_id))
             expires = (utc_now() + timedelta(days=INVITE_DAYS)).strftime("%Y-%m-%d %H:%M:%S")
-            db.execute("""INSERT INTO invites (tree_id, token, role, person_id, created_by, expires_at, max_uses)
-                          VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                       (tree_id, secrets.token_urlsafe(18), inv_role, person_id, me["id"], expires,
-                        1 if person_id else None))
+            cur = db.execute("""INSERT INTO invites (tree_id, token, role, person_id, created_by, expires_at, max_uses)
+                                VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                             (tree_id, secrets.token_urlsafe(18), inv_role, person_id, me["id"], expires,
+                              1 if person_id else None))
             db.commit()
             flash("Invite link ready. Copy it and send it however your family talks: text, email, WhatsApp.", "success")
+            # Land right on the new link (highlighted, Copy focused) instead of making the owner hunt for it.
+            return redirect(url_for("trees.share", tree_id=tree_id, _anchor=f"invite-row-{cur.lastrowid}"))
         elif action == "revoke_invite":
             db.execute("UPDATE invites SET revoked = 1 WHERE id = ? AND tree_id = ?",
                        (request.form.get("invite_id", type=int), tree_id))
@@ -506,7 +508,7 @@ def api_tree(tree_id):
     return jsonify(
         tree={"id": tree["id"], "name": tree["name"], "hide_living": bool(tree["hide_living"]),
               "discoverable": bool(tree["discoverable"])},
-        role=role, me={"id": me, "person_id": my_leaf},
+        role=role, me={"id": me, "person_id": my_leaf, "name": current_user()["name"]},
         people=[person_payload(p, tree, role, me, states, accounts, issues.get(p["id"])) for p in people],
         relationships=[dict(r) for r in rels])
 

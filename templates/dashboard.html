@@ -16,7 +16,8 @@
     {{ m.csrf() }}
     <div class="field">
       <label for="tree-name">Name your tree</label>
-      <input id="tree-name" name="name" placeholder="The {{ me.name.split()[-1] if me.name.split()|length > 1 else 'Smith' }} family" required maxlength="120" autofocus>
+      {# A ready-made name, so planting is one click; it's selected on focus, so typing replaces it. #}
+      <input id="tree-name" name="name" value="{{ 'The ' ~ me.name.split()[-1] ~ ' family' if me.name.split()|length > 1 else '' }}" placeholder="The Smith family" required maxlength="120" autofocus onfocus="this.select()">
     </div>
     <button class="btn-primary btn-lg">{{ m.icon("sprout") }} Plant my tree</button>
   </form>
