@@ -35,6 +35,21 @@
   app.querySelectorAll(".sb-nav a").forEach((a) => a.addEventListener("click", () => setOpen(false)));
 })();
 
+// ---- People page: instant search -------------------------------------------
+(() => {
+  const input = document.querySelector("[data-people-search]");
+  const list = document.querySelector("[data-people-list]");
+  if (!input || !list) return;
+  const none = document.querySelector("[data-people-none]");
+  const rows = [...list.querySelectorAll("[data-search]")];
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    let shown = 0;
+    rows.forEach((r) => { const on = !q || r.dataset.search.includes(q); r.hidden = !on; shown += on; });
+    if (none) none.hidden = shown > 0;
+  });
+})();
+
 // ---- 1. Copy buttons -------------------------------------------------------
 document.querySelectorAll("[data-copy]").forEach((button) => {
   button.addEventListener("click", async () => {

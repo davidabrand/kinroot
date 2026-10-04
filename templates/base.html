@@ -35,8 +35,9 @@
           <div class="sb-group">
             <p class="sb-label" title="{{ ctx_tree.name }}">{{ ctx_tree.name }}</p>
             <a href="{{ url_for('trees.tree_view', tree_id=ctx_tree.id) }}" title="Family tree" {% if request.endpoint == 'trees.tree_view' %}aria-current="page"{% endif %} data-tree-mode="tree">{{ m.icon("leaf") }}<span>Family tree</span></a>
-            <a href="{{ url_for('trees.tree_view', tree_id=ctx_tree.id) }}#timeline" title="Timeline" data-tree-mode="timeline">{{ m.icon("clock") }}<span>Timeline</span></a>
-            <a href="{{ url_for('trees.tree_view', tree_id=ctx_tree.id) }}#relate" title="Relationships" data-tree-mode="relate">{{ m.icon("route") }}<span>Relationships</span></a>
+            <a href="{{ url_for('archive.people', tree_id=ctx_tree.id) }}" title="People" {% if request.endpoint == 'archive.people' %}aria-current="page"{% endif %}>{{ m.icon("people") }}<span>People</span></a>
+            <a href="{{ url_for('archive.timeline', tree_id=ctx_tree.id) }}" title="Timeline" {% if request.endpoint == 'archive.timeline' %}aria-current="page"{% endif %}>{{ m.icon("clock") }}<span>Timeline</span></a>
+            <a href="{{ url_for('archive.relationships', tree_id=ctx_tree.id) }}" title="Relationships" {% if request.endpoint == 'archive.relationships' %}aria-current="page"{% endif %}>{{ m.icon("route") }}<span>Relationships</span></a>
             {% if ctx_role == 'owner' %}
               <a href="{{ url_for('trees.share', tree_id=ctx_tree.id) }}" title="Invite & settings" {% if request.endpoint == 'trees.share' %}aria-current="page"{% endif %}>{{ m.icon("user-plus") }}<span>Invite &amp; settings</span></a>
             {% endif %}

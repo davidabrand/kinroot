@@ -55,6 +55,11 @@
 <span class="avatar {{ cls }}" aria-hidden="true">{{ name | initials }}</span>
 {%- endmacro %}
 
+{# A person as a brass medallion: their portrait if there is one, otherwise their initials. #}
+{% macro medallion(p, size="") -%}
+<span class="medallion {{ size }}">{% if p.photo_url %}<img src="{{ p.photo_url }}" alt="" loading="lazy">{% else %}<span aria-hidden="true">{{ (p.first_name ~ ' ' ~ p.last_name) | initials }}</span>{% endif %}</span>
+{%- endmacro %}
+
 {% macro role_pill(role, labels) -%}
 <span class="pill {{ role }}">{{ labels[role] }}</span>
 {%- endmacro %}

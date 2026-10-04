@@ -270,6 +270,10 @@ async function boot() {
     if (location.hash === "#timeline" && app.store.people.length) app.timelapse.open();
     else if (location.hash === "#relate" && app.store.people.length) app.panel.relate();
     else if (location.hash === "#add" && app.store.canEdit) app.panel.personForm({ mode: "add" });
+    else if (location.hash.startsWith("#person-")) {          // from the People page: fly to them
+      const id = Number(location.hash.slice(8));
+      if (app.store.byId.has(id)) app.select(id, { fly: true });
+    }
   };
   openMode();
   addEventListener("hashchange", openMode);

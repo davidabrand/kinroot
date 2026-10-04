@@ -9,7 +9,7 @@ from markupsafe import Markup, escape
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import safe_join
 
-from . import auth, db, family, trees
+from . import archive, auth, db, family, trees
 from .landing import scene as landing_scene
 from .dates import format_date, utc_now
 
@@ -58,6 +58,7 @@ def create_app(test_config=None):
     app.register_blueprint(auth.bp)
     app.register_blueprint(trees.bp)
     app.register_blueprint(family.bp)
+    app.register_blueprint(archive.bp)
 
     @app.route("/")
     def landing():

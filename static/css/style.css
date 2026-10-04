@@ -399,6 +399,61 @@ details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one con
 .skel.short { width: 45%; }
 @keyframes skel { from { background-position: 100% 0; } to { background-position: 0 0; } }
 
+/* ---------- medallions: a person as a brass ring around a portrait or initials ---------- */
+.medallion { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
+  background: var(--surface); box-shadow: 0 0 0 1.5px var(--honey), 0 0 0 5px color-mix(in srgb, var(--honey) 12%, transparent);
+  font: 500 1.05rem/1 var(--display); color: var(--ink); }
+.medallion img { width: 100%; height: 100%; object-fit: cover; }
+.medallion.sm { width: 32px; height: 32px; font-size: .85rem; box-shadow: 0 0 0 1.25px var(--honey); }
+.medallion.lg { width: 84px; height: 84px; font-size: 1.7rem; }
+
+/* ---------- People ---------- */
+.people-tools { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; justify-content: space-between; }
+.people-search { position: relative; flex: 1 1 260px; max-width: 420px; }
+.people-search .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-soft); }
+.people-search input { padding-left: 40px; height: 46px; border-radius: var(--r-pill); }
+.segmented { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: var(--r-pill); }
+.segmented a { padding: 7px 16px; border-radius: var(--r-pill); font: 600 .72rem/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); text-decoration: none; }
+.segmented a[aria-current] { background: var(--primary-bg); color: var(--primary-ink); }
+.portrait-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--sp-6) var(--sp-4); }
+.portrait-grid a { display: grid; justify-items: center; gap: 6px; text-align: center; color: var(--ink); text-decoration: none; padding: var(--sp-2); border-radius: var(--r-md); }
+.portrait-grid a:hover .medallion { box-shadow: 0 0 0 1.5px var(--honey-hover), 0 0 0 7px color-mix(in srgb, var(--honey) 20%, transparent); }
+.portrait-grid .medallion { margin-bottom: 6px; transition: box-shadow var(--dur) var(--ease); }
+.pg-name { font: 500 1.2rem/1.15 var(--display); }
+.pg-dates { font-size: var(--fs-small); color: var(--ink-soft); }
+.pg-rel { font: 600 .62rem/1.3 var(--body); letter-spacing: .16em; text-transform: uppercase; color: var(--honey-ink); }
+.people-table { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }
+.people-table th, .people-table td { padding: 10px 12px 10px 0; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.people-table thead th { font: 600 .66rem/1.3 var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); }
+.people-table tbody th a { display: inline-flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; font: 500 1.1rem/1.2 var(--display); }
+.people-table tbody th a:hover { color: var(--honey-ink); }
+@media (max-width: 640px) { .people-table td:nth-child(3), .people-table th:nth-child(3) { display: none; } }
+
+/* ---------- Relationships ---------- */
+.relate-form { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: var(--sp-3); align-items: end; }
+.relate-and { padding-bottom: 12px; font: 500 1.6rem/1 var(--display); color: var(--honey-ink); }
+.relate-result { display: grid; gap: var(--sp-4); padding-top: var(--sp-5); border-top: 1px solid var(--line); animation: rise-in var(--dur) var(--ease); }
+.relate-term { font: 500 clamp(2.4rem, 3vw + 1.4rem, 3.6rem)/1 var(--display); }
+.lineage { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-5) 0; align-items: flex-start; }
+.lineage li { position: relative; display: grid; justify-items: center; gap: 6px; width: 92px; text-align: center; animation: rise-in .5s var(--ease) both; animation-delay: calc(var(--i) * 120ms); }
+.lineage li + li::before { content: ""; position: absolute; top: 22px; right: calc(50% + 26px); width: calc(92px - 52px); height: 2px; background: var(--honey); border-radius: 2px; }
+.lineage-name { font: 500 1.05rem/1.1 var(--display); }
+.lineage-year { font-size: .75rem; color: var(--ink-soft); }
+@media (max-width: 640px) { .relate-form { grid-template-columns: 1fr; } .relate-and { display: none; } }
+
+/* ---------- Timeline ---------- */
+.decades { list-style: none; margin: 0; padding: 0; display: grid; }
+.decade { display: grid; grid-template-columns: minmax(120px, 200px) minmax(0, 1fr); gap: var(--sp-5); padding: var(--sp-5) 0; border-top: 1px solid var(--line); }
+.decade-year { font: 500 clamp(2.4rem, 2vw + 1.6rem, 3.4rem)/1 var(--display); color: var(--honey-ink); position: sticky; top: 76px; align-self: start; }
+.decade-year span { font-size: .5em; }
+.events { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.event { display: grid; grid-template-columns: 52px auto minmax(0, 1fr); gap: 14px; align-items: center; }
+.event-year { font: 600 .8rem/1 var(--body); letter-spacing: .08em; color: var(--ink-soft); }
+.event-text small { display: block; color: var(--ink-soft); font-size: var(--fs-small); }
+.event.died .medallion { box-shadow: 0 0 0 1.25px #C9A86A; filter: saturate(.75); }
+@media (max-width: 640px) { .decade { grid-template-columns: 1fr; gap: var(--sp-3); } .decade-year { position: static; } }
+@media (prefers-reduced-motion: reduce) { .lineage li { animation: none; } }
+
 /* ---------- settings pages: sections divided by hairlines, not boxed ---------- */
 .settings { display: grid; }
 .settings > section { display: grid; gap: var(--sp-3); align-content: start; padding-block: var(--sp-6); border-top: 1px solid var(--line); }

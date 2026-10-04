@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}People · {{ tree.name }} · Kinroot{% endblock %}
+{% block app_title %}<a href="{{ url_for('trees.dashboard') }}">My trees</a><span class="sep">/</span><a href="{{ url_for('trees.tree_view', tree_id=tree.id) }}">{{ tree.name }}</a><span class="sep">/</span><span class="here">People</span>{% endblock %}
+{% block content %}
+<main class="page people-page">
+  <div class="page-head with-action">
+    <p class="eyebrow">{{ tree.name }}</p>
+    <h1 class="display">Everyone in the tree</h1>
+    <p class="muted">{{ people | length }} {{ 'person' if people | length == 1 else 'people' }}{% if relation %}, named by how they're related to you{% endif %}.</p>
+    {% if role in ('owner', 'editor') %}<a class="btn btn-primary head-action" href="{{ url_for('trees.tree_view', tree_id=tree.id) }}#add">{{ m.icon("plus") }} Add a relative</a>{% endif %}
+  </div>
+
+  {% if people %}
+  <div class="people-tools">
+    <div class="field people-search">
+      <label for="people-q" class="sr-only">Search people</label>
+      {{ m.icon("search") }}<input id="people-q" type="search" placeholder="Search by name or year" autocomplete="off" data-people-search>
+    </div>
+    <div class="segmented" role="group" aria-label="View">
+      <a href="?view=portraits" {% if view == 'portraits' %}aria-current="true"{% endif %}>Portraits</a>
+      <a href="?view=list" {% if view == 'list' %}aria-current="true"{% endif %}>List</a>
+    </div>
+  </div>
+
+  {% if view == 'portraits' %}
+    <ul class="portrait-grid" data-people-list>
+      {% for p in people %}
+        <li data-search="{{ (p.first_name ~ ' ' ~ p.last_name ~ ' ' ~ (p.birth_year or '') ~ ' ' ~ (p.death_year or '')) | lower }}">
+          <a href="{{ url_for('trees.tree_view', tree_id=tree.id) }}#person-{{ p.id }}">
+            {{ m.medallion(p, "lg") }}
+            <span class="pg-name">{{ p.first_name }} {{ p.last_name }}</span>
+            {% if p.birth_year or p.death_year %}<span class="pg-dates num">{{ p.birth_year or '?' }}{% if p.death_year %} – {{ p.death_year }}{% endif %}</span>{% endif %}
+            {% if relation[p.id] %}<span class="pg-rel">{{ relation[p.id] }}</span>{% endif %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <table class="people-table" data-people-list>
+      <thead><tr><th scope="col">Name</th><th scope="col">Born</th><th scope="col">Died</th>{% if relation %}<th scope="col">Relationship</th>{% endif %}</tr></thead>
+      <tbody>
+        {% for p in people %}
+          <tr data-search="{{ (p.first_name ~ ' ' ~ p.last_name ~ ' ' ~ (p.birth_year or '') ~ ' ' ~ (p.death_year or '')) | lower }}">
+            <th scope="row"><a href="{{ url_for('trees.tree_view', tree_id=tree.id) }}#person-{{ p.id }}">{{ m.medallion(p, "sm") }}<span>{{ p.first_name }} {{ p.last_name }}</span></a></th>
+            <td class="num">{{ p.birth_display or ('—' if not p.private else 'Private') }}</td>
+            <td class="num">{{ p.death_display or '' }}</td>
+            {% if relation %}<td>{{ relation[p.id] or '' }}</td>{% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+  <p class="empty" data-people-none hidden><strong>Nobody matches that</strong><span>Try a first name, a surname or a year.</span></p>
+  {% else %}
+    <div class="empty">{{ m.icon("user-plus") }}<strong>Add someone you know</strong>
+      <span>Every tree begins with one person.</span>
+      {% if role in ('owner', 'editor') %}<a class="btn btn-primary btn-sm" href="{{ url_for('trees.tree_view', tree_id=tree.id) }}#add">Add relative</a>{% endif %}</div>
+  {% endif %}
+</main>
+{% endblock %}

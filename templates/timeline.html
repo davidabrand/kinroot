@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}Timeline · {{ tree.name }} · Kinroot{% endblock %}
+{% block app_title %}<a href="{{ url_for('trees.dashboard') }}">My trees</a><span class="sep">/</span><a href="{{ url_for('trees.tree_view', tree_id=tree.id) }}">{{ tree.name }}</a><span class="sep">/</span><span class="here">Timeline</span>{% endblock %}
+{% block content %}
+<main class="page timeline-page">
+  <div class="page-head with-action">
+    <p class="eyebrow">Timeline</p>
+    <h1 class="display">A century, <em>in order.</em></h1>
+    <p class="muted">Births and remembrances across {{ tree.name }}.{% if undated %} {{ undated }} {{ 'person has' if undated == 1 else 'people have' }} no birth year yet.{% endif %}</p>
+    <a class="btn btn-primary head-action" href="{{ url_for('trees.tree_view', tree_id=tree.id) }}#timeline">{{ m.icon("clock") }} Watch it grow</a>
+  </div>
+
+  {% if decades %}
+    <ol class="decades">
+      {% for d in decades %}
+        <li class="decade">
+          <h2 class="decade-year num">{{ d.decade }}<span>s</span></h2>
+          <ol class="events">
+            {% for e in d.events %}
+              <li class="event {{ e.kind }}">
+                <span class="event-year num">{{ e.year }}</span>
+                {{ m.medallion(e.person, "sm") }}
+                <span class="event-text">
+                  {% if e.kind == 'born' %}<b>{{ e.person.first_name }} {{ e.person.last_name }}</b> is born
+                  {% else %}Remembering <b>{{ e.person.first_name }} {{ e.person.last_name }}</b>{% endif %}
+                  {% if e.when and e.when != e.year | string %}<small>{{ e.when }}</small>{% endif %}
+                </span>
+              </li>
+            {% endfor %}
+          </ol>
+        </li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <div class="empty">{{ m.icon("clock") }}<strong>History starts with a date</strong>
+      <span>Add a birth year to someone on the tree and their story will appear here.</span></div>
+  {% endif %}
+</main>
+{% endblock %}
