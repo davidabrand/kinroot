@@ -14,16 +14,16 @@ const KNOWN_NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);      // a new moon to count
 // Sky looks keyed by the sun's height in degrees. Colours blend between neighbours.
 // The 8° row is Kinroot's signature golden hour; the others are tuned around it.
 export const KEYFRAMES = [
-  { alt: -18, top: "#070d1c", mid: "#111a33", horizon: "#232c48", ground: "#11160f", sun: "#000000",
-    glow: 0, stars: 1, light: "#9fb4e0", lightI: 0.55, hemiSky: "#5d6f9a", hemiGround: "#141a14", hemiI: 0.45, fillI: 0.3, motes: "#d6f08c" },
-  { alt: -9, top: "#18214a", mid: "#4b4778", horizon: "#b87063", ground: "#2e2a22", sun: "#ff7a4a",
-    glow: 0.35, stars: 0.35, light: "#c9a3c0", lightI: 0.8, hemiSky: "#8f86b3", hemiGround: "#2a2620", hemiI: 0.55, fillI: 0.35, motes: "#ffd29a" },
-  { alt: -1, top: "#4d5e8e", mid: "#c08480", horizon: "#f79a55", ground: "#7d5f3e", sun: "#ff8c42",
-    glow: 0.75, stars: 0, light: "#ff9d5c", lightI: 1.9, hemiSky: "#ffc59a", hemiGround: "#3b3022", hemiI: 0.6, fillI: 0.45, motes: "#ffd9a0" },
-  { alt: 8, top: "#8fa8b6", mid: "#e6c39a", horizon: "#f6c98a", ground: "#b99461", sun: "#ffb257",
-    glow: 0.55, stars: 0, light: "#ffc27a", lightI: 2.8, hemiSky: "#ffe2b8", hemiGround: "#3b3a22", hemiI: 0.7, fillI: 0.6, motes: "#ffe2a0" },
-  { alt: 30, top: "#5f93c2", mid: "#a6c7dc", horizon: "#f1e0bd", ground: "#b99461", sun: "#fff1d0",
-    glow: 0.25, stars: 0, light: "#fff1dc", lightI: 3.0, hemiSky: "#e8f0f4", hemiGround: "#3b3a22", hemiI: 0.8, fillI: 0.6, motes: "#fff1c8" },
+  { alt: -18, top: "#050607", mid: "#08090a", horizon: "#121318", ground: "#0a0b09", sun: "#000000",
+    glow: 0, stars: 1, light: "#9fb4e0", lightI: 0.6, hemiSky: "#4a5470", hemiGround: "#0d0e0b", hemiI: 0.45, fillI: 0.3, motes: "#e7cb8e" },
+  { alt: -9, top: "#07080b", mid: "#100f14", horizon: "#241b19", ground: "#0d0c0a", sun: "#c4643a",
+    glow: 0.25, stars: 0.35, light: "#c9a3c0", lightI: 0.85, hemiSky: "#6f6888", hemiGround: "#14120e", hemiI: 0.5, fillI: 0.35, motes: "#e7cb8e" },
+  { alt: -1, top: "#0b0a0b", mid: "#1d1612", horizon: "#3c2a1c", ground: "#120f0b", sun: "#d98a4a",
+    glow: 0.45, stars: 0, light: "#ffb27a", lightI: 1.8, hemiSky: "#d9b48a", hemiGround: "#17130d", hemiI: 0.55, fillI: 0.45, motes: "#f3ddaa" },
+  { alt: 8, top: "#0d0c0a", mid: "#1f1a12", horizon: "#3f3220", ground: "#14110c", sun: "#d2b77d",
+    glow: 0.4, stars: 0, light: "#ffd39a", lightI: 2.6, hemiSky: "#f1dcb4", hemiGround: "#1a170f", hemiI: 0.65, fillI: 0.6, motes: "#f3ddaa" },
+  { alt: 30, top: "#10110e", mid: "#1d1e19", horizon: "#34322a", ground: "#151510", sun: "#f1ebdd",
+    glow: 0.2, stars: 0, light: "#fff1dc", lightI: 2.9, hemiSky: "#ece4d4", hemiGround: "#1a1914", hemiI: 0.75, fillI: 0.6, motes: "#f1ebdd" },
 ];
 
 const COLOR_KEYS = ["top", "mid", "horizon", "ground", "sun", "light", "hemiSky", "hemiGround", "motes"];

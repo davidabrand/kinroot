@@ -113,6 +113,7 @@ def create_app(test_config=None):
                 "nav_counts": family.counts(me["id"]) if me else None,
                 "versioned_modules": versioned_modules}
 
+    app.jinja_env.globals["landing_scene"] = landing_scene   # the homepage tree, reused on the sign-in pages
     app.add_template_filter(format_date, "fdate")
     app.add_template_filter(_ago, "ago")
     app.add_template_filter(_initials, "initials")

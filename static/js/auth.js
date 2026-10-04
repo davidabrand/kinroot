@@ -24,6 +24,10 @@
     requestAnimationFrame(tick);
   }
 
+  // On phones the homepage tree is a framed picture above the form: crop the drawing tightly around it.
+  const treeSvg = document.querySelector(".kr-scene .kt");
+  if (treeSvg && window.matchMedia("(max-width: 900px)").matches) treeSvg.setAttribute("viewBox", "240 90 900 920");
+
   // Put the cursor in the first empty box (the password, after a typo). Only with a mouse or
   // trackpad: on a phone, a keyboard popping up straight away would cover the whole scene.
   // Waits for "load" because jumping to #sign-in moves focus to the card once the page is parsed.

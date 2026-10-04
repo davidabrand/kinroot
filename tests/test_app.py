@@ -24,14 +24,15 @@ def test_landing_register_login_and_logout(app):
 def test_sign_in_pages_keep_where_you_were_headed(app):
     c = app.test_client()
     page = c.get("/login?next=/join/abc").get_data(as_text=True)
-    nav = page.split("</nav>")[0]
+    header = page[page.index("<header"):page.index("</header>")]
     assert 'action="/login?next=/join/abc"' in page                 # no #sign-in to trail onto the next page
     assert 'href="/register?next=/join/abc#sign-up"' in page        # switching forms keeps the invite
-    assert 'href="/register?next=/join/abc">Start your tree' in nav  # ...and so does the top bar
-    assert ">Log in</a>" not in nav                                  # no link to the page you're on
+    assert 'href="/register?next=/join/abc">Start' in header         # ...and so does the top bar
+    assert ">Log in</a>" not in header                               # no link to the page you're on
     page = c.get("/register").get_data(as_text=True)
     assert 'id="sign-up"' in page and 'href="/login#sign-in"' in page
-    assert "Start your tree</a>" not in page.split("</nav>")[0]
+    header = page[page.index("<header"):page.index("</header>")]
+    assert 'href="/login">Log in</a>' in header and "/register" not in header
 
 
 def test_people_dates_and_relationships(app):

@@ -159,13 +159,13 @@ export { srgb };
 export function addLandscape(scene) {
   const group = new THREE.Group();
   const ground = new THREE.Mesh(new THREE.CircleGeometry(400, 64),
-    new THREE.MeshStandardMaterial({ color: 0x5c7440, roughness: 1, envMapIntensity: 0.5 }));
+    new THREE.MeshStandardMaterial({ color: 0x0f100d, roughness: 1, envMapIntensity: 0.3 }));
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   group.add(ground);
 
-  // Soft rolling hills fading into the haze.
-  const hillMat = [0x7d8a4a, 0x93935a, 0x6f8043].map((c) =>
+  // Low dark hills: silhouettes that give the stage depth without competing with the tree.
+  const hillMat = [0x161712, 0x1b1c16, 0x131410].map((c) =>
     new THREE.MeshStandardMaterial({ color: c, roughness: 1, envMapIntensity: 0.4 }));
   const hills = [
     [-120, -170, 90, 22, 60, 0], [40, -210, 120, 30, 70, 1], [170, -160, 80, 18, 55, 2],

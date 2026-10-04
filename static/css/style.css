@@ -1,31 +1,36 @@
 /* ==========================================================================
-   Kinroot design system — "golden hour in the family forest"
-   Colors: canopy green ink, misty sage paper, honey sunlight, leaf, bark.
-   Type:   Alegreya (display, storybook warmth) + Alegreya Sans (interface).
+   Kinroot design system — "a family archive in warm light"
+   Two moods from one palette, following the device setting:
+     dark  = ink: near-black stage, ivory type, gold accents (the homepage's cinema)
+     light = paper: warm ivory sheet, ink type, bronze accents (the homepage's final page)
+   Type: Cormorant Garamond (history, headings) + Manrope (product, interface).
    ========================================================================== */
 
 :root {
-  --bg: #eef1e6;
-  --bg-deep: #e3e8d8;
-  --surface: #f9faf4;
-  --surface-2: #f2f5ea;
-  --ink: #1b3326;
-  --ink-soft: #56675a;
-  --line: #d2dac8;
-  --leaf: #44723a;
-  --leaf-vein: #9cc47e;
-  --leaf-soft: #dde8d2;
-  --honey: #e3992b;
-  --honey-hover: #d4891c;
-  --honey-soft: #f7e6c4;
-  --honey-ink: #8f5510;
-  --bark: #6a4a30;
-  --danger: #a8402c;
-  --danger-soft: #f4ddd6;
-  --on-honey: #1b1407;
-  --shadow: 0 1px 2px rgb(27 51 38 / 6%), 0 10px 30px -12px rgb(27 51 38 / 18%);
-  --shadow-sm: 0 1px 2px rgb(27 51 38 / 7%);
-  --shadow-pop: 0 2px 6px rgb(27 51 38 / 8%), 0 16px 40px -14px rgb(27 51 38 / 30%);   /* menus, popovers, toasts */
+  --bg: #EEE7D9;
+  --bg-deep: #E5DCCA;
+  --surface: #F6F1E7;
+  --surface-2: #E9E1D1;
+  --ink: #14130F;
+  --ink-soft: #5F584B;
+  --line: #D6CCB8;
+  --leaf: #6F5733;          /* links and positive states: deep bronze */
+  --leaf-vein: #D2B77D;
+  --leaf-soft: #E4D9C2;
+  --honey: #A88346;         /* the accent: brass */
+  --honey-hover: #8E7349;
+  --honey-soft: #EADFC8;
+  --honey-ink: #6F5733;
+  --bark: #6F5733;
+  --danger: #A33F2B;
+  --danger-soft: #F1DCD3;
+  --on-honey: #F6F1E7;
+  --primary-bg: #14130F;    /* the one main action: ink on paper */
+  --primary-ink: #EEE7D9;
+  --primary-hover: #2A2620;
+  --shadow: 0 1px 2px rgb(20 19 15 / 6%), 0 10px 30px -12px rgb(20 19 15 / 20%);
+  --shadow-sm: 0 1px 2px rgb(20 19 15 / 7%);
+  --shadow-pop: 0 2px 6px rgb(20 19 15 / 8%), 0 16px 40px -14px rgb(20 19 15 / 32%);   /* menus, popovers, toasts */
   --hover: color-mix(in srgb, var(--ink) 6%, transparent);                              /* quiet hover wash */
   --ring: 0 0 0 3px color-mix(in srgb, var(--honey) 32%, transparent);                  /* focus halo on fields */
 
@@ -43,36 +48,39 @@
   --dur-fast: 150ms;
   --dur: 200ms;
 
-  --display: "Alegreya", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  --body: "Alegreya Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --fs-hero: clamp(2.5rem, 4.2vw + 1rem, 4.25rem);
-  --fs-h1: clamp(1.8rem, 1.2vw + 1.25rem, 2.3rem);
-  --fs-h2: 1.3rem;
-  --fs-h3: 1.08rem;
-  --fs-small: .92rem;
-  --fs-tiny: .78rem;
+  --display: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --body: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --fs-hero: clamp(2.8rem, 4.2vw + 1.2rem, 4.75rem);
+  --fs-h1: clamp(2.2rem, 1.6vw + 1.55rem, 3rem);
+  --fs-h2: 1.65rem;
+  --fs-h3: 1.25rem;
+  --fs-small: .875rem;
+  --fs-tiny: .74rem;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0e1813;
-    --bg-deep: #0a120e;
-    --surface: #15231b;
-    --surface-2: #1a2a21;
-    --ink: #eaf0e4;
-    --ink-soft: #a2b2a4;
-    --line: #2a3d31;
-    --leaf: #8cbf6e;
-    --leaf-vein: #cfe5bd;
-    --leaf-soft: #1d3324;
-    --honey: #f2b24c;
-    --honey-hover: #f7c26a;
-    --honey-soft: #3a2e17;
-    --honey-ink: #f2b24c;
-    --bark: #a9805b;
-    --danger: #e8876f;
-    --danger-soft: #3a1e18;
-    --on-honey: #1b1407;
+    --bg: #090A09;
+    --bg-deep: #050605;
+    --surface: #11120F;
+    --surface-2: #181914;
+    --ink: #F1EBDD;
+    --ink-soft: #A8A397;
+    --line: #2A2924;
+    --leaf: #D2B77D;
+    --leaf-vein: #F3DDAA;
+    --leaf-soft: #1F1C15;
+    --honey: #BE9B5E;
+    --honey-hover: #D2B77D;
+    --honey-soft: #221E15;
+    --honey-ink: #D2B77D;
+    --bark: #8E7349;
+    --danger: #E28A72;
+    --danger-soft: #2A1712;
+    --on-honey: #090A09;
+    --primary-bg: #F1EBDD;  /* ivory on ink */
+    --primary-ink: #090A09;
+    --primary-hover: #FFF8EA;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px -14px rgb(0 0 0 / 60%);
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
     --shadow-pop: 0 2px 6px rgb(0 0 0 / 30%), 0 18px 44px -14px rgb(0 0 0 / 70%);
@@ -87,21 +95,22 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 400 1.0625rem/1.55 var(--body);
+  font: 400 1rem/1.6 var(--body);
   -webkit-font-smoothing: antialiased;
+  font-synthesis-weight: none;   /* never fake a bold the serif doesn't have */
 }
 img { max-width: 100%; }
 a { color: var(--leaf); text-underline-offset: .18em; text-decoration-thickness: 1px; }
 a:hover { color: var(--ink); }
-h1, h2, h3 { font-family: var(--display); font-weight: 800; line-height: 1.12; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: -.015em; }
 h1 { font-size: var(--fs-h1); }
-h2 { font-size: var(--fs-h2); font-weight: 700; }
-h3 { font-size: var(--fs-h3); font-weight: 700; }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); font-weight: 600; }
 p { margin: 0; }
-.lede { font-size: 1.18rem; color: var(--ink-soft); max-width: 58ch; }
+.lede { font-size: 1.1rem; line-height: 1.65; color: var(--ink-soft); max-width: 58ch; }
 .muted { color: var(--ink-soft); }
 .small { font-size: var(--fs-small); }
-.eyebrow { font-size: var(--fs-tiny); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--honey-ink); }
+.eyebrow { font-size: var(--fs-tiny); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--honey-ink); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .num { font-variant-numeric: tabular-nums; }
 [hidden] { display: none !important; }
@@ -110,7 +119,7 @@ p { margin: 0; }
 a:focus-visible { border-radius: var(--r-xs); }
 
 /* ---------- logo ---------- */
-.mark { width: 34px; height: 34px; flex: none; }
+.mark { width: 28px; height: 28px; flex: none; }
 .mk-sun { fill: var(--honey); }
 .mk-ink { fill: var(--ink); }
 .mk-leaf { fill: var(--leaf); }
@@ -118,32 +127,32 @@ a:focus-visible { border-radius: var(--r-xs); }
 .mk-leg { stroke: var(--ink); stroke-width: 9; stroke-linecap: round; fill: none; }
 .mk-roots { stroke: var(--honey); stroke-width: 2.6; fill: none; stroke-linecap: round; }
 .brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); }
-.wordmark { font-family: var(--display); font-weight: 800; font-size: 1.6rem; letter-spacing: -.02em; line-height: 1; }
-.wordmark .root { color: var(--honey-ink); }
+.wordmark { font-family: var(--display); font-weight: 500; font-size: 1.4rem; letter-spacing: .14em; text-transform: uppercase; line-height: 1; }
+.wordmark .root { color: inherit; }
 
 /* ---------- top bar ---------- */
 .topbar {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-  padding: 10px clamp(16px, 3vw, 32px);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: saturate(140%) blur(10px);
+  min-height: 68px; padding: 10px clamp(16px, 3vw, 40px);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(18px) saturate(115%); -webkit-backdrop-filter: blur(18px) saturate(115%);
   border-bottom: 1px solid var(--line);
 }
-.topnav { display: flex; align-items: center; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.topnav { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-wrap: wrap; }
 /* Nav links. A .btn in the nav ("Start your tree") keeps its own button styling. */
 .topnav a:not(.btn), .topnav .navbtn {
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: var(--r-pill);
-  color: var(--ink-soft); text-decoration: none; font: 500 1rem/1.2 var(--body); background: none; border: none;
+  color: var(--ink-soft); text-decoration: none; font: 600 .75rem/1.2 var(--body); letter-spacing: .14em; text-transform: uppercase; background: none; border: none;
   transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 .topnav a:not(.btn):hover, .topnav .navbtn:hover { background: var(--hover); color: var(--ink); }
 /* "page" = you're on it; "true" = you're inside it (a tree, its settings): same highlight either way. */
-.topnav a[aria-current] { background: var(--leaf-soft); color: var(--ink); font-weight: 600; }
+.topnav a[aria-current] { background: var(--leaf-soft); color: var(--ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--honey) 35%, transparent); }
 .topnav form { margin: 0; }
 .badge {
   min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--r-pill); background: var(--honey); color: var(--on-honey);
-  font-size: .75rem; font-weight: 700; display: inline-grid; place-items: center; font-variant-numeric: tabular-nums;
+  font-size: .72rem; font-weight: 700; letter-spacing: 0; text-transform: none; display: inline-grid; place-items: center; font-variant-numeric: tabular-nums;
 }
 
 /* ---------- page containers ---------- */
@@ -171,27 +180,27 @@ a:focus-visible { border-radius: var(--r-xs); }
 @keyframes rise-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
 /* ---------- buttons ----------
-   Primary (honey) = the one main action on a screen. Default (outlined) = everything else.
+   Primary (ivory on ink / ink on paper) = the one main action on a screen. Default (outlined) = everything else.
    Ghost = quiet, low-stakes. Danger = destructive, and only next to a typed/explicit confirmation. */
 .btn, button {
-  font: 600 .98rem/1.2 var(--body); cursor: pointer; border-radius: var(--r-pill); padding: 10px 18px;
+  font: 600 .9rem/1.2 var(--body); letter-spacing: .01em; cursor: pointer; border-radius: var(--r-pill); padding: 11px 20px;
   border: 1px solid var(--line); background: var(--surface); color: var(--ink);
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
   transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
     color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
-.btn:hover, button:hover { border-color: color-mix(in srgb, var(--ink) 28%, var(--line)); color: var(--ink); box-shadow: var(--shadow-sm); }
+.btn:hover, button:hover { border-color: color-mix(in srgb, var(--honey) 55%, var(--line)); color: var(--ink); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
 .btn:active, button:active { transform: translateY(1px) scale(.99); box-shadow: none; }
-.btn-primary, button.btn-primary { background: var(--honey); border-color: var(--honey); color: var(--on-honey); }
-.btn-primary:hover, button.btn-primary:hover { background: var(--honey-hover); border-color: var(--honey-hover); color: var(--on-honey); }
+.btn-primary, button.btn-primary { background: var(--primary-bg); border-color: var(--primary-bg); color: var(--primary-ink); }
+.btn-primary:hover, button.btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: var(--primary-ink); }
 .btn-ghost, button.btn-ghost { background: transparent; border-color: transparent; }
 .btn-ghost:hover, button.btn-ghost:hover { background: var(--hover); border-color: transparent; }
 /* Text-like and in-menu buttons never lift. */
 :is(.linklike, .btn-ghost, .navbtn, .who, .menu-list button, .search-results button, .toast button, .tl-close):hover { box-shadow: none; }
 .btn-danger, button.btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
 .btn-danger:hover, button.btn-danger:hover { color: #fff; filter: brightness(1.08); }
-.btn-sm, button.btn-sm { padding: 6px 12px; font-size: .9rem; }
-.btn-lg, button.btn-lg { padding: 13px 24px; font-size: 1.08rem; }
+.btn-sm, button.btn-sm { padding: 7px 14px; font-size: .82rem; }
+.btn-lg, button.btn-lg { padding: 15px 28px; font-size: .95rem; }
 .linklike { background: none; border: none; padding: 0; color: var(--leaf); font-weight: 600; text-decoration: underline; text-underline-offset: .18em; border-radius: 4px; }
 .linklike:hover { background: none; color: var(--ink); }
 .linklike.danger { color: var(--danger); }
@@ -207,7 +216,6 @@ button[aria-busy="true"]::after {
   border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
   animation: spin .6s linear infinite;
 }
-.auth-card button[aria-busy="true"]::after { content: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- cards & forms ----------
@@ -301,199 +309,6 @@ details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one con
 .settings .danger-zone > h2 { color: var(--danger); }
 
 /* ==========================================================================
-   Sign-in pages: one continuous golden-hour scene (dusk in dark mode)
-   The sky, sun, hills and drifting light run under the whole page, so the
-   growing tree on the left and the glass form on the right share one world.
-   ========================================================================== */
-:root {
-  --sky-top: #f7ecd4;
-  --sky-mid: #f3d49d;
-  --sky-low: #e9ae68;
-  --sky-cool: #dde6d4;
-  --sun-core: rgb(255 246 218 / 96%);
-  --sun-glow: rgb(255 199 112 / 58%);
-  --hill-far: #dcbd84;
-  --hill-mid: #a9ae6b;
-  --hill-near: #6f8b47;
-  --hill-deep: #3f5c31;
-  --mound-top: #6f8b47;
-  --mound-edge: #6f8b47;
-  --mote: 255 247 220;
-  --glass: rgb(251 251 246 / 72%);
-  --glass-border: rgb(255 255 255 / 62%);
-  --field: rgb(255 255 255 / 62%);
-  --card-shadow: 0 34px 90px -34px rgb(90 50 0 / 42%);
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --sky-top: #0e1520;
-    --sky-mid: #1d2031;
-    --sky-low: #5a3a2c;
-    --sky-cool: #172230;
-    --sun-core: rgb(255 204 130 / 88%);
-    --sun-glow: rgb(214 112 58 / 42%);
-    --hill-far: #3b3431;
-    --hill-mid: #252f20;
-    --hill-near: #1b2616;
-    --hill-deep: #0e160c;
-    --mound-top: #1b2616;
-    --mound-edge: #1b2616;
-    --mote: 255 214 140;
-    --glass: rgb(20 32 25 / 70%);
-    --glass-border: rgb(255 255 255 / 11%);
-    --field: rgb(0 0 0 / 24%);
-    --card-shadow: 0 34px 90px -30px rgb(0 0 0 / 70%);
-  }
-}
-
-body.auth-page { background: var(--sky-top); }
-.auth-page .topbar { position: absolute; left: 0; right: 0; background: transparent; border-bottom-color: transparent; backdrop-filter: none;
-  min-height: 64px; }   /* same height whether the right side holds a button or a link, so the logo never nudges */
-
-.auth-scene {
-  /* clip (not just hidden) so jumping to #sign-in can never scroll the scene's layers out of line */
-  position: relative; isolation: isolate; overflow: hidden; overflow: clip;
-  min-height: 100vh; min-height: 100dvh;
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 440px); align-items: center;
-  padding: 104px clamp(16px, 6vw, 104px) 64px;
-}
-.scene-sky, .scene-sun, .scene-hills, .scene-particles { position: absolute; pointer-events: none; }
-.scene-sky {
-  inset: 0; z-index: -6;
-  background:
-    radial-gradient(60% 70% at 92% 8%, var(--sky-cool), transparent 72%),
-    linear-gradient(172deg, var(--sky-top) 0%, var(--sky-mid) 48%, var(--sky-low) 100%);
-}
-.scene-sun {
-  z-index: -5; left: 28%; bottom: 30%; width: 70vmin; height: 70vmin; transform: translate(-50%, 50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--sun-core) 0 7%, var(--sun-glow) 24%, transparent 64%);
-}
-.scene-hills { z-index: -4; left: -3%; bottom: 0; width: 106%; height: 44vh; min-height: 240px; }
-.hill-far { fill: var(--hill-far); opacity: .9; }
-.hill-mid { fill: var(--hill-mid); }
-.scene-tree { position: absolute; z-index: -3; left: clamp(0px, 5vw, 110px); bottom: 3vh; width: min(50vw, 640px, 82vh); }
-.grow-tree { display: block; width: 100%; height: auto; overflow: visible; }
-.scene-particles { inset: 0; z-index: -2; overflow: hidden; }
-/* Side by side, the scene is pinned to the window, so it sits in exactly the same place behind the
-   short log-in card and the taller sign-up card (and a tall card on a short screen glides over it). */
-@media (min-width: 861px) {
-  .scene-sky, .scene-sun, .scene-hills, .scene-tree, .scene-particles { position: fixed; }
-}
-
-/* The tree grows in once (wood first: each medallion blooms as its branch arrives), then sways in the evening air. */
-.lt-trunk { transform-box: fill-box; transform-origin: 50% 100%; animation: lt-rise .9s cubic-bezier(.2, .8, .2, 1) .1s both; }
-.lt-br { stroke-dasharray: 1 1; animation: lt-draw var(--t, .8s) ease-out var(--d) both; }
-.lt-md { transform-box: fill-box; transform-origin: 50% 50%; animation: lt-pop .6s cubic-bezier(.34, 1.56, .64, 1) var(--d) both; }
-/* The branches (behind the trunk) and the medallions (in front) sway together around the knot at the top of
-   the trunk, so nothing ever slides apart. It starts mid-swing (negative delay) so it never jumps, and the
-   glow starts from how it looks at rest for the same reason. */
-.lt-sway { transform-box: view-box; transform-origin: 301px 305px; animation: lt-sway 7s ease-in-out -3.5s infinite alternate; }
-.lt-you-glow { transform-box: fill-box; transform-origin: 50% 50%; animation: lt-pulse 3.4s ease-in-out 3.9s infinite; }
-@keyframes lt-rise { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-@keyframes lt-draw { 0% { stroke-dashoffset: 1; opacity: 0; } 2% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 1; } }
-@keyframes lt-pop { from { transform: scale(0); opacity: 0; } 50% { opacity: 1; } to { transform: scale(1); opacity: 1; } }
-@keyframes lt-sway { from { transform: rotate(-.8deg); } to { transform: rotate(.8deg); } }
-@keyframes lt-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .55; transform: scale(.88); } }
-
-/* Year counter over the crown: 1890 ... today, then the line about stories. */
-.scene-caption { position: absolute; left: 5%; bottom: 100%; display: grid; gap: 2px; margin: 0; }
-.scene-caption b { font: 800 clamp(2rem, 2.4vw + 1rem, 3.1rem)/1 var(--display); color: var(--honey-ink); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-.scene-caption span { font: italic 700 1.1rem/1.3 var(--display); color: var(--ink); opacity: .82; }
-.js-grow .scene-caption span { opacity: 0; transform: translateY(6px); }
-.js-grow.grown .scene-caption span { opacity: .82; transform: none; transition: opacity 1.2s ease, transform 1.2s ease; }
-
-/* A little depth: layers drift at different speeds as the pointer moves (set from auth.js). */
-.scene-hills { translate: calc(var(--px, 0) * -10px) 0; }
-.scene-tree { translate: calc(var(--px, 0) * -18px) calc(var(--py, 0) * -6px); }
-.scene-particles { translate: calc(var(--px, 0) * -30px) calc(var(--py, 0) * -12px); }
-.scene-sun { translate: calc(var(--px, 0) * 8px) calc(var(--py, 0) * 5px); }
-.scene-hills, .scene-tree, .scene-particles, .scene-sun { transition: translate .8s cubic-bezier(.2, .8, .2, 1); }
-
-/* Dust motes by day, fireflies at dusk, stars overhead at night, and a few falling leaves. */
-.mote {
-  position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); border-radius: 50%;
-  background: rgb(var(--mote) / 95%); box-shadow: 0 0 calc(var(--s) * 2.4) rgb(var(--mote) / 70%);
-  animation: mote-float var(--dur) ease-in-out var(--delay) infinite alternate;
-}
-@keyframes mote-float {
-  0% { transform: translate(0, 0); opacity: .1; }
-  45% { opacity: .95; }
-  100% { transform: translate(var(--dx), var(--dy)); opacity: .15; }
-}
-.star { display: none; position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); border-radius: 50%; background: #fff8e6; }
-@media (prefers-color-scheme: dark) {
-  .star { display: block; animation: twinkle var(--dur) ease-in-out var(--delay) infinite alternate; }
-  .scene-caption span { color: var(--ink); }
-}
-@keyframes twinkle { from { opacity: .15; } to { opacity: .85; } }
-.leaf-fall { position: absolute; top: -40px; left: var(--x); animation: leaf-fall var(--dur) linear var(--delay) infinite; }
-.leaf-fall svg { display: block; width: var(--s); height: auto; animation: leaf-sway 2.8s ease-in-out infinite alternate; }
-@keyframes leaf-fall {
-  0% { transform: translate(0, -4vh); opacity: 0; }
-  6% { opacity: .95; }
-  88% { opacity: .9; }
-  100% { transform: translate(var(--drift), 108vh); opacity: 0; }
-}
-@keyframes leaf-sway { from { transform: rotate(-42deg) translateX(-10px); } to { transform: rotate(36deg) translateX(12px); } }
-
-/* The form floats on frosted glass, so the sky colours flow through it. */
-.auth-card {
-  grid-column: 2; position: relative; z-index: 1; display: grid; gap: 18px;
-  padding: clamp(26px, 3vw, 38px); border-radius: 28px;
-  background: var(--glass); border: 1px solid var(--glass-border);
-  backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%);
-  box-shadow: var(--card-shadow), inset 0 1px 0 rgb(255 255 255 / 35%);
-  animation: card-in .9s cubic-bezier(.2, .8, .2, 1) .25s both;
-  scroll-margin-top: 100vh;   /* side by side the card is always in view, so #sign-in never scrolls */
-  view-transition-name: auth-card;
-}
-@keyframes card-in { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: none; } }
-
-/* Hopping between log in and sign up (see partials/auth_head.html): the tree is already grown... */
-.auth-continue .lt-trunk, .auth-continue .lt-br, .auth-continue .lt-md { animation: none; }
-/* ...and where the browser can, the card morphs from one form into the other while the scene holds still.
-   Switching forms (#sign-in / #sign-up) or coming back with a message, the card is simply there. */
-.auth-morph .auth-card, .auth-card:target, .auth-card:has(.flash) { animation: none; }
-.auth-page .topbar { view-transition-name: auth-topbar; }   /* glides back into place if you'd scrolled */
-::view-transition-group(*) { animation-duration: .55s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
-::view-transition-old(*), ::view-transition-new(*) { animation-duration: .45s; }
-
-/* "Opening your tree…": a slow shimmer on the button while the next page loads. */
-.auth-card .btn-primary[aria-busy="true"] {
-  cursor: progress;
-  background-image: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 38%) 50%, transparent 65%);
-  background-size: 250% 100%;
-  animation: btn-shimmer 1.3s linear infinite;
-}
-@keyframes btn-shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
-.auth-card h1 { font-size: clamp(1.9rem, 1.2vw + 1.4rem, 2.5rem); line-height: 1.06; }
-.auth-card .lede { font-size: 1.05rem; }
-.auth-card input { background: var(--field); border-color: color-mix(in srgb, var(--line) 70%, transparent); padding: 12px 14px; border-radius: var(--r-md); }
-.auth-card .btn-primary { width: 100%; }
-.auth-card .flash { margin: 0; }
-.auth-switch { display: flex; align-items: center; gap: 12px; color: var(--ink-soft); font-size: var(--fs-small); }
-.auth-switch::before, .auth-switch::after { content: ""; flex: 1; height: 1px; background: color-mix(in srgb, var(--ink) 16%, transparent); }
-.auth-card .btn-ghost.wide { width: 100%; border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); }
-.auth-card .btn-ghost.wide:hover { background: rgb(255 255 255 / 18%); }
-
-@media (max-width: 860px) {
-  .auth-scene { grid-template-columns: 1fr; align-items: start; padding-top: 70px; padding-bottom: 40px; }
-  .scene-tree { position: relative; z-index: -3; left: auto; bottom: auto; width: min(88vw, 430px); margin: 0 auto -12px; grid-row: 1; }
-  .auth-card { grid-column: 1; grid-row: 2; scroll-margin-top: 16px; }   /* phones: #sign-in brings the card up */
-  .scene-sun { left: 50%; top: 30vh; bottom: auto; width: 90vmin; height: 90vmin; transform: translate(-50%, -50%); }
-  .scene-hills { height: 36vh; }
-  .scene-caption { position: static; display: flex; gap: 10px; align-items: baseline; justify-content: center; margin-bottom: 4px; }
-  .scene-caption b { font-size: 1.6rem; }
-  .scene-caption span { font-size: .95rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mote, .leaf-fall, .leaf-fall svg, .star { animation: none !important; }
-  .leaf-fall { display: none; }
-}
-
-/* ==========================================================================
    Dashboard
    ========================================================================== */
 .dash-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: start; }
@@ -503,9 +318,14 @@ body.auth-page { background: var(--sky-top); }
   background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
   transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
 a.tree-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--honey) 60%, var(--line)); color: var(--ink); box-shadow: var(--shadow); }
-.tree-card .preview { background: linear-gradient(180deg, #f7ebcd, #efd39a); display: grid; place-items: end center; height: 118px; }
-@media (prefers-color-scheme: dark) { .tree-card .preview { background: linear-gradient(180deg, #232a1b, #3b3018); } }
+.tree-card .preview { display: grid; place-items: end center; height: 118px; border-bottom: 1px solid var(--line);
+  background: radial-gradient(60% 80% at 50% 70%, color-mix(in srgb, var(--honey) 16%, transparent), transparent 70%), var(--bg-deep); }
 .tree-card .preview svg { width: 100%; height: 100%; }
+/* The little lineage drawing (macro mini_tree): thin gold lines, brass rings, the eldest filled. */
+.mt-trunk { stroke: var(--bark); stroke-width: 2.4; stroke-linecap: round; fill: none; opacity: .8; }
+.mt-line { stroke: var(--honey); stroke-width: 1; fill: none; opacity: .6; }
+.mt-node { fill: var(--surface); stroke: var(--honey); stroke-width: 1.3; }
+.mt-node.is-root { fill: var(--honey); }
 .tree-card .body { padding: 14px 16px 16px; display: grid; gap: 6px; align-content: start; }
 .tree-card .name { font: 800 1.3rem/1.15 var(--display); }
 .tree-card .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; color: var(--ink-soft); font-size: var(--fs-small); }
@@ -537,18 +357,18 @@ html.tree-html, body.tree-page { height: 100%; }
 body.tree-page { display: flex; flex-direction: column; overflow: hidden; }
 body.tree-page .topbar { position: relative; top: 0; }
 .tree-layout { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: 0; }
-.scene-wrap { position: relative; min-height: 0; background: #e9b877; overflow: hidden; }
+.scene-wrap { position: relative; min-height: 0; background: #090A09; overflow: hidden; }
 #scene { position: absolute; inset: 0; }
 #scene canvas { display: block; transition: filter .6s; }
-.scene-loading { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: var(--sp-3); color: #3b2a14; font: 700 1.1rem var(--display); pointer-events: none; }
-.scene-loading::before { content: ""; width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid rgb(59 42 20 / 25%); border-top-color: #3b2a14; animation: spin .8s linear infinite; }
-.glass { background: rgb(22 33 26 / 62%); color: #f6f2e6; border: 1px solid rgb(255 255 255 / 14%); backdrop-filter: blur(10px) saturate(130%); }
+.scene-loading { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: var(--sp-3); color: #D2B77D; font: 700 1.1rem var(--display); pointer-events: none; }
+.scene-loading::before { content: ""; width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid rgb(210 183 125 / 25%); border-top-color: #D2B77D; animation: spin .8s linear infinite; }
+.glass { background: rgb(17 18 15 / 64%); color: #f6f2e6; border: 1px solid rgb(255 255 255 / 14%); backdrop-filter: blur(10px) saturate(130%); }
 .scene-toolbar { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; pointer-events: none; z-index: 3; }
 .scene-toolbar > * { pointer-events: auto; }
 .scene-title { font: 800 clamp(1.3rem, 1.2vw + 1rem, 1.8rem)/1.1 var(--display); color: #fff9ea; text-shadow: 0 1px 12px rgb(60 30 0 / 55%); margin-right: auto; padding-inline: 4px; }
 .tool { font: 600 .92rem/1 var(--body); border-radius: var(--r-pill); padding: 9px 13px; cursor: pointer; display: inline-flex; gap: 7px; align-items: center; text-decoration: none;
   transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
-.tool.glass:hover { background: rgb(22 33 26 / 78%); color: #fff; border-color: rgb(255 255 255 / 25%); box-shadow: none; }
+.tool.glass:hover { background: rgb(17 18 15 / 80%); color: #fff; border-color: rgb(255 255 255 / 25%); box-shadow: none; }
 .tool.tool-primary { background: var(--honey); color: var(--on-honey); border: 1px solid var(--honey); }
 .tool.tool-primary:hover { background: var(--honey-hover); border-color: var(--honey-hover); color: var(--on-honey); }
 .tool[aria-pressed="true"] { background: var(--honey); color: var(--on-honey); border-color: var(--honey); }
@@ -578,11 +398,11 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .empty-scene h2 { color: #fff9ea; }
 
 /* 3D name labels (HTML placed over the canvas) */
-.label3d { font: 700 12.5px/1.15 var(--body); color: #fffaf0; background: rgb(24 32 22 / 66%); padding: 4px 8px 5px; border-radius: var(--r-sm);
+.label3d { font: 700 12.5px/1.15 var(--body); color: #fffaf0; background: rgb(17 18 15 / 70%); padding: 4px 8px 5px; border-radius: var(--r-sm);
   white-space: nowrap; pointer-events: auto; cursor: pointer; border: 1px solid rgb(255 255 255 / 16%); text-align: center;
   backdrop-filter: blur(6px); transition: opacity .35s, background-color .2s, border-color .2s; user-select: none; }
 .label3d small { display: block; font-weight: 400; color: #e6dcc6; font-size: 10.5px; margin-top: 1px; }
-.label3d:hover { background: rgb(24 32 22 / 85%); }
+.label3d:hover { background: rgb(17 18 15 / 88%); }
 .label3d.selected { border-color: var(--honey); background: rgb(58 40 12 / 88%); }
 .label3d.on-path { border-color: #ffd27a; box-shadow: 0 0 0 2px rgb(255 210 122 / 40%); }
 .label3d.dimmed { opacity: .28; }
@@ -593,7 +413,7 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .timelapse { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); width: min(720px, calc(100% - 24px)); z-index: 4;
   border-radius: var(--r-lg); padding: 12px 16px 14px; display: grid; gap: 8px; }
 .tl-row { display: flex; align-items: center; gap: 12px; }
-.tl-year { font: 800 2.1rem/1 var(--display); font-variant-numeric: tabular-nums; min-width: 4.2ch; color: #ffd98f; }
+.tl-year { font: 800 2.1rem/1 var(--display); font-variant-numeric: tabular-nums; min-width: 4.2ch; color: #D2B77D; }
 .tl-row input[type="range"] { flex: 1; accent-color: var(--honey); background: transparent; border: none; padding: 0; }
 .tl-row input[type="range"]:focus { box-shadow: none; }
 .tl-btn { width: 40px; height: 40px; padding: 0; border-radius: 50%; background: var(--honey); border-color: var(--honey); color: var(--on-honey); flex: none; }
@@ -602,7 +422,7 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .tl-close:hover { color: #fff; background: rgb(255 255 255 / 10%); }
 .tl-events { list-style: none; margin: 0; padding: 0; min-height: 1.4em; font-size: .92rem; color: #efe6d2; display: grid; gap: 2px; }
 .tl-events li { animation: tl-in .5s ease-out; }
-.tl-events b { color: #ffd98f; font-weight: 700; }
+.tl-events b { color: #D2B77D; font-weight: 700; }
 @keyframes tl-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 /* side panel */

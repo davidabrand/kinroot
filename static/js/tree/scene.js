@@ -11,8 +11,9 @@ import { TRUNK_HEIGHT } from "./layout.js";
 import { computeWood, growSchedule, GROW_YEARS } from "./wood.js";
 import { lifespan } from "./util.js";
 
-const GREENS = ["#4e7f3c", "#6a9a4c", "#86b268", "#3f6b33", "#5b8c43"];
-const GOLDS = ["#d9a441", "#e8bb58", "#c68b2d", "#f0c96d", "#dba64a"];
+// Wreath leaves: muted bronze for the living, warm gold in remembrance of those who have passed.
+const GREENS = ["#6f5a3a", "#8e7349", "#7a6440", "#9a7f52", "#5f4d33"];
+const GOLDS = ["#d2b77d", "#e7cb8e", "#be9b5e", "#f3ddaa", "#c9a86a"];
 const REDUCED_MOTION = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 // Preview another time of day by adding ?hour=5.5 (half past five in the morning) to the address.
 const PREVIEW_HOUR = (() => {
@@ -148,13 +149,13 @@ export class TreeScene {
     setInterval(() => this._applyTime(), 60_000);
 
     const dim = (m) => Object.assign(m.clone(), { transparent: true, opacity: 0.14, depthWrite: false });
-    const bark = new THREE.MeshStandardMaterial({ color: 0x6b4a2f, roughness: 0.92, envMapIntensity: 0.6 });
-    const vine = new THREE.MeshStandardMaterial({ color: 0xe3a93f, metalness: 0.7, roughness: 0.35, emissive: 0x2a1800 });
-    const brass = new THREE.MeshStandardMaterial({ color: 0xc9973f, metalness: 0.85, roughness: 0.3 });
+    const bark = new THREE.MeshStandardMaterial({ color: 0x4f3e2a, roughness: 0.72, metalness: 0.25, envMapIntensity: 0.7 });
+    const vine = new THREE.MeshStandardMaterial({ color: 0xbe9b5e, metalness: 0.75, roughness: 0.35, emissive: 0x1e160a });
+    const brass = new THREE.MeshStandardMaterial({ color: 0xbe9b5e, metalness: 0.85, roughness: 0.3 });
     const leaf = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, side: THREE.DoubleSide, envMapIntensity: 0.6 });
     this.mats = {
       bark, barkDim: dim(bark), vine, vineDim: dim(vine), brass, brassDim: dim(brass), leaf, leafDim: dim(leaf),
-      path: new THREE.MeshStandardMaterial({ color: 0xffd27a, emissive: 0xffa629, emissiveIntensity: 1.9, roughness: 0.4 }),
+      path: new THREE.MeshStandardMaterial({ color: 0xf3ddaa, emissive: 0xd2b77d, emissiveIntensity: 1.6, roughness: 0.4 }),
       hit: new THREE.MeshBasicMaterial({ visible: false }),
     };
     this.glowTex = glowTexture();

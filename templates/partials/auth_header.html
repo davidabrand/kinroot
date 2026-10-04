@@ -1,0 +1,15 @@
+{# Header for the sign-in pages: the homepage's header, offering whichever page you're not on. #}
+{% set next_url = request.args.get('next') %}
+<header class="kr-header" data-scrolled="false">
+  <a class="kr-brand" href="{{ url_for('landing') }}" aria-label="Kinroot home">{{ m.mark("kr-mark") }}<span>Kinroot</span></a>
+  <span></span>
+  <div class="kr-account">
+    {% if request.endpoint == 'auth.login' %}
+      <span class="kr-account-note">New to Kinroot?</span>
+      <a class="kr-btn kr-btn-primary kr-btn-sm" href="{{ url_for('auth.register', next=next_url) }}">Start<span class="kr-xs-hide"> your tree</span></a>
+    {% else %}
+      <span class="kr-account-note">Have an account?</span>
+      <a class="kr-btn kr-btn-quiet kr-btn-sm" href="{{ url_for('auth.login', next=next_url) }}">Log in</a>
+    {% endif %}
+  </div>
+</header>

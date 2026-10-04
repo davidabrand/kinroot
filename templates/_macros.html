@@ -53,39 +53,36 @@
 
 {# A tiny silhouette of a tree: one row of leaves per generation, oldest at the bottom. #}
 {% macro mini_tree(counts) -%}
+{# One row of medallions per generation, oldest at the bottom: thin gold lineage lines and brass
+   rings, coloured by the design tokens (style.css .mt-*), so it suits both the ink and paper modes. #}
 <svg viewBox="0 0 240 118" aria-hidden="true" preserveAspectRatio="xMidYMax meet">
-  <circle cx="196" cy="40" r="22" fill="#f6c25b" opacity=".55"/>
-  <circle cx="196" cy="40" r="11" fill="#fff1c9" opacity=".9"/>
-  <path d="M0 110C60 102 180 102 240 110V118H0Z" fill="#6e8a45" opacity=".55"/>
   {% if not counts %}
-    <path d="M120 112v-18" stroke="#6a4a30" stroke-width="3" stroke-linecap="round"/>
-    <path d="M120 98c0-7-5-11-12-11 0 7 5 11 12 11Z" fill="#5f8f45"/>
-    <path d="M120 102c0-8 5-12 13-12 0 8-5 12-13 12Z" fill="#79a85a"/>
+    <path class="mt-trunk" d="M120 112V84"/>
+    <circle class="mt-node is-root" cx="120" cy="76" r="7"/>
   {% else %}
     {% set rows = counts[:5] %}
-    <path d="M116 112C117 100 118 90 117.5 82H122.5C122 90 123 100 124 112Z" fill="#6a4a30"/>
+    <path class="mt-trunk" d="M120 116V84"/>
     {% for n in rows %}
       {% set g = loop.index0 %}
       {% set shown = n if n < 9 else 9 %}
-      {% set y = 72 - g * 16 %}
+      {% set y = 76 - g * 16 %}
       {% set step = 22 - g %}
       {% set width = (shown - 1) * step %}
-      {% set src_y = 82 if g == 0 else 72 - (g - 1) * 16 %}
+      {% set src_y = 84 if g == 0 else 76 - (g - 1) * 16 %}
       {% for i in range(shown) %}
         {% set x = 120 - width / 2 + i * step %}
-        <path d="M120 {{ src_y }}Q{{ (120 + x) / 2 }} {{ (src_y + y) / 2 + 6 }} {{ x }} {{ y }}" stroke="#6a4a30" stroke-width="{{ 3 - g * 0.45 }}" fill="none" opacity=".75"/>
+        <path class="mt-line" d="M120 {{ src_y }}C120 {{ (src_y + y) / 2 }}, {{ x }} {{ (src_y + y) / 2 }}, {{ x }} {{ y }}"/>
       {% endfor %}
     {% endfor %}
     {% for n in rows %}
       {% set g = loop.index0 %}
       {% set shown = n if n < 9 else 9 %}
-      {% set y = 72 - g * 16 %}
+      {% set y = 76 - g * 16 %}
       {% set step = 22 - g %}
       {% set width = (shown - 1) * step %}
       {% for i in range(shown) %}
         {% set x = 120 - width / 2 + i * step %}
-        <circle cx="{{ x }}" cy="{{ y }}" r="{{ 8 - g * 0.8 }}" fill="{{ '#d9a441' if g == 0 and rows|length > 2 else ('#5f8f45' if (i + g) % 2 else '#79a85a') }}"/>
-        <circle cx="{{ x }}" cy="{{ y }}" r="{{ 3.4 - g * 0.3 }}" fill="#fbf3dd" stroke="#c9973f" stroke-width="1.4"/>
+        <circle class="mt-node{{ ' is-root' if g == 0 }}" cx="{{ x }}" cy="{{ y }}" r="{{ 4.6 - g * 0.45 }}"/>
       {% endfor %}
     {% endfor %}
   {% endif %}
