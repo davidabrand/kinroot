@@ -32,6 +32,8 @@ for the `register` / `make_tree` / `add` helpers).
 - `kinroot/db.py` — SQLite schema via append-only MIGRATIONS (never edit an old
   migration; add a new numbered one at the end).
 - `static/js/tree/` — the 3D view (layout.js is pure math and has tests).
+  `skytime.js` works out the time-of-day sky (preview with `?hour=5.5`); `sky.js` draws it.
+  Its tests are in `tests/js/` and run through pytest when Node is installed.
 - `templates/` — Jinja pages; `static/css/style.css` — the design system.
 
 ## Rules — do not break these

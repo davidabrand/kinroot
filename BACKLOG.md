@@ -34,6 +34,11 @@ a date; add new ideas with a one-line "why".
 - [ ] **Large-tree performance** — instanced leaves, label culling for 500+ people.
 
 ## Done
+- [x] 2026-10-04 **Time-of-day sky** (owner request) — the sky behind the tree follows the
+      visitor's clock: stars + the moon in its real phase at night, a rosy blue hour,
+      fiery sunrise, golden hour (unchanged signature colours), brighter midday. Richer
+      three-band gradient with sun glow along the horizon; fireflies after dark.
+      Preview any time with `?hour=5.5` in the address bar.
 - [x] 2026-10-03 **Consistency checks** — "Worth a second look" notes on the person
       panel and the overview (editors only): died before born, lived past 120, born
       before a parent, parent under 12 / over 60 (mother) / over 80, born after a parent

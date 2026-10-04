@@ -5,7 +5,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { addLandscape, addSky, DustMotes, glowTexture, SKY } from "./sky.js";
+import { addLandscape, addSky, applySky, DustMotes, glowTexture, refreshEnvironment, SKY, srgb } from "./sky.js";
+import { skyState } from "./skytime.js";
 import { TRUNK_HEIGHT } from "./layout.js";
 import { computeWood, growSchedule, GROW_YEARS } from "./wood.js";
 import { lifespan } from "./util.js";
@@ -13,6 +14,11 @@ import { lifespan } from "./util.js";
 const GREENS = ["#4e7f3c", "#6a9a4c", "#86b268", "#3f6b33", "#5b8c43"];
 const GOLDS = ["#d9a441", "#e8bb58", "#c68b2d", "#f0c96d", "#dba64a"];
 const REDUCED_MOTION = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+// Preview another time of day by adding ?hour=5.5 (half past five in the morning) to the address.
+const PREVIEW_HOUR = (() => {
+  const h = parseFloat(new URLSearchParams(location.search).get("hour"));
+  return h >= 0 && h < 24 ? h : null;
+})();
 const TUBE_SEGMENTS = 36;
 const TUBE_SIDES = 8;
 
@@ -119,9 +125,11 @@ export class TreeScene {
     this.controls.addEventListener("start", stop);
     this.orthoControls.addEventListener("start", stop);
 
-    scene.add(new THREE.HemisphereLight(0xffe2b8, 0x3b3a22, 0.7));
+    this.hemi = new THREE.HemisphereLight(0xffe2b8, 0x3b3a22, 0.7);
+    scene.add(this.hemi);
+    this.lightDir = SKY.sunDir.clone();     // where the main light comes from: the sun, or the moon at night
     const sun = new THREE.DirectionalLight(0xffc27a, 2.8);
-    sun.position.copy(SKY.sunDir).multiplyScalar(80);
+    sun.position.copy(this.lightDir).multiplyScalar(80);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
     sun.shadow.bias = -0.0004;
@@ -131,10 +139,13 @@ export class TreeScene {
     const fill = new THREE.DirectionalLight(0xfff0dc, 0.6);
     fill.position.set(12, 18, 40);
     scene.add(fill);
+    this.fillLight = fill;
 
     this.treeGroup = new THREE.Group();
     scene.add(this.treeGroup);
     this.motes = REDUCED_MOTION ? null : new DustMotes(scene);
+    this._applyTime();
+    setInterval(() => this._applyTime(), 60_000);
 
     const dim = (m) => Object.assign(m.clone(), { transparent: true, opacity: 0.14, depthWrite: false });
     const bark = new THREE.MeshStandardMaterial({ color: 0x6b4a2f, roughness: 0.92, envMapIntensity: 0.6 });
@@ -493,9 +504,27 @@ export class TreeScene {
     const size = this.bounds.getSize(new THREE.Vector3());
     const r = Math.max(size.x, size.y, size.z) * 0.8 + 8;
     this.sunLight.target.position.copy(center);
-    this.sunLight.position.copy(center).addScaledVector(SKY.sunDir, 120);
+    this.sunLight.position.copy(center).addScaledVector(this.lightDir, 120);
     Object.assign(this.sunLight.shadow.camera, { left: -r, right: r, top: r, bottom: -r, near: 1, far: 260 });
     this.sunLight.shadow.camera.updateProjectionMatrix();
+  }
+
+  // Match the sky and the light to the visitor's clock: stars and moonlight at night,
+  // a rosy dawn, golden hour, brighter midday. Runs on load and once a minute.
+  _applyTime() {
+    const state = skyState(new Date(), PREVIEW_HOUR);
+    applySky(this.scene, state);
+    this.fog.color.copy(SKY.horizon);            // kept in sync even while the flat view switches fog off
+    this.sunLight.color.copy(srgb(state.light));
+    this.sunLight.intensity = state.lightI;
+    this.lightDir.set(...state.lightDir);
+    this.hemi.color.copy(srgb(state.hemiSky));
+    this.hemi.groundColor.copy(srgb(state.hemiGround));
+    this.hemi.intensity = state.hemiI;
+    this.fillLight.intensity = state.fillI;
+    this.motes?.points.material.color.copy(srgb(state.motes));   // dust in the sun, fireflies after dark
+    this._fitShadows();
+    refreshEnvironment(this.scene, this.renderer);
   }
 
   _fitOrtho() {

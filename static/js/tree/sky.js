@@ -1,14 +1,28 @@
-// Golden-hour sky: a gradient dome with a low sun, warm haze, and floating dust.
-// The same sky is used as the environment map, so brass medallions reflect sunset light.
+// The sky dome: a layered gradient that follows the time of day (see skytime.js),
+// with a sun glow along the horizon, a moon with its real phase, and stars at night.
+// The same sky is used as the environment map, so brass medallions reflect its light.
 import * as THREE from "three";
 
+const srgb = (rgb) => new THREE.Color().setRGB(rgb[0], rgb[1], rgb[2], THREE.SRGBColorSpace);
+
+// Live values, updated in place by applySky() so every material using them follows along.
+// They start at Kinroot's signature golden hour.
 export const SKY = {
   top: new THREE.Color("#8fa8b6"),      // dusty evening blue overhead
+  mid: new THREE.Color("#e6c39a"),
   horizon: new THREE.Color("#f6c98a"),  // honey haze at the horizon
   ground: new THREE.Color("#b99461"),
   sun: new THREE.Color("#ffb257"),
   // Low in the sky, behind the tree and to the left, so branches get a warm rim light.
   sunDir: new THREE.Vector3(-0.5, 0.2, -0.84).normalize(),
+  moonDir: new THREE.Vector3(0.5, 0.4, -0.77).normalize(),
+};
+
+const uniforms = {
+  topColor: { value: SKY.top }, midColor: { value: SKY.mid }, horizonColor: { value: SKY.horizon },
+  groundColor: { value: SKY.ground }, sunColor: { value: SKY.sun }, sunDir: { value: SKY.sunDir },
+  moonDir: { value: SKY.moonDir }, glow: { value: 0.55 }, stars: { value: 0 },
+  moonPhase: { value: 0.5 }, moonVisible: { value: 0 }, sunVisible: { value: 1 },
 };
 
 const vertexShader = /* glsl */ `
@@ -20,30 +34,97 @@ const vertexShader = /* glsl */ `
 
 const fragmentShader = /* glsl */ `
   uniform vec3 topColor;
+  uniform vec3 midColor;
   uniform vec3 horizonColor;
   uniform vec3 groundColor;
   uniform vec3 sunColor;
   uniform vec3 sunDir;
+  uniform vec3 moonDir;
+  uniform float glow;
+  uniform float stars;
+  uniform float moonPhase;
+  uniform float moonVisible;
+  uniform float sunVisible;
   varying vec3 vDir;
+
+  float hash(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453); }
+
   void main() {
     vec3 dir = normalize(vDir);
     float h = dir.y;
-    vec3 col = mix(horizonColor, topColor, pow(clamp(h, 0.0, 1.0), 0.6));
+
+    // Three bands: horizon haze -> mid sky -> overhead.
+    vec3 col = mix(horizonColor, midColor, smoothstep(0.0, 0.22, h));
+    col = mix(col, topColor, smoothstep(0.12, 0.75, h));
+
+    // Warm light pooling along the horizon on the sun's side of the sky.
+    vec2 flatDir = dir.xz / max(length(dir.xz), 1e-4);
+    vec2 sunFlat = sunDir.xz / max(length(sunDir.xz), 1e-4);
+    float side = max(dot(flatDir, sunFlat), 0.0);
+    col += sunColor * glow * pow(side, 3.0) * (1.0 - smoothstep(-0.02, 0.35, h)) * 0.6;
+
+    // Stars, fading in as it gets dark (round points, not square cells).
+    if (stars > 0.0 && h > 0.0) {
+      vec3 cell = floor(dir * 260.0);
+      float r = hash(cell);
+      float d = length(fract(dir * 260.0) - 0.5);
+      col += vec3(0.9, 0.93, 1.0) * stars * step(0.9965, r) * (1.0 - smoothstep(0.12, 0.3, d))
+           * smoothstep(0.02, 0.2, h) * (0.5 + 0.5 * hash(cell + 7.0));
+    }
+
     col = mix(col, groundColor, clamp(-h * 5.0, 0.0, 1.0));
+
+    // The sun: a soft halo and a bright disc.
     float s = max(dot(dir, normalize(sunDir)), 0.0);
-    col += sunColor * (pow(s, 5.0) * 0.28 + pow(s, 48.0) * 0.55);
-    col = mix(col, vec3(1.0, 0.96, 0.84), smoothstep(0.9990, 0.9995, s));
+    col += sunColor * sunVisible * (pow(s, 5.0) * 0.28 + pow(s, 48.0) * 0.55);
+    col = mix(col, vec3(1.0, 0.96, 0.84), sunVisible * smoothstep(0.9990, 0.9995, s) * step(0.0, h));
+
+    // The moon, lit on the side that matches tonight's phase.
+    if (moonVisible > 0.0) {
+      vec3 md = normalize(moonDir);
+      float m = dot(dir, md);
+      col += vec3(0.75, 0.8, 0.95) * pow(max(m, 0.0), 300.0) * 0.25 * moonVisible;
+      float radius = 0.026;
+      vec3 right = normalize(cross(md, vec3(0.0, 1.0, 0.0)));
+      vec3 up = cross(right, md);
+      vec2 q = vec2(dot(dir, right), dot(dir, up)) / radius;
+      float edge = 1.0 - smoothstep(0.92, 1.0, length(q));
+      if (m > 0.0 && edge > 0.0) {
+        float halfWidth = sqrt(max(1.0 - q.y * q.y, 0.0));
+        float term = cos(moonPhase * 6.28318) * halfWidth;
+        float lit = moonPhase < 0.5 ? smoothstep(term - 0.06, term + 0.06, q.x)
+                                    : 1.0 - smoothstep(-term - 0.06, -term + 0.06, q.x);
+        vec3 face = mix(col + vec3(0.04, 0.05, 0.08), vec3(0.96, 0.95, 0.88), lit);
+        col = mix(col, face, edge * moonVisible);
+      }
+    }
     gl_FragColor = vec4(col, 1.0);
   }`;
 
 function skyMaterial() {
+  // Both domes share one uniforms object, so updating it changes both.
   return new THREE.ShaderMaterial({
-    uniforms: {
-      topColor: { value: SKY.top }, horizonColor: { value: SKY.horizon }, groundColor: { value: SKY.ground },
-      sunColor: { value: SKY.sun }, sunDir: { value: SKY.sunDir },
-    },
-    vertexShader, fragmentShader, side: THREE.BackSide, depthWrite: false, fog: false,
+    uniforms, vertexShader, fragmentShader, side: THREE.BackSide, depthWrite: false, fog: false,
   });
+}
+
+let envScene = null;
+
+// Re-bake the reflections from the current sky (cheap: a tiny sphere).
+export function refreshEnvironment(scene, renderer) {
+  try {
+    if (!envScene) {
+      envScene = new THREE.Scene();
+      envScene.add(new THREE.Mesh(new THREE.SphereGeometry(40, 32, 16), skyMaterial()));
+    }
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const old = scene.environment;
+    scene.environment = pmrem.fromScene(envScene, 0.04).texture;
+    pmrem.dispose();
+    old?.dispose();
+  } catch (err) {
+    console.warn("Kinroot: no environment lighting", err);
+  }
 }
 
 export function addSky(scene, renderer) {
@@ -55,19 +136,25 @@ export function addSky(scene, renderer) {
   sky.frustumCulled = false;
   sky.renderOrder = -1;
   scene.add(sky);
-
-  // Reflections and soft light from the same sky.
-  try {
-    const envScene = new THREE.Scene();
-    envScene.add(new THREE.Mesh(new THREE.SphereGeometry(40, 32, 16), skyMaterial()));
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(envScene, 0.04).texture;
-    pmrem.dispose();
-  } catch (err) {
-    console.warn("Kinroot: no environment lighting", err);
-  }
+  refreshEnvironment(scene, renderer);
   return sky;
 }
+
+// Point the sky at a moment in time: `state` comes from skyState() in skytime.js.
+export function applySky(scene, state) {
+  for (const key of ["top", "mid", "horizon", "ground", "sun"]) SKY[key].copy(srgb(state[key]));
+  SKY.sunDir.set(...state.sunDir);
+  SKY.moonDir.set(...state.moonDir);
+  uniforms.glow.value = state.glow;
+  uniforms.stars.value = state.stars;
+  uniforms.moonPhase.value = state.moonPhase;
+  uniforms.moonVisible.value = state.moonVisible;
+  uniforms.sunVisible.value = state.sunVisible;
+  scene.background?.copy?.(SKY.horizon);
+  scene.fog?.color.copy(SKY.horizon);
+}
+
+export { srgb };
 
 export function addLandscape(scene) {
   const group = new THREE.Group();
