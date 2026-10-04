@@ -2,6 +2,7 @@
 import { createApi } from "./tree/api.js";
 import { computeLayout } from "./tree/layout.js";
 import { Panel } from "./tree/panel.js";
+import { filterSet, FILTERS } from "./tree/filters.js";
 import { Search } from "./tree/search.js";
 import { Timelapse } from "./tree/timelapse.js";
 import { download, sleep, slug } from "./tree/util.js";
@@ -31,7 +32,7 @@ const app = {
     if (this.focusId && !s.byId.has(this.focusId)) this.focusId = null;
     $("empty-scene").hidden = s.people.length > 0;
     // Search, time-lapse, relationships and views have nothing to work on in an empty tree: show them once someone's there.
-    for (const el of [$("btn-grow"), $("btn-relate"), $("btn-flat"), document.querySelector(".cam-controls"), document.querySelector(".scene-toolbar .search")]) {
+    for (const el of [$("btn-grow"), $("btn-relate"), $("btn-flat"), document.querySelector(".cam-controls"), document.querySelector(".scene-toolbar .search"), document.querySelector(".tool-select")]) {
       if (el) el.hidden = s.people.length === 0;
     }
     $("btn-me").hidden = !s.me.person_id;   // "Centre on me" once you've claimed your leaf
@@ -44,9 +45,39 @@ const app = {
     }
   },
 
+  // Branch filter ("Show: Ancestors", ...), centred on the selected person, or on you.
+  filter: "all",
+  setFilter(mode) {
+    this.filter = mode;
+    const anchor = this.store.selected ?? this.store.me?.person_id;
+    if (mode !== "all" && anchor == null) {
+      this.toast("Select someone on the tree first, then choose which part of their family to show.");
+      this.filter = "all";
+      document.getElementById("branch-filter").value = "all";
+      return;
+    }
+    this.emphasize();
+    const keep = filterSet(mode, anchor, this.store.fam, this.store.byId);
+    if (keep && keep.size > 1) this.scene?.frameIds([...keep]); else if (!keep) this.scene?.frameAll();
+    if (keep) this.toast(`Showing ${FILTERS[mode].toLowerCase()} of ${this.store.byId.get(anchor)?.first_name || "this person"}.`);
+  },
+
+  // Hovering a name lights that person's immediate family (after a beat, so sweeping across names doesn't flicker).
+  hover(id) {
+    clearTimeout(this._hoverTimer);
+    this._hoverTimer = setTimeout(() => {
+      if (this.hoverId === id) return;
+      this.hoverId = id;
+      this.emphasize();
+    }, id ? 140 : 60);
+  },
+
   emphasize() {
     if (!this.scene) return;
-    const keep = this.pathIds ? new Set(this.pathIds) : this.focusId ? branchOf(this.focusId, this.store.fam) : null;
+    const anchor = this.store.selected ?? this.store.me?.person_id;
+    const filtered = this.filter !== "all" ? filterSet(this.filter, anchor, this.store.fam, this.store.byId) : null;
+    const keep = this.pathIds ? new Set(this.pathIds) : filtered ? filtered : this.focusId ? branchOf(this.focusId, this.store.fam)
+      : this.hoverId ? immediateFamily(this.hoverId, this.store.fam) : null;
     this.scene.emphasize({ keep, selected: this.store.selected, path: this.pathIds });
   },
 
@@ -161,6 +192,7 @@ function branchOf(id, fam) {
 
 function wireToolbar() {
   $("btn-reset").addEventListener("click", () => app.scene?.frameAll());
+  $("branch-filter").addEventListener("change", (e) => app.setFilter(e.target.value));
   $("btn-zoom-in").addEventListener("click", () => app.scene?.zoomBy(0.72));
   $("btn-zoom-out").addEventListener("click", () => app.scene?.zoomBy(1.38));
   $("btn-me").addEventListener("click", () => app.store.me.person_id && app.select(app.store.me.person_id, { fly: true }));
@@ -208,7 +240,7 @@ async function boot() {
 
   try {
     const { TreeScene } = await import("./tree/scene.js");
-    app.scene = new TreeScene($("scene"), { onPick: (id) => (id ? app.select(id, { fly: true }) : null) });
+    app.scene = new TreeScene($("scene"), { onPick: (id) => (id ? app.select(id, { fly: true }) : null), onHover: (id) => app.hover(id) });
     // Wait (briefly) for the Alegreya font so initials on the medallions use it.
     await Promise.race([document.fonts?.load?.('800 100px "Alegreya"'), sleep(1500)]).catch(() => {});
     await app.scene.loadModels(CFG.modelsBase);
@@ -242,6 +274,10 @@ async function boot() {
   openMode();
   addEventListener("hashchange", openMode);
   window.kinroot = app;   // handy for poking around in the browser console
+}
+
+function immediateFamily(id, fam) {
+  return new Set([id, ...(fam.parents.get(id) || []), ...(fam.children.get(id) || []), ...(fam.spouses.get(id) || [])]);
 }
 
 boot();

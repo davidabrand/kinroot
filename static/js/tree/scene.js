@@ -70,9 +70,10 @@ function seeded(seed) {
 }
 
 export class TreeScene {
-  constructor(container, { onPick } = {}) {
+  constructor(container, { onPick, onHover } = {}) {
     this.container = container;
     this.onPick = onPick || (() => {});
+    this.onHover = onHover || (() => {});
     this.nodes = new Map();
     this.edges = [];
     this.knots = [];
@@ -469,6 +470,8 @@ export class TreeScene {
     }
     el.addEventListener("pointerdown", (e) => e.stopPropagation());
     el.addEventListener("click", () => this.onPick(p.id));
+    el.addEventListener("pointerenter", () => this.onHover(p.id));
+    el.addEventListener("pointerleave", () => this.onHover(null));
     const label = new CSS2DObject(el);
     label.position.set(0, -1.3, 0);
 

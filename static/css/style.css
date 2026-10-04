@@ -519,6 +519,10 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .menu[open] > .menu-list { animation: pop-in var(--dur-fast) var(--ease); }
 .menu-list a, .menu-list button { width: 100%; display: flex; justify-content: flex-start; gap: 10px; border: none; background: none; border-radius: var(--r-sm); padding: 9px 11px; color: var(--ink); text-decoration: none; font-weight: 500; }
 .menu-list a:hover, .menu-list button:hover { background: var(--honey-soft); color: var(--ink); }
+/* The one branch-filter control: an icon with a quiet native select (keyboard and screen-reader friendly). */
+.tool-select { gap: 6px; padding-block: 0; padding-right: 6px; }
+.tool-select select { width: auto; min-height: 0; padding: 8px 4px; border: none; background: transparent; color: inherit; font: 600 .82rem/1 var(--body); box-shadow: none; cursor: pointer; }
+.tool-select select option { color: #14130F; }
 .cam-controls { position: absolute; right: 14px; bottom: 14px; z-index: 3; display: grid; padding: 4px; border-radius: var(--r-md); }
 .cam-controls button { width: 38px; height: 38px; padding: 0; border: none; border-radius: var(--r-sm); background: none; color: #F1EBDD; }
 .cam-controls button:hover { background: rgb(241 235 221 / 10%); color: #fff; box-shadow: none; transform: none; }

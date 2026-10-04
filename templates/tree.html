@@ -34,6 +34,12 @@
       </div>
       <button type="button" class="tool glass" id="btn-grow" title="Watch your family grow">{{ m.icon("clock") }}<span class="label">Watch it grow</span></button>
       <button type="button" class="tool glass" id="btn-relate" title="How are we related?">{{ m.icon("route") }}<span class="label">Related?</span></button>
+      <label class="tool glass tool-select" title="Show part of the family">{{ m.icon("sliders") }}<span class="sr-only">Show</span>
+        <select id="branch-filter" aria-label="Show part of the family">
+          <option value="all">Everyone</option><option value="immediate">Immediate family</option>
+          <option value="ancestors">Ancestors</option><option value="descendants">Descendants</option>
+          <option value="paternal">Father's side</option><option value="maternal">Mother's side</option>
+        </select></label>
       <button type="button" class="tool glass" id="btn-flat" aria-pressed="false" title="Switch between 3D and a flat view">{{ m.icon("layers") }}<span class="label">Flat view</span></button>
       {% if role in ('editor', 'owner') %}
         <button type="button" class="tool tool-primary" id="btn-add">{{ m.icon("plus") }}<span class="label">Add person</span></button>
