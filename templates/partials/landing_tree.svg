@@ -1,0 +1,94 @@
+{# The homepage's living tree: the fictional Hale–Cole family from kinroot/landing.py.
+   Section stages (data-stage on .kr-scene) dim, reveal and light parts of it via landing.css. #}
+<svg class="kt" viewBox="-130 0 1300 1000" preserveAspectRatio="xMidYMax meet" role="img"
+     aria-label="An illustrated family tree: five generations of the fictional Hale and Cole family, from Arthur and Rose to their great-great-grandchildren.">
+  <defs>
+    <linearGradient id="kt-trunk" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#5a4a30" stop-opacity="0"/>
+      <stop offset=".35" stop-color="#8E7349"/>
+      <stop offset="1" stop-color="#BE9B5E"/>
+    </linearGradient>
+    <linearGradient id="kt-root" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#BE9B5E" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#BE9B5E" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="kt-halo">
+      <stop offset=".55" stop-color="#D2B77D" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#D2B77D" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <g class="kt-world">
+    <g class="kt-breathe">
+      <g class="kt-roots">
+        {% set tx = scene.trunk_x %}
+        <path d="M{{ tx }} 930 C{{ tx - 20 }} 965, {{ tx - 110 }} 975, {{ tx - 190 }} 1010"/>
+        <path d="M{{ tx }} 935 C{{ tx - 8 }} 970, {{ tx - 50 }} 990, {{ tx - 70 }} 1015"/>
+        <path d="M{{ tx }} 935 C{{ tx + 10 }} 972, {{ tx + 60 }} 988, {{ tx + 90 }} 1015"/>
+        <path d="M{{ tx }} 928 C{{ tx + 24 }} 960, {{ tx + 120 }} 972, {{ tx + 210 }} 1010"/>
+      </g>
+      <path class="kt-trunk" d="M{{ tx - 13 }} 1010 C{{ tx - 9 }} 930, {{ tx - 6 }} 860, {{ tx - 3 }} 806 L{{ tx + 3 }} 806 C{{ tx + 6 }} 860, {{ tx + 9 }} 930, {{ tx + 15 }} 1010 Z"/>
+
+      <g class="kt-lines">
+        {% for l in scene.lines %}
+          <path class="kt-line g{{ l.gen }}{{ ' kt-new' if l.new }}" d="{{ l.d }}" pathLength="1" data-born="{{ l.born }}"/>
+        {% endfor %}
+        <path class="kt-couple" d="{{ scene.couple_line }}"/>
+      </g>
+
+      {# Slow points of light travelling up a few lineage lines. #}
+      <g class="kt-glints">
+        {% for l in scene.lines if l.to in (9, 12, 13) %}
+          <path class="kt-glint" d="{{ l.d }}" pathLength="1" style="--g: {{ loop.index0 }}"/>
+        {% endfor %}
+      </g>
+
+      {# "How are we related?": the route Kinroot finds from You to Elena. #}
+      <path class="kt-route-bloom" d="{{ scene.relation_path }}" pathLength="1"/>
+      <path class="kt-route" d="{{ scene.relation_path }}" pathLength="1"/>
+
+      <g class="kt-people">
+        {% for p in scene.people %}
+          {% set ri = scene.relation_ids.index(p.id) if p.id in scene.relation_ids else -1 %}
+          <g class="kt-node g{{ p.gen }}{{ ' is-you' if p.id == scene.you }}{{ ' on-route' if ri >= 0 }}{{ ' kt-new' if p.id == scene.new_arrival }}"
+             transform="translate({{ p.x }} {{ p.y }})" data-born="{{ p.born }}" data-died="{{ p.died or '' }}"
+             style="--i: {{ loop.index0 }}; --route: {{ ri }}">
+            <g class="kt-med">
+              <circle class="kt-halo" r="{{ scene.r + 16 }}"/>
+              <circle class="kt-disc" r="{{ scene.r }}"/>
+              <circle class="kt-ring" r="{{ scene.r }}"/>
+              <text class="kt-init" y="{{ 4 if p.id == scene.you else 7 }}">{{ p.initials }}</text>
+              <text class="kt-name" y="{{ scene.r + 22 }}">{{ p.first }}{{ ' ' ~ p.last if p.last }}</text>
+              <text class="kt-years" y="{{ scene.r + 37 }}">{{ p.born }}{{ '–' ~ p.died if p.died }}</text>
+            </g>
+          </g>
+        {% endfor %}
+      </g>
+
+      {# "Family isn't built alone": a few quiet contributions. #}
+      <g class="kt-notes">
+        <g class="kt-note" style="--n: 0" transform="translate(1046 286)">
+          <circle class="kt-photo" r="9"/>
+          <path class="kt-photo-glyph" d="M-4 -1.5h2l1-1.6h2l1 1.6h2v4.8h-8z M0 -0.2a1.3 1.3 0 1 0 0.01 0z"/>
+          <text x="18" y="4">Mila added a photograph</text>
+        </g>
+        <g class="kt-note" style="--n: 1" transform="translate(992 484)">
+          <circle class="kt-dot" r="3"/>
+          <text x="12" y="4">Daniel confirmed 1960</text>
+        </g>
+        <g class="kt-note" style="--n: 2" transform="translate(826 112)">
+          <circle class="kt-dot" r="3"/>
+          <text x="12" y="4">Leo added Theo</text>
+        </g>
+      </g>
+
+      <g class="kt-dust" aria-hidden="true">
+        {% for x, y, r, d in [(420,260,1.6,0),(520,380,1.1,3),(690,250,1.4,6),(760,520,1.2,2),(880,300,1.7,8),(980,420,1.1,4),
+                              (600,560,1.3,7),(330,560,1.0,1),(1080,250,1.2,5),(700,130,1.0,9),(450,700,1.4,2),(860,720,1.1,6),
+                              (1150,420,1.0,3),(250,420,1.2,8),(640,420,0.9,5),(910,170,1.3,1)] %}
+          <circle cx="{{ x }}" cy="{{ y }}" r="{{ r }}" style="--d: {{ d }}"/>
+        {% endfor %}
+      </g>
+    </g>
+  </g>
+</svg>

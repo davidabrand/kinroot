@@ -2,57 +2,194 @@
 {% import "_macros.html" as m with context %}
 {% block title %}Kinroot — your family tree, in its best light{% endblock %}
 {% block body_class %}landing{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
+{% set arrow %}<svg class="kr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg>{% endset %}
+{% set lock %}<svg class="kr-ico" viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8.5" rx="1.6"/><path d="M6.8 9V6.6a3.2 3.2 0 0 1 6.4 0V9"/></svg>{% endset %}
+{% set import_url = url_for('auth.register', next=url_for('trees.dashboard') ~ '#import') %}
+
+{% block topbar %}
+<header class="kr-header" data-scrolled="false">
+  <a class="kr-brand" href="{{ url_for('landing') }}" aria-label="Kinroot home">{{ m.mark("kr-mark") }}<span>Kinroot</span></a>
+  <nav class="kr-nav" aria-label="On this page">
+    <a href="#explore" data-for="explore">How it works</a>
+    <a href="#time" data-for="time">The tree</a>
+    <a href="#together" data-for="together">Family</a>
+    <a href="#privacy" data-for="privacy">Privacy</a>
+  </nav>
+  <div class="kr-account">
+    <a class="kr-login" href="{{ url_for('auth.login') }}">Log in</a>
+    <a class="kr-btn kr-btn-primary kr-btn-sm" href="{{ url_for('auth.register') }}">Start<span class="kr-xs-hide"> your tree</span></a>
+  </div>
+</header>
+{% endblock %}
+
 {% block content %}
-<section class="hero">
-  <div class="hero-inner">
-    <div>
-      <h1>Your family tree, <em>in its best light.</em></h1>
-      <p class="lede">Kinroot turns names, dates and old photos into a living 3D tree that your whole family can explore, add to and talk around.</p>
-      <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}">Start your tree</a>
-        <a class="text-cta" href="#features">See how it works <span aria-hidden="true">↓</span></a>
-      </div>
-      <p class="hero-note">Already researching? Bring your tree from Ancestry, FamilySearch or MyHeritage as a GEDCOM file.</p>
+<main class="kr" id="main">
+  <div class="kr-story">
+    {# The persistent scene: one tree behind sections 01–05, changing as you read. #}
+    <div class="kr-scene" data-stage="hero" aria-hidden="false">
+      <div class="kr-light" aria-hidden="true"></div>
+      <div class="kr-tree">{% include "partials/landing_tree.svg" %}</div>
+      <div class="kr-atmos" aria-hidden="true"></div>
+      <div class="kr-grain" aria-hidden="true"></div>
     </div>
-    {% include "partials/hero_tree.svg" %}
-  </div>
-</section>
 
-<section class="features" id="features" aria-labelledby="features-title">
-  <header class="section-intro">
-    <h2 id="features-title">Made for the people in it</h2>
-    <p class="lede">Everything your family needs to gather its story in one place, and nothing that gets in the way.</p>
-  </header>
-  <ol class="feature-list">
-    <li><span class="feature-num" aria-hidden="true">01</span>
-      <h3>A tree you can walk around</h3>
-      <p>Spin, zoom and fly between generations. Every relative hangs in a brass medallion with their photo or initials.</p></li>
-    <li><span class="feature-num" aria-hidden="true">02</span>
-      <h3>Watch your family grow</h3>
-      <p>Press play and a century unfolds. People appear in the year they were born, and leaves turn gold for those who've passed.</p></li>
-    <li><span class="feature-num" aria-hidden="true">03</span>
-      <h3>How are we related?</h3>
-      <p>Pick any two people and Kinroot names it, from great-aunt to second cousin once removed, then lights the path between you.</p></li>
-    <li><span class="feature-num" aria-hidden="true">04</span>
-      <h3>Invite the whole family</h3>
-      <p>Send a link. Relatives claim their own leaf and add what they know, and you decide who can view and who can edit.</p></li>
-    <li><span class="feature-num" aria-hidden="true">05</span>
-      <h3>Talk on the tree</h3>
-      <p>Found a relative? Send a request and message once they accept. Nobody can message you out of the blue.</p></li>
-    <li><span class="feature-num" aria-hidden="true">06</span>
-      <h3>Bring your research</h3>
-      <p>Import a GEDCOM file and export yours any time. Rough dates like “about 1921” are fine, and nothing is ever locked in.</p></li>
-  </ol>
-</section>
-<section class="promise" aria-labelledby="privacy-title">
-  <div class="promise-inner">
-    <h2 id="privacy-title"><em>Private by default.</em> Only the people you invite can see your tree.</h2>
-    <p class="muted">Living relatives' birthdays and birthplaces stay hidden from view-only guests, because those are the answers to bank security questions. Other families can only find your ancestors if you switch that on, and only people who have passed away are ever matched.</p>
-  </div>
-</section>
+    <section class="kr-sec kr-hero" id="home" data-stage="hero" aria-labelledby="hero-title">
+      <div class="kr-hero-copy">
+        <p class="kr-eyebrow kr-in" style="--in: 0">Your family, still growing</p>
+        <h1 id="hero-title" class="kr-display kr-in" style="--in: 1"><span class="kr-line">Your family tree,</span> <span class="kr-line">in its <em>best light.</em></span></h1>
+        <p class="kr-lede kr-in" style="--in: 2">Turn names, dates and old photographs into a living family tree your whole family can explore, grow and remember together.</p>
+        <div class="kr-ctas kr-in" style="--in: 3">
+          <a class="kr-btn kr-btn-primary" href="{{ url_for('auth.register') }}">Start your tree {{ arrow }}</a>
+          <a class="kr-btn kr-btn-quiet" href="#explore">See how it works <span class="kr-down" aria-hidden="true">↓</span></a>
+        </div>
+        <p class="kr-note kr-in" style="--in: 4"><span>Already researching?</span> Bring your tree from Ancestry, FamilySearch or MyHeritage as a GEDCOM file.</p>
+      </div>
+      <a class="kr-cue" href="#explore"><span>Trace your roots</span><i aria-hidden="true"></i></a>
+    </section>
 
-<footer class="site-footer">
-  <a class="brand" href="{{ url_for('landing') }}">{{ m.mark() }}{{ m.wordmark() }}</a>
-  <span>© {{ this_year }} Kinroot</span>
-</footer>
+    <section class="kr-sec kr-explore" id="explore" data-stage="explore" aria-labelledby="explore-title">
+      <div class="kr-copy rv">
+        <p class="kr-eyebrow">Explore</p>
+        <h2 id="explore-title" class="kr-display">A tree you can walk <em>around.</em></h2>
+        <p class="kr-body">Spin, zoom and move between generations. Every relative has a place, a face and a path connecting them to the people around them.</p>
+      </div>
+      <ol class="kr-callouts">
+        <li class="rv"><span class="kr-num">01</span><h3>Explore generations</h3><p>Move naturally from grandparents to grandchildren.</p></li>
+        <li class="rv2"><span class="kr-num">02</span><h3>Open a life</h3><p>Photos, dates and details stay connected to the person they belong to.</p></li>
+        <li class="rv3"><span class="kr-num">03</span><h3>Follow the branch</h3><p>See exactly where one part of your family connects to another.</p></li>
+      </ol>
+    </section>
+
+    <section class="kr-sec kr-time" id="time" data-stage="time" aria-labelledby="time-title">
+      <h2 id="time-title" class="kr-display kr-time-title rv">Watch a century <em>unfold.</em></h2>
+      <div class="kr-time-copy rv2">
+        <p class="kr-body">Press play and people appear in the year they were born. Generations take shape in front of you, while Kinroot keeps each person where they belong.</p>
+        <p class="kr-small">Leaves turn warm gold in remembrance of relatives who have passed.</p>
+      </div>
+      <div class="kr-timeline rv3">
+        <button type="button" class="kr-play" aria-pressed="false" aria-label="Play the timeline">
+          <svg class="kr-play-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5l8 5-8 5z"/></svg>
+          <svg class="kr-pause-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 5h2.4v10H6.5zM11.1 5h2.4v10h-2.4z"/></svg>
+        </button>
+        <div class="kr-rail">
+          <span class="kr-rail-line" aria-hidden="true"><span class="kr-rail-fill"></span></span>
+          <ol class="kr-years">{% for y in range(1900, 2021, 20) %}<li>{{ y }}</li>{% endfor %}</ol>
+        </div>
+        <output class="kr-year" aria-live="off">2025</output>
+      </div>
+    </section>
+
+    <section class="kr-sec kr-relate" id="relate" data-stage="relate" aria-labelledby="relate-title">
+      <div class="kr-relate-copy rv">
+        <p class="kr-pair">You <span aria-hidden="true">+</span><span class="sr-only">and</span> Elena</p>
+        <h2 id="relate-title" class="kr-display kr-term">Second cousin <em>once removed</em></h2>
+        <p class="kr-body">Kinroot follows the family path and names the relationship for you.</p>
+        <p class="kr-small">Pick any two people. See the connection instantly.</p>
+      </div>
+    </section>
+
+    <section class="kr-sec kr-together" id="together" data-stage="together" aria-labelledby="together-title">
+      <div class="kr-copy rv">
+        <p class="kr-eyebrow">Together</p>
+        <h2 id="together-title" class="kr-display">Your family knows <em>pieces</em> you don't.</h2>
+        <p class="kr-body">Invite relatives into the tree. They can claim their place, add what they know and help the family's story become more complete.</p>
+      </div>
+      <dl class="kr-trio rv2">
+        <div><dt>Invite</dt><dd>Send your family a private link.</dd></div>
+        <div><dt>Contribute</dt><dd>Relatives add the memories and details they know.</dd></div>
+        <div><dt>Control</dt><dd>You decide who can view and who can edit.</dd></div>
+      </dl>
+      <div class="kr-talk rv3" id="talk">
+        <svg class="kr-talk-art" viewBox="0 0 132 44" aria-hidden="true">
+          <circle cx="22" cy="22" r="17"/><text x="22" y="27">NW</text>
+          <path d="M44 22h44" class="kr-talk-line"/><circle cx="58" cy="22" r="1.8"/><circle cx="66" cy="22" r="1.8"/><circle cx="74" cy="22" r="1.8"/>
+          <circle cx="110" cy="22" r="17"/><text x="110" y="27">MC</text>
+        </svg>
+        <div>
+          <h3>Talk around the tree.</h3>
+          <p>Found a relative? Send a request and message after they accept. Nobody can message you out of the blue.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="kr-sec kr-privacy" id="privacy" data-stage="privacy" aria-labelledby="privacy-title">
+      <div class="kr-privacy-copy rv">
+        <svg class="kr-shield" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.5 2.8v5.6c0 4.3-3.1 7.9-7.5 9.1-4.4-1.2-7.5-4.8-7.5-9.1V5.8z"/><path d="M9 12l2.1 2.1L15.2 10"/></svg>
+        <h2 id="privacy-title" class="kr-display">Some stories belong to the <em>family.</em></h2>
+        <p class="kr-body">Kinroot is private by default. Only the people you invite can see your tree.</p>
+        <p class="kr-small">Sensitive details about living relatives stay protected. Ancestor discovery remains under your control.</p>
+      </div>
+    </section>
+  </div>
+
+  {# 06 — the first solid surface: warm paper rising over the scene. #}
+  <section class="kr-paper" id="begin" data-stage="begin" aria-labelledby="begin-title">
+    <div class="kr-begin">
+      <div class="kr-begin-copy">
+        <p class="kr-label rv">Your family starts here</p>
+        <h2 id="begin-title" class="kr-display rv">Give your family somewhere to <em>live on.</em></h2>
+        <p class="kr-body rv2">Start with the people you know. Add photographs and memories as you go, invite your family when you're ready, or bring an existing tree with you.</p>
+        <div class="kr-ctas rv2">
+          <a class="kr-btn kr-btn-ink" href="{{ url_for('auth.register') }}">Start your tree {{ arrow }}</a>
+          <a class="kr-btn kr-btn-line" href="{{ import_url }}">Import a GEDCOM</a>
+        </div>
+        <p class="kr-reassure rv3">{{ lock }} Your tree is private by default.</p>
+      </div>
+
+      <figure class="kr-mini rv2" aria-label="An example Kinroot family tree: Rose and Arthur Hale, their children Thomas and Margaret, and grandchildren Peter, Anna and Daniel.">
+        <svg viewBox="0 0 520 480" aria-hidden="true">
+          <g class="km-lines">
+            <path d="M260 372 C260 330, 150 330, 150 262"/><path d="M260 372 C260 330, 370 330, 370 262"/>
+            <path d="M150 212 C150 170, 80 170, 80 112"/><path d="M150 212 C150 170, 220 170, 220 112"/>
+            <path d="M370 212 C370 170, 440 170, 440 112"/><path d="M226 398 L294 398"/>
+          </g>
+          {% for x, y, ini, name, yrs in [(226,398,'AH','Arthur Hale','1898–1971'),(294,398,'RH','Rose Hale','1902–1988'),
+                                          (150,237,'TH','Thomas Hale','1926–2004'),(370,237,'MC','Margaret Cole','1931–2015'),
+                                          (80,87,'PH','Peter Hale','b. 1955'),(220,87,'AW','Anna Ward','b. 1958'),(440,87,'DC','Daniel Cole','b. 1960')] %}
+            <g class="km-node" transform="translate({{ x }} {{ y }})">
+              <circle r="24"/><text class="km-init" y="6">{{ ini }}</text>
+              <text class="km-name" y="40">{{ name }}</text>
+              <text class="km-years" y="54">{{ yrs }}</text>
+            </g>
+          {% endfor %}
+        </svg>
+      </figure>
+    </div>
+
+    <aside class="kr-gedcom rv" id="gedcom" aria-labelledby="gedcom-title">
+      <p class="kr-label" id="gedcom-title">Already have years of research?</p>
+      <p>Bring your tree from Ancestry, FamilySearch or MyHeritage with a GEDCOM file. Export it again whenever you want.</p>
+      <p class="kr-em">Your research isn't locked in.</p>
+    </aside>
+
+    <footer class="kr-footer">
+      <div class="kr-foot-grid">
+        <a class="kr-brand kr-brand-ink" href="{{ url_for('landing') }}" aria-label="Kinroot home">{{ m.mark("kr-mark") }}<span>Kinroot</span></a>
+        <nav aria-label="Product"><h3>Product</h3>
+          <a href="#explore">Explore</a><a href="#time">Timeline</a><a href="#relate">Relationships</a><a href="#gedcom">GEDCOM</a></nav>
+        <nav aria-label="Family"><h3>Family</h3>
+          <a href="#together">Invite relatives</a><a href="#privacy">Privacy</a><a href="#talk">Messaging</a></nav>
+        <nav aria-label="Account"><h3>Account</h3>
+          <a href="{{ url_for('auth.login') }}">Log in</a><a href="{{ url_for('auth.register') }}">Start your tree</a></nav>
+      </div>
+      <p class="kr-wordmark" aria-hidden="true">Kinroot</p>
+      <div class="kr-legal"><span>© {{ this_year }} Kinroot</span><span>Private by default</span></div>
+    </footer>
+  </section>
+</main>
+
+<nav class="kr-index" aria-label="Sections">
+  {% for id, label in [('home','Home'),('explore','Explore'),('time','Time'),('relate','Relationships'),('together','Together'),('begin','Begin')] %}
+    <a href="#{{ id }}" data-for="{{ id }}"><span class="kr-index-n">{{ '%02d' % loop.index }}</span><span class="kr-index-l">{{ label }}</span></a>
+  {% endfor %}
+</nav>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/landing.js') }}" defer></script>
 {% endblock %}

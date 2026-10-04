@@ -28,7 +28,7 @@
     <li><div class="s-body"><strong>Invite your family</strong><span class="muted small">Share a link so relatives can claim their leaf and add their side.</span></div></li>
   </ol>
 
-  <details class="onboard-import">
+  <details class="onboard-import" id="import">
     <summary>Already have a tree elsewhere? Import a GEDCOM file</summary>
     <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="stack">
       {{ m.csrf() }}
@@ -78,7 +78,7 @@
           </li>
       </ul>
 
-      <details class="dash-import">
+      <details class="dash-import" id="import">
         <summary>Have a tree elsewhere? Import a GEDCOM file</summary>
         <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="inline-form">
           {{ m.csrf() }}

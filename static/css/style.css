@@ -35,9 +35,6 @@
   /* Corner radii: small controls, fields, cards, sheets, pills. */
   --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
 
-  /* Page frame: one content width and one side gutter for full-width (marketing) sections. */
-  --content-max: 1160px;
-  --gutter: clamp(16px, 4vw, 48px);
   --radius: var(--r-md);
   --radius-sm: var(--r-sm);
 
@@ -302,84 +299,6 @@ details:not(.menu)[open] > summary + * { margin-top: var(--sp-3); }   /* one con
 .settings .danger-zone { margin-top: var(--sp-3); padding: var(--sp-5); border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line)); border-radius: var(--r-md);
   background: color-mix(in srgb, var(--danger-soft) 45%, transparent); }
 .settings .danger-zone > h2 { color: var(--danger); }
-
-/* ==========================================================================
-   Landing page
-   ========================================================================== */
-/* On the landing page the bar sits on the hero, aligned to the same content column as everything below it. */
-.landing .topbar { background: transparent; border-bottom-color: transparent; position: absolute; left: 0; right: 0; backdrop-filter: none;
-  padding-inline: max(var(--gutter), calc((100% - var(--content-max)) / 2)); padding-block: var(--sp-4); }
-.landing p { text-wrap: pretty; }   /* no one-word last lines */
-html:has(body.landing) { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html:has(body.landing) { scroll-behavior: auto; } }
-.hero {
-  position: relative; overflow: hidden;
-  background:
-    linear-gradient(180deg, transparent 72%, var(--bg) 100%),   /* the glow fades into the page: no seam */
-    radial-gradient(120% 80% at 78% 62%, color-mix(in srgb, var(--honey) 38%, transparent) 0%, transparent 60%),
-    linear-gradient(180deg, var(--hero-top, #f6ecd2) 0%, var(--hero-bottom, #eef1e6) 100%);
-  padding: 110px var(--gutter) var(--sp-7);
-}
-@media (prefers-color-scheme: dark) { .hero { --hero-top: #1d2418; --hero-bottom: #0e1813; } }
-/* Every landing section shares one content width and one gutter, so all edges line up. */
-.hero-inner, .features, .promise-inner, .site-footer { width: 100%; max-width: var(--content-max); margin-inline: auto; }
-.features, .site-footer { max-width: calc(var(--content-max) + 2 * var(--gutter)); }   /* these carry their own gutter */
-.hero-inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(20px, 4vw, 56px); align-items: center; }
-.hero h1 { font-size: var(--fs-hero); line-height: 1.02; letter-spacing: -.025em; }
-.hero h1 em { font-style: italic; font-weight: 700; color: var(--honey-ink); }
-.hero .lede { margin-top: var(--sp-4); font-size: 1.25rem; }
-.hero .btn-row { margin-top: var(--sp-5); }
-.hero-art { width: 100%; height: auto; display: block; max-width: 640px; justify-self: center; }
-.hero-note { margin-top: var(--sp-4); font-size: var(--fs-small); color: var(--ink-soft); max-width: 46ch; }
-.hero .btn-row { gap: var(--sp-5); }
-/* The quiet secondary action: text, not a second button competing with "Start your tree". */
-.text-cta { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ink); text-decoration: none;
-  border-radius: var(--r-xs); transition: color var(--dur-fast) var(--ease); }
-.text-cta span { transition: transform var(--dur) var(--ease); }
-.text-cta:hover { color: var(--honey-ink); }
-.text-cta:hover span { transform: translateY(2px); }
-@media (max-width: 860px) {
-  .hero-inner { grid-template-columns: 1fr; }
-  .hero { padding-top: 96px; }
-  .hero-art { max-width: 520px; }
-}
-
-/* "Made for the people in it": an editorial grid set in type. Each feature is a gold numeral,
-   a serif title and a short paragraph under a hairline: no cards, no icons, no shadows. */
-.features { padding: var(--sp-8) var(--gutter); display: grid; gap: var(--sp-7); }
-.section-intro { display: grid; gap: var(--sp-3); max-width: 48rem; }
-.section-intro h2 { font-size: var(--fs-h1); }
-.section-intro .lede { font-size: 1.125rem; }
-.feature-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-7) var(--sp-6); }
-.feature-list > li { display: grid; align-content: start; gap: var(--sp-3); padding-top: var(--sp-4); border-top: 1px solid var(--line); }
-.feature-num { font: 700 var(--fs-small)/1 var(--display); color: var(--honey-ink); font-variant-numeric: tabular-nums lining-nums; letter-spacing: .06em; }
-.feature-list h3 { font-size: 1.3rem; line-height: 1.2; }
-.feature-list p { color: var(--ink-soft); line-height: 1.6; max-width: 40ch; }
-@media (max-width: 960px) { .feature-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 600px) {
-  .features { padding-block: var(--sp-7); gap: var(--sp-6); }
-  .feature-list { grid-template-columns: 1fr; gap: var(--sp-5); }
-}
-
-.promise { background: var(--surface); border-block: 1px solid var(--line); padding-inline: var(--gutter); }
-/* Same three columns as the features grid: the statement in the first, the detail across the other two. */
-.promise-inner { padding-block: var(--sp-7); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-5) var(--sp-6); align-items: start; }
-.promise h2 { font-size: clamp(1.45rem, .6vw + 1.2rem, 1.75rem); line-height: 1.2; }
-.promise h2 em { font-style: italic; color: var(--honey-ink); }
-.promise p { grid-column: span 2; max-width: 62ch; line-height: 1.65; padding-top: 4px; }
-@media (max-width: 860px) {
-  .promise-inner { grid-template-columns: 1fr; }
-  .promise p { grid-column: auto; }
-}
-.site-footer { padding: var(--sp-5) var(--gutter) var(--sp-7); display: flex; gap: var(--sp-3); justify-content: space-between; align-items: center; flex-wrap: wrap; color: var(--ink-soft); font-size: var(--fs-small); }
-@media (prefers-reduced-motion: no-preference) {
-  .mote { animation: drift 9s ease-in-out infinite alternate; }
-  .mote:nth-child(2n) { animation-duration: 12s; }
-  .mote:nth-child(3n) { animation-duration: 15s; animation-delay: -4s; }
-  .sway { transform-origin: 320px 470px; animation: sway 7s ease-in-out infinite alternate; }
-}
-@keyframes drift { from { transform: translate(0, 0); } to { transform: translate(14px, -22px); } }
-@keyframes sway { from { transform: rotate(-.6deg); } to { transform: rotate(.6deg); } }
 
 /* ==========================================================================
    Sign-in pages: one continuous golden-hour scene (dusk in dark mode)
@@ -791,7 +710,6 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .timelapse-on .scene-hint { display: none; }
 @media (max-width: 1440px) { #btn-relate .label, #btn-flat .label { display: none; } }
 
-.landing .flashes { position: relative; z-index: 21; padding-top: 64px; }
 h2 .icon, h3 .icon { vertical-align: -0.14em; color: var(--leaf); }
 .rel-list .linklike.danger { font-size: .82rem; font-weight: 500; opacity: .75; }
 .rel-list li:hover .linklike.danger, .rel-list .linklike.danger:focus-visible { opacity: 1; }

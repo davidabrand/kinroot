@@ -35,6 +35,9 @@ for the `register` / `make_tree` / `add` helpers).
   `skytime.js` works out the time-of-day sky (preview with `?hour=5.5`); `sky.js` draws it.
   Its tests are in `tests/js/` and run through pytest when Node is installed.
 - `templates/` — Jinja pages; `static/css/style.css` — the design system.
+- Homepage (logged-out `/`): `templates/landing.html` + `partials/landing_tree.svg`, styled only by
+  `static/css/landing.css` and driven by `static/js/landing.js`. Its example family lives in
+  `kinroot/landing.py`; `tests/test_landing.py` checks the relationship it shows against the real engine.
 
 ## Rules — do not break these
 1. **Never deploy to production automatically.** The live app is on

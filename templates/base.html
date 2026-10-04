@@ -16,6 +16,7 @@
   {% block head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
+  {% block topbar %}
   <header class="topbar">
     <a class="brand" href="{{ url_for('landing') }}" aria-label="Kinroot home">{{ m.mark() }}{{ m.wordmark() }}</a>
     <nav class="topnav" aria-label="Main">
@@ -35,6 +36,7 @@
       {% endif %}
     </nav>
   </header>
+  {% endblock %}
   {% block flashes %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

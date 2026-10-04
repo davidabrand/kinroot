@@ -44,6 +44,15 @@ document.querySelectorAll(".flash:not(.error)").forEach((el) => {
   row?.querySelector("[data-copy]")?.focus({ preventScroll: true });
 })();
 
+// Arrived from the homepage's "Import a GEDCOM" (/trees#import)? Open the import option.
+(() => {
+  const target = location.hash === "#import" ? document.getElementById("import") : null;
+  if (target && target.tagName === "DETAILS") {
+    target.open = true;
+    target.scrollIntoView({ block: "center" });
+  }
+})();
+
 // ---- 2. Stop a form being submitted twice ----------------------------------
 // We flag the form rather than disabling the button, so a button's own
 // name/value (e.g. Accept vs Decline) is still included in the submission.

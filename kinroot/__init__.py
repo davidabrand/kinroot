@@ -10,6 +10,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.security import safe_join
 
 from . import auth, db, family, trees
+from .landing import scene as landing_scene
 from .dates import format_date, utc_now
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -62,7 +63,7 @@ def create_app(test_config=None):
     def landing():
         if auth.current_user():
             return redirect(url_for("trees.dashboard"))
-        return render_template("landing.html")
+        return render_template("landing.html", scene=landing_scene())
 
     @app.before_request
     def protect_writes():

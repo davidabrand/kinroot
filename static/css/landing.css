@@ -1,0 +1,407 @@
+/* ==========================================================================
+   Kinroot homepage — a cinematic walk through one family tree.
+   Loaded only by templates/landing.html; every rule is scoped to body.landing
+   or .kr-* / .kt-* names, so the app's own pages are untouched.
+
+   Structure: a sticky full-screen scene (.kr-scene, the tree) sits behind
+   sections 01–05; each section sets data-stage on the scene (landing.js) and
+   the tree interpolates to that stage. Section 06 (.kr-paper) rises over it.
+   ========================================================================== */
+
+body.landing {
+  --k-ink: #090A09;
+  --k-panel: #11120F;
+  --k-ivory: #F1EBDD;
+  --k-paper: #EEE7D9;
+  --k-paper-ink: #14130F;
+  --k-gold: #BE9B5E;
+  --k-gold-soft: #D2B77D;
+  --k-bronze: #8E7349;
+  --k-muted: rgba(241, 235, 221, .68);
+  --k-faint: rgba(241, 235, 221, .48);
+  --k-hairline: rgba(241, 235, 221, .14);
+  --k-serif: "Cormorant Garamond", "Alegreya", Georgia, serif;
+  --k-sans: "Manrope", "Alegreya Sans", system-ui, sans-serif;
+  --k-gutter: clamp(24px, 4.5vw, 72px);
+  --k-ease: cubic-bezier(.2, .7, .2, 1);
+  --k-header: 92px;
+  --k-index-clear: clamp(24px, 9vw, 168px);   /* right-side copy stays clear of the section index */
+  margin: 0;
+  background: var(--k-ink);
+  color: var(--k-ivory);
+  font: 400 1rem/1.6 var(--k-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+html:has(body.landing) { background: #090A09; scroll-behavior: smooth; }
+body.landing ::selection { background: rgba(190, 155, 94, .35); color: var(--k-ivory); }
+:where(body.landing) a { color: inherit; text-decoration: none; }   /* zero-specificity, so button colours always win */
+body.landing :focus-visible { outline: 2px solid var(--k-gold-soft); outline-offset: 3px; }
+
+/* ---------- type ---------- */
+.kr-display { font: 500 clamp(58px, 6vw, 92px)/.95 var(--k-serif); letter-spacing: -.02em; margin: 0; text-wrap: balance; color: var(--k-ivory); }
+.kr-display em { font-style: italic; font-weight: 400; color: var(--k-paper, #E8DFCC); }
+.kr-eyebrow { display: flex; align-items: center; gap: 14px; margin: 0 0 22px; font: 600 12px/1 var(--k-sans); letter-spacing: .24em; text-transform: uppercase; color: var(--k-gold-soft); }
+.kr-eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--k-gold); }
+.kr-body { margin: 22px 0 0; max-width: 470px; font-size: 17.5px; line-height: 1.65; color: var(--k-muted); text-wrap: pretty; }
+.kr-small { margin: 14px 0 0; max-width: 440px; font-size: 14px; line-height: 1.6; color: var(--k-faint); text-wrap: pretty; }
+.kr-label { margin: 0 0 18px; font: 600 12px/1 var(--k-sans); letter-spacing: .22em; text-transform: uppercase; }
+
+/* ---------- buttons ---------- */
+.kr-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 54px; padding: 0 26px; border-radius: 999px;
+  font: 600 12.5px/1 var(--k-sans); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; border: 1px solid transparent;
+  transition: transform .25s var(--k-ease), background-color .25s var(--k-ease), border-color .25s var(--k-ease), color .25s var(--k-ease); }
+.kr-btn:hover { transform: translateY(-1px); }
+.kr-btn:active { transform: translateY(0); }
+.kr-btn-sm { height: 40px; padding: 0 18px; font-size: 11.5px; }
+.kr-arrow { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s var(--k-ease); }
+.kr-btn:hover .kr-arrow { transform: translateX(3px); }
+.kr-btn-primary { background: var(--k-ivory); color: var(--k-ink); }
+.kr-btn-primary:hover { background: #FFF8EA; }
+.kr-btn-quiet { border-color: rgba(241, 235, 221, .22); background: rgba(241, 235, 221, .04); color: var(--k-ivory); backdrop-filter: blur(6px); }
+.kr-btn-quiet:hover { border-color: rgba(210, 183, 125, .6); }
+.kr-down { display: inline-block; transition: transform .25s var(--k-ease); }
+.kr-btn-quiet:hover .kr-down { transform: translateY(3px); }
+.kr-btn-ink { background: var(--k-paper-ink); color: var(--k-paper); }
+.kr-btn-ink:hover { background: #2a2620; }
+.kr-btn-line { border-color: rgba(20, 19, 15, .24); color: var(--k-paper-ink); }
+.kr-btn-line:hover { border-color: var(--k-bronze); }
+
+/* ---------- header ---------- */
+.kr-header { position: fixed; inset: 0 0 auto; z-index: 50; height: var(--k-header); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  padding: 0 clamp(24px, 4.5vw, 72px); border-bottom: 1px solid transparent;
+  transition: background-color .5s var(--k-ease), border-color .5s var(--k-ease), height .5s var(--k-ease); }
+.kr-header[data-scrolled="true"] { height: 72px; background: rgba(9, 10, 9, .58); backdrop-filter: blur(18px) saturate(115%); -webkit-backdrop-filter: blur(18px) saturate(115%); border-bottom-color: var(--k-hairline); }
+.kr-brand { display: inline-flex; align-items: center; gap: 10px; justify-self: start; }
+.kr-brand span { font: 500 23px/1 var(--k-serif); letter-spacing: .14em; text-transform: uppercase; }
+.kr-mark { width: 26px; height: 26px; }
+.kr-mark .mk-ink { fill: var(--k-ivory); }
+.kr-mark .mk-leg { stroke: var(--k-ivory); }
+.kr-mark .mk-leaf { fill: var(--k-gold); }
+.kr-mark .mk-sun, .kr-mark .mk-roots { fill: var(--k-gold-soft); stroke: var(--k-gold-soft); }
+.kr-mark .mk-roots { fill: none; }
+.kr-nav { display: flex; gap: clamp(22px, 2.6vw, 44px); }
+.kr-nav a { position: relative; padding: 8px 0; font: 600 12px/1 var(--k-sans); letter-spacing: .14em; text-transform: uppercase; color: var(--k-muted); transition: color .25s var(--k-ease); }
+.kr-nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--k-gold); transform: scaleX(0); transform-origin: left; transition: transform .4s var(--k-ease); }
+.kr-nav a:hover, .kr-nav a.is-active { color: var(--k-ivory); }
+.kr-nav a.is-active::after { transform: scaleX(1); }
+.kr-account { display: flex; align-items: center; gap: 22px; justify-self: end; }
+.kr-login { font: 600 12px/1 var(--k-sans); letter-spacing: .14em; text-transform: uppercase; color: var(--k-muted); padding: 8px 0; transition: color .25s; }
+.kr-login:hover { color: var(--k-ivory); }
+/* Over the paper sheet the header turns to paper too. */
+.kr-header[data-surface="paper"] { background: rgba(238, 231, 217, .8); border-bottom-color: rgba(20, 19, 15, .1); color: var(--k-paper-ink); }
+.kr-header[data-surface="paper"] .kr-nav a, .kr-header[data-surface="paper"] .kr-login { color: rgba(20, 19, 15, .62); }
+.kr-header[data-surface="paper"] .kr-nav a:hover, .kr-header[data-surface="paper"] .kr-login:hover { color: var(--k-paper-ink); }
+.kr-header[data-surface="paper"] .kr-mark .mk-ink { fill: var(--k-paper-ink); }
+.kr-header[data-surface="paper"] .kr-mark .mk-leg { stroke: var(--k-paper-ink); }
+.kr-header[data-surface="paper"] .kr-btn-primary { background: var(--k-paper-ink); color: var(--k-paper); }
+.kr-header, .kr-header .kr-nav a, .kr-header .kr-login, .kr-header .kr-btn { transition-property: background-color, border-color, color, height, transform; transition-duration: .5s; transition-timing-function: var(--k-ease); }
+
+/* Messages (e.g. "You're logged out") float under the header. */
+body.landing .flashes { position: fixed; top: calc(var(--k-header) + 8px); left: var(--k-gutter); z-index: 51; max-width: 420px; margin: 0; padding: 0; }
+body.landing .flash { background: rgba(17, 18, 15, .9); border-color: var(--k-hairline); color: var(--k-ivory); backdrop-filter: blur(10px); }
+
+/* ---------- the persistent scene ---------- */
+.kr-story { position: relative; }
+.kr-scene { position: sticky; top: 0; height: 100vh; margin-bottom: -100vh; z-index: 0; overflow: hidden; pointer-events: none; background: var(--k-ink); }
+.kr-light { position: absolute; inset: 0; background: radial-gradient(48% 56% at 58% 58%, rgba(214, 186, 132, .13), rgba(214, 186, 132, .04) 45%, transparent 72%);
+  translate: calc(var(--px, 0) * 3px) calc(var(--py, 0) * 3px); }
+.kr-tree { position: absolute; inset: 0; translate: calc(var(--px, 0) * 8px) calc(var(--py, 0) * 6px); transition: translate .9s var(--k-ease); }
+.kr-atmos { position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(4, 5, 4, .82) 0%, rgba(4, 5, 4, .42) 28%, transparent 50%),
+    linear-gradient(0deg, rgba(4, 5, 4, .78) 0%, transparent 40%),
+    linear-gradient(180deg, rgba(4, 5, 4, .42) 0%, transparent 22%); }
+.kr-grain { position: absolute; inset: 0; opacity: .05; background-image: var(--grain, none); background-size: 180px; mix-blend-mode: overlay; }
+
+/* ---------- the tree (SVG) ---------- */
+.kt { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.kt-world { transform-box: view-box; transform-origin: 655px 1000px; transition: transform 1.6s var(--k-ease), opacity 1.2s var(--k-ease);
+  animation: kt-enter 1.3s var(--k-ease) .1s backwards; }
+@keyframes kt-enter { from { opacity: 0; transform: scale(.97); } }
+.kt-breathe { animation: kt-breathe 9s ease-in-out infinite alternate; }
+@keyframes kt-breathe { to { transform: translateY(-1.5px); } }
+
+.kt-roots path { fill: none; stroke: url(#kt-root); stroke-width: 1.2; }
+.kt-trunk { fill: url(#kt-trunk); }
+.kt-line { fill: none; stroke: var(--k-gold); stroke-width: 1.3; stroke-opacity: .42; vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke-dashoffset 1.4s var(--k-ease), stroke-opacity .9s var(--k-ease); }
+.kt-couple { fill: none; stroke: var(--k-gold-soft); stroke-width: 1.6; stroke-opacity: .7; transition: stroke-opacity .9s var(--k-ease); }
+.kt-glint { fill: none; stroke: #F3DDAA; stroke-width: 2; stroke-linecap: round; stroke-dasharray: .035 1; stroke-dashoffset: .035; opacity: 0;
+  animation: kt-glint 9s linear infinite; animation-delay: calc(2s + var(--g) * 3s); transition: opacity .8s; }
+@keyframes kt-glint { 0% { stroke-dashoffset: .035; opacity: 0; } 10% { opacity: .8; } 85% { opacity: .8; } 100% { stroke-dashoffset: -1; opacity: 0; } }
+
+.kt-node { transition: opacity .9s var(--k-ease); }
+.kt-med { animation: kt-light 1.2s var(--k-ease) backwards; animation-delay: calc(.7s + var(--i) * .08s); }
+@keyframes kt-light { from { opacity: 0; } }
+.kt-disc { fill: #15140F; }
+.kt-ring { fill: none; stroke: var(--k-gold); stroke-width: 1.6; stroke-opacity: .72; transition: stroke .9s var(--k-ease), stroke-opacity .9s var(--k-ease); }
+.kt-halo { fill: url(#kt-halo); opacity: 0; transition: opacity .9s var(--k-ease); }
+.kt-init { font: 500 19px var(--k-serif); fill: var(--k-ivory); text-anchor: middle; letter-spacing: .02em; }
+.kt-name { font: 500 12.5px var(--k-sans); fill: rgba(241, 235, 221, .86); text-anchor: middle; }
+.kt-years { font: 400 10.5px var(--k-sans); fill: rgba(241, 235, 221, .5); text-anchor: middle; letter-spacing: .04em; }
+.kt-node.is-you .kt-disc { fill: var(--k-gold); }
+.kt-node.is-you .kt-ring { stroke: #F3DDAA; stroke-opacity: 1; }
+.kt-node.is-you .kt-init { font: 600 10.5px var(--k-sans); letter-spacing: .16em; fill: var(--k-ink); }
+.kt-node.is-you .kt-halo { opacity: .5; }
+
+.kt-route, .kt-route-bloom { fill: none; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.kt-route { stroke: #E7CB8E; stroke-width: 2.4; transition: stroke-dashoffset 1.6s var(--k-ease); }
+.kt-route-bloom { stroke: #E7CB8E; stroke-width: 12; opacity: 0; transition: stroke-dashoffset 1.6s var(--k-ease); }
+
+.kt-notes { opacity: 1; }
+.kt-note { opacity: 0; transition: opacity .9s var(--k-ease); }
+.kt-note text { font: 500 12.5px var(--k-sans); fill: rgba(241, 235, 221, .86); }
+.kt-photo { fill: var(--k-gold); }
+.kt-photo-glyph { fill: var(--k-ink); }
+.kt-dot { fill: var(--k-gold-soft); }
+
+.kt-dust circle { fill: #F3DDAA; opacity: .35; animation: kt-drift 16s ease-in-out infinite alternate; animation-delay: calc(var(--d) * -1.7s); }
+@keyframes kt-drift { 50% { opacity: .6; } to { transform: translate(14px, -26px); opacity: .2; } }
+
+/* Hero: generations 0–3. The two youngest wait for "Explore"; Theo waits for "Together". */
+.kt-node.g4, .kt-line.g4 { opacity: 0; }
+.kt-node.kt-new, .kt-line.kt-new { opacity: 0; }
+.kt-line.g4 { stroke-dashoffset: 1; }
+
+/* 02 Explore: the tree turns a little and the youngest generation appears. */
+.kr-scene[data-stage="explore"] .kt-world { transform: translate(-18px, 14px) rotate(-1.4deg) scale(.96); }
+.kr-scene:not([data-stage="hero"]) .kt-node.g4:not(.kt-new) { opacity: 1; }
+.kr-scene:not([data-stage="hero"]) .kt-line.g4:not(.kt-new) { opacity: 1; stroke-dashoffset: 0; }
+
+/* Glints only while the tree is "at rest" (hero, explore). */
+.kr-scene[data-stage="hero"] .kt-glint, .kr-scene[data-stage="explore"] .kt-glint { opacity: 1; }
+.kr-scene:not([data-stage="hero"]):not([data-stage="explore"]) .kt-glint { animation-play-state: paused; opacity: 0; }
+
+/* 03 Time: people appear in the year they were born (landing.js sets is-future / is-remembered). */
+.kr-scene[data-stage="time"] .kt-node.is-future { opacity: .06; }
+.kr-scene[data-stage="time"] .kt-line.is-future { stroke-dashoffset: 1; }
+.kr-scene[data-stage="time"] .kt-node.is-remembered .kt-ring { stroke: #E7CB8E; stroke-opacity: 1; }
+.kr-scene[data-stage="time"] .kt-node.is-remembered .kt-halo { opacity: .55; }
+
+/* 04 Relate: everything quiets; the route from You to Elena draws itself, then each person on it lights in turn. */
+.kr-scene[data-stage="relate"] .kt-world { transform: scale(.98); }
+.kr-scene[data-stage="relate"] .kt-node:not(.on-route):not(.kt-new) { opacity: .2; }
+.kr-scene[data-stage="relate"] .kt-line, .kr-scene[data-stage="relate"] .kt-couple { stroke-opacity: .12; }
+.kr-scene[data-stage="relate"] .kt-route, .kr-scene[data-stage="relate"] .kt-route-bloom { stroke-dashoffset: 0; }
+.kr-scene[data-stage="relate"] .kt-route-bloom { animation: kt-bloom 2.6s var(--k-ease) both; }
+@keyframes kt-bloom { 0% { opacity: 0; } 45% { opacity: .2; } 100% { opacity: .05; } }
+.kr-scene[data-stage="relate"] .kt-node.on-route .kt-ring { stroke: #F3DDAA; stroke-opacity: 1; transition-delay: calc(.35s + var(--route) * .18s); }
+.kr-scene[data-stage="relate"] .kt-node.on-route .kt-halo { opacity: .45; transition-delay: calc(.35s + var(--route) * .18s); }
+
+/* 05 Together: Theo joins, and a few contributions quietly arrive. */
+.kr-scene[data-stage="together"] .kt-node.kt-new { opacity: 1; transition-delay: .9s; }
+.kr-scene[data-stage="together"] .kt-line.kt-new { opacity: 1; stroke-dashoffset: 0; transition-delay: .3s; }
+.kr-scene[data-stage="together"] .kt-note { opacity: 1; transition-delay: calc(1.2s + var(--n) * .7s); }
+
+/* Privacy: the tree grows quiet; only the oldest lines stay lit. */
+.kr-scene[data-stage="privacy"] .kt-world { opacity: .55; transform: scale(.97); }
+.kr-scene[data-stage="privacy"] .kt-node:not(.kt-new) { opacity: .14; }
+.kr-scene[data-stage="privacy"] .kt-line:not(.g1), .kr-scene[data-stage="privacy"] .kt-route { stroke-opacity: .06; }
+.kr-scene[data-stage="privacy"] .kt-line.g1, .kr-scene[data-stage="privacy"] .kt-couple { stroke-opacity: .7; }
+
+/* ---------- sections ---------- */
+.kr-sec { position: relative; z-index: 1; min-height: 100vh; padding: calc(var(--k-header) + 56px) var(--k-gutter) 96px; box-sizing: border-box; }
+.kr-copy { max-width: 600px; }
+
+/* 01 Hero */
+.kr-hero { min-height: max(100vh, 760px); padding-top: clamp(145px, 22vh, 210px); }
+.kr-hero-copy { width: min(620px, 82vw); will-change: transform, opacity; }
+.kr-hero h1 { font-size: clamp(60px, 5.6vw, 96px); line-height: .92; }
+.kr-hero h1 .kr-line { display: block; white-space: nowrap; }   /* two deliberate lines, never "tree, in its" */
+.kr-hero h1 em { color: var(--k-gold-soft); }
+.kr-lede { margin: 30px 0 0; max-width: 470px; font-size: 17.5px; line-height: 1.65; color: var(--k-muted); text-wrap: pretty; }
+.kr-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 38px; }
+.kr-note { margin: 30px 0 0; max-width: 430px; font-size: 13.5px; line-height: 1.6; color: var(--k-faint); }
+.kr-note span { display: block; color: var(--k-muted); font-weight: 600; }
+.kr-in { animation: kr-rise 1.15s var(--k-ease) backwards; animation-delay: calc(.35s + var(--in) * .12s); }
+@keyframes kr-rise { from { opacity: 0; transform: translateY(18px); } }
+.kr-cue { position: absolute; left: var(--k-gutter); bottom: 40px; display: flex; align-items: center; gap: 16px;
+  font: 600 11px/1 var(--k-sans); letter-spacing: .24em; text-transform: uppercase; color: var(--k-faint); }
+.kr-cue i { position: relative; width: 1px; height: 56px; background: var(--k-hairline); overflow: hidden; }
+.kr-cue i::after { content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--k-gold); animation: kr-cue 2.6s var(--k-ease) infinite; }
+@keyframes kr-cue { to { top: 100%; } }
+.kr-cue:hover { color: var(--k-ivory); }
+
+/* 02 Explore */
+.kr-explore { display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto 1fr; column-gap: 48px; }
+.kr-explore .kr-copy { grid-column: 1; grid-row: 1; }
+.kr-callouts { grid-column: 2; grid-row: 2; align-self: end; list-style: none; margin: 0 var(--k-index-clear) 6vh 0; padding: 0; display: grid; gap: 30px; }
+.kr-callouts li { padding-top: 14px; border-top: 1px solid rgba(190, 155, 94, .5); }
+.kr-num { display: block; margin-bottom: 10px; font: 500 12px/1 var(--k-sans); letter-spacing: .14em; color: var(--k-gold-soft); }
+.kr-callouts h3 { margin: 0 0 6px; font: 600 12px/1.3 var(--k-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--k-ivory); }
+.kr-callouts p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--k-muted); }
+
+/* 03 Time */
+.kr-time { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-rows: 1fr auto auto; column-gap: 64px; }
+.kr-time-title { grid-column: 1; grid-row: 2; align-self: end; font-size: clamp(60px, 6.4vw, 96px); }
+.kr-time-copy { grid-column: 2; grid-row: 2; align-self: end; justify-self: end; max-width: 330px; padding-bottom: 8px; margin-right: var(--k-index-clear); }
+.kr-time-copy .kr-body { margin-top: 0; }
+.kr-timeline { grid-column: 1 / -1; grid-row: 3; margin-top: 56px; display: flex; align-items: center; gap: 22px; pointer-events: auto; }
+.kr-play { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  border: 1px solid rgba(210, 183, 125, .5); background: rgba(241, 235, 221, .04); color: var(--k-ivory); transition: border-color .25s, background-color .25s; }
+.kr-play:hover { border-color: var(--k-gold-soft); background: rgba(241, 235, 221, .08); }
+.kr-play svg { width: 16px; height: 16px; fill: currentColor; }
+.kr-play .kr-pause-icon, .kr-play[aria-pressed="true"] .kr-play-icon { display: none; }
+.kr-play[aria-pressed="true"] .kr-pause-icon { display: block; }
+.kr-rail { flex: 1; min-width: 0; }
+.kr-rail-line { display: block; height: 1px; background: var(--k-hairline); position: relative; }
+.kr-rail-fill { position: absolute; inset: 0 auto 0 0; width: var(--progress, 100%); background: var(--k-gold); }
+.kr-rail-fill::after { content: ""; position: absolute; right: -3px; top: -3px; width: 7px; height: 7px; border-radius: 50%; background: #F3DDAA; }
+.kr-years { list-style: none; margin: 12px 0 0; padding: 0; display: flex; justify-content: space-between; font: 500 12px/1 var(--k-sans); letter-spacing: .1em; color: var(--k-faint); font-variant-numeric: tabular-nums; }
+.kr-year { flex: none; min-width: 4ch; font: 500 30px/1 var(--k-serif); color: var(--k-gold-soft); font-variant-numeric: tabular-nums; }
+
+/* 04 Relate */
+.kr-relate { display: grid; align-content: end; padding-bottom: 12vh; }
+.kr-relate-copy { max-width: 720px; }
+.kr-pair { margin: 0 0 18px; font: 600 12px/1 var(--k-sans); letter-spacing: .24em; text-transform: uppercase; color: var(--k-gold-soft); }
+.kr-pair span[aria-hidden] { margin: 0 .5em; color: var(--k-faint); }
+.kr-term { font-size: clamp(52px, 5.8vw, 90px); }
+
+/* 05 Together */
+.kr-together { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr auto; column-gap: 64px; }
+.kr-together .kr-copy { grid-column: 1; grid-row: 1; }
+.kr-trio { grid-column: 1; grid-row: 3; margin: 56px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; max-width: 640px; }
+.kr-trio div { padding-top: 14px; border-top: 1px solid var(--k-hairline); }
+.kr-trio dt { margin-bottom: 8px; font: 600 12px/1 var(--k-sans); letter-spacing: .18em; text-transform: uppercase; color: var(--k-gold-soft); }
+.kr-trio dd { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--k-muted); }
+.kr-talk { grid-column: 2; grid-row: 3; align-self: end; justify-self: end; max-width: 380px; margin-right: var(--k-index-clear);
+  display: flex; gap: 20px; align-items: flex-start; padding-top: 18px; border-top: 1px solid var(--k-hairline); }
+.kr-talk-art { flex: none; width: 112px; }
+.kr-talk-art circle:not([r="1.8"]) { fill: #15140F; stroke: var(--k-gold); stroke-width: 1.2; }
+.kr-talk-art circle[r="1.8"] { fill: var(--k-gold-soft); }
+.kr-talk-art text { font: 500 13px var(--k-serif); fill: var(--k-ivory); text-anchor: middle; }
+.kr-talk-line { stroke: var(--k-hairline); stroke-width: 1; }
+.kr-talk h3 { margin: 0 0 6px; font: 500 24px/1.1 var(--k-serif); color: var(--k-ivory); }
+.kr-talk p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--k-muted); }
+
+/* Privacy moment */
+.kr-privacy { display: grid; align-content: center; min-height: 92vh; padding-bottom: 22vh; }
+.kr-privacy-copy { max-width: 600px; }
+.kr-shield { width: 30px; height: 30px; margin-bottom: 26px; fill: none; stroke: var(--k-gold-soft); stroke-width: 1.3; stroke-linejoin: round; stroke-linecap: round; }
+.kr-privacy h2 { font-size: clamp(52px, 5.4vw, 84px); }
+
+/* ---------- 06 Begin: the paper sheet ---------- */
+.kr-paper { position: relative; z-index: 2; margin: -14vh clamp(8px, 1.6vw, 28px) 0; border-radius: 32px 32px 0 0; background: var(--k-paper); color: var(--k-paper-ink);
+  padding: clamp(72px, 8vw, 120px) clamp(24px, 6vw, 112px) 36px; box-shadow: 0 -40px 90px -50px rgba(0, 0, 0, .8); overflow: hidden; }
+.kr-paper ::selection { background: rgba(142, 115, 73, .3); color: var(--k-paper-ink); }
+.kr-paper .kr-display { color: var(--k-paper-ink); font-size: clamp(54px, 5.3vw, 82px); }
+.kr-paper .kr-display em { color: #6F5733; }
+.kr-paper .kr-label { color: var(--k-bronze); }
+.kr-paper .kr-body { color: rgba(20, 19, 15, .72); }
+.kr-paper :focus-visible { outline-color: var(--k-bronze); }
+.kr-begin { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(32px, 5vw, 80px); align-items: center; }
+.kr-begin .kr-ctas { margin-top: 36px; }
+.kr-reassure { display: flex; align-items: center; gap: 8px; margin: 22px 0 0; font-size: 13.5px; color: rgba(20, 19, 15, .62); }
+.kr-ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.kr-mini { margin: 0 calc(clamp(24px, 6vw, 112px) * -0.6) 0 0; }
+.kr-mini svg { display: block; width: 100%; height: auto; overflow: visible; }
+.km-lines path { fill: none; stroke: var(--k-bronze); stroke-width: 1.4; stroke-opacity: .55; }
+.km-node circle { fill: #F7F2E8; stroke: var(--k-gold); stroke-width: 1.6; transition: stroke .25s var(--k-ease); }
+.km-node { transition: transform .25s var(--k-ease); }
+.km-init { font: 500 17px var(--k-serif); fill: var(--k-paper-ink); text-anchor: middle; }
+.km-name { font: 600 12.5px var(--k-sans); fill: var(--k-paper-ink); text-anchor: middle; opacity: .85; transition: opacity .25s; }
+.km-years { font: 400 11px var(--k-sans); fill: rgba(20, 19, 15, .55); text-anchor: middle; }
+.kr-mini:hover .km-node circle { stroke: #A88346; }
+.kr-mini:hover .km-name { opacity: 1; }
+
+.kr-gedcom { margin: clamp(64px, 8vw, 112px) 0 0; padding-top: 26px; border-top: 1px solid rgba(20, 19, 15, .14); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; gap: 12px 48px; align-items: baseline; }
+.kr-gedcom .kr-label { margin: 0; color: var(--k-bronze); }
+.kr-gedcom p { margin: 0; font-size: 15px; line-height: 1.6; color: rgba(20, 19, 15, .72); }
+.kr-gedcom .kr-em { font: italic 500 22px/1.2 var(--k-serif); color: var(--k-paper-ink); white-space: nowrap; }
+
+.kr-footer { margin-top: clamp(72px, 9vw, 128px); padding-top: 40px; border-top: 1px solid rgba(20, 19, 15, .14); }
+.kr-foot-grid { display: grid; grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr)); gap: 32px; }
+.kr-brand-ink { color: var(--k-paper-ink); align-self: start; }
+.kr-brand-ink .mk-ink { fill: var(--k-paper-ink); }
+.kr-brand-ink .mk-leg { stroke: var(--k-paper-ink); }
+.kr-foot-grid nav { display: grid; gap: 12px; align-content: start; }
+.kr-foot-grid h3 { margin: 0 0 4px; font: 600 11px/1 var(--k-sans); letter-spacing: .2em; text-transform: uppercase; color: var(--k-bronze); }
+.kr-foot-grid nav a { font-size: 14.5px; color: rgba(20, 19, 15, .76); width: fit-content; transition: color .2s; }
+.kr-foot-grid nav a:hover { color: var(--k-paper-ink); }
+.kr-wordmark { margin: clamp(40px, 6vw, 80px) 0 0; font: 500 clamp(100px, 18vw, 270px)/.8 var(--k-serif); letter-spacing: .06em; text-transform: uppercase; color: var(--k-paper-ink); opacity: .045; text-align: center; white-space: nowrap; user-select: none; }
+.kr-legal { display: flex; justify-content: space-between; gap: 16px; margin-top: 20px; font-size: 12.5px; color: rgba(20, 19, 15, .55); }
+
+/* ---------- section index (desktop) ---------- */
+.kr-index { position: fixed; right: 42px; top: 50%; transform: translateY(-50%); z-index: 40; display: grid; gap: 14px; justify-items: end; }
+.kr-index a { display: flex; align-items: center; gap: 12px; flex-direction: row-reverse; color: rgba(241, 235, 221, .45); transition: color .4s var(--k-ease); }
+.kr-index-n { font: 500 11px/1 var(--k-sans); letter-spacing: .12em; font-variant-numeric: tabular-nums; }
+.kr-index-l { font: 600 10.5px/1 var(--k-sans); letter-spacing: .18em; text-transform: uppercase; opacity: 0; transform: translateX(8px); transition: opacity .45s var(--k-ease), transform .45s var(--k-ease); }
+.kr-index a:hover { color: var(--k-ivory); }
+.kr-index a.is-active { color: var(--k-gold-soft); }
+.kr-index a.is-active .kr-index-l, .kr-index a:hover .kr-index-l, .kr-index a:focus-visible .kr-index-l { opacity: 1; transform: none; }
+.kr-index.on-paper a { color: rgba(20, 19, 15, .4); }
+.kr-index.on-paper a.is-active { color: var(--k-bronze); }
+
+/* ---------- reveals ----------
+   Where the browser supports scroll-driven animations, each .rv eases up as it enters view.
+   Otherwise landing.js adds .no-sda and an IntersectionObserver adds .in. Without either,
+   nothing is hidden. */
+@supports (animation-timeline: view()) {
+  .rv, .rv2, .rv3 { animation: kr-reveal linear both; animation-timeline: view(); }
+  .rv { animation-range: entry 5% entry 55%; }
+  .rv2 { animation-range: entry 12% entry 62%; }
+  .rv3 { animation-range: entry 19% entry 69%; }
+}
+@keyframes kr-reveal { from { opacity: 0; transform: translateY(60px); } }
+.no-sda .rv, .no-sda .rv2, .no-sda .rv3 { opacity: 0; transform: translateY(50px); transition: opacity 1s var(--k-ease), transform 1s var(--k-ease); }
+.no-sda .rv2 { transition-delay: .12s; }
+.no-sda .rv3 { transition-delay: .24s; }
+.no-sda .in { opacity: 1; transform: none; }
+
+/* ---------- ≤ 900px: a proper phone composition ---------- */
+@media (max-width: 900px) {
+  body.landing { --k-gutter: 20px; --k-header: 68px; }
+  .kr-header { grid-template-columns: 1fr auto; padding: 0 20px; }
+  .kr-header[data-scrolled="true"] { height: 60px; }
+  .kr-nav, .kr-index, .kr-cue { display: none; }
+  .kr-brand span { font-size: 19px; }
+  .kr-account { gap: 14px; }
+
+  /* The tree stays with you as a contained frame across the top; the story flows beneath it. */
+  .kr-scene { height: 46svh; margin-bottom: 0; z-index: 2; }
+  .kr-scene::after { content: ""; position: absolute; inset: auto 0 0; height: 30%; background: linear-gradient(0deg, var(--k-ink), transparent); }
+  .kr-atmos { background: linear-gradient(180deg, rgba(4, 5, 4, .55) 0%, transparent 28%); }
+  .kt-name, .kt-years { display: none; }
+  .kt-init { font-size: 22px; }
+  .kt-note text { display: none; }   /* the copy below says it; the badges stay */
+
+  .kr-sec { min-height: auto; padding: 36px 20px 88px; display: block; }
+  .kr-hero { min-height: auto; padding-top: 28px; }
+  .kr-hero-copy { width: auto; }
+  .kr-hero h1 { font-size: clamp(34px, 11.2vw, 64px); line-height: .95; }   /* sized to the screen so both lines always fit */
+  .kr-display { font-size: clamp(42px, 11.5vw, 60px); }
+  .kr-ctas { flex-direction: column; align-items: stretch; }
+  .kr-btn { width: 100%; }
+  .kr-header .kr-btn { width: auto; }
+  .kr-callouts, .kr-trio { margin: 40px 0 0; max-width: none; }
+  .kr-trio { grid-template-columns: 1fr; gap: 22px; }
+  .kr-time-copy { margin: 28px 0 0; }
+  .kr-timeline { margin-top: 36px; }
+  .kr-years li:nth-child(even) { visibility: hidden; }
+  .kr-relate { padding-bottom: 88px; }
+  .kr-talk { margin: 40px 0 0; max-width: none; }
+  .kr-privacy { min-height: auto; padding-bottom: 22vh; }
+  .kr-paper { margin: -12vh 0 0; border-radius: 24px 24px 0 0; padding: 64px 20px 28px; }
+  .kr-begin { grid-template-columns: 1fr; }
+  .kr-mini { margin: 8px -8px 0; }
+  .kr-gedcom { grid-template-columns: 1fr; }
+  .kr-gedcom .kr-em { white-space: normal; }
+  .kr-foot-grid { grid-template-columns: 1fr 1fr; }
+  .kr-foot-grid .kr-brand { grid-column: 1 / -1; }
+  .kr-legal { flex-direction: column; gap: 6px; }
+}
+@media (max-width: 420px) {
+  .kr-xs-hide { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }   /* "Start" on screen; screen readers still hear "Start your tree" */
+}
+
+/* ---------- reduced motion: everything visible, nothing drifting ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html:has(body.landing) { scroll-behavior: auto; }
+  .kr-in, .kt-world, .kt-med, .kt-breathe, .kt-dust circle, .kt-glint, .kr-cue i::after, .kt-route-bloom,
+  .rv, .rv2, .rv3 { animation: none !important; }
+  .kt-glint, .kt-route-bloom { display: none; }
+  .no-sda .rv, .no-sda .rv2, .no-sda .rv3 { opacity: 1; transform: none; }
+  .kr-tree, .kr-light { translate: none; }
+  .kt-world, .kt-node, .kt-line, .kt-route, .kt-ring, .kt-halo, .kt-note { transition-duration: .01s !important; transition-delay: 0s !important; }
+}
