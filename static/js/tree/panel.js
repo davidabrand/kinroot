@@ -139,63 +139,124 @@ export class Panel {
       ? `<img class="portrait" src="${esc(p.photo_url)}" alt="Photo of ${esc(fullName(p))}">`
       : `<div class="portrait initials" aria-hidden="true">${esc(initials(p))}</div>`;
     const focusOn = this.app.focusId === id;
+    const familyCount = Object.values(groups).reduce((n, list) => n + list.length, 0);
+    const tab = this.tab || "overview";
+    const tabBtn = (key, label) => `<button type="button" role="tab" id="tab-${key}" aria-controls="pane-${key}" aria-selected="${tab === key}" tabindex="${tab === key ? 0 : -1}" data-tab="${key}">${label}</button>`;
+
+    // "Life": a small timeline from real dates only — born, children born, died.
+    const life = [];
+    if (p.birth_year) life.push({ year: p.birth_year, text: `Born${p.birth_place ? ` in ${esc(p.birth_place)}` : ""}`, when: p.birth_display });
+    for (const r of rels) {
+      if (r.kind !== "parent" || r.person_a !== id) continue;
+      const c = byId.get(r.person_b);
+      if (c?.birth_year) life.push({ year: c.birth_year, text: `${esc(c.first_name)} is born`, when: c.birth_display, goto: c.id });
+    }
+    if (p.death_year) life.push({ year: p.death_year, text: "Passed away", when: p.death_display });
+    life.sort((x, y) => x.year - y.year);
+    const lifeHtml = life.length
+      ? `<ol class="life">${life.map((e) => `<li><span class="life-year">${e.year}</span><span>${e.goto ? `<button class="who" data-goto="${e.goto}">${e.text}</button>` : e.text}${e.when && String(e.when) !== String(e.year) ? `<small>${esc(e.when)}</small>` : ""}</span></li>`).join("")}</ol>`
+      : `<div class="empty"><strong>No dates yet</strong><span>${p.private ? `${esc(p.first_name)} is living, so dates are only shown to people who can edit this tree.` : "Add a birth date and their life will start to take shape here."}</span></div>`;
 
     this.render(`
       <p><button class="linklike" data-act="back">← Overview</button></p>
-      <div class="panel-head">
+      <header class="person-head">
         ${photo}
-        <h2>${esc(fullName(p))}</h2>
-        ${lifespan(p) ? `<p class="muted">${esc(lifespan(p))}${p.deceased ? " · remembered" : ""}</p>` : ""}
+        <div class="person-id">
+          <p class="person-rel" data-rel hidden></p>
+          <h2>${esc(fullName(p))}</h2>
+          ${lifespan(p) ? `<p class="person-dates">${esc(lifespan(p))}${p.deceased ? ` <span>· remembered</span>` : ""}</p>` : ""}
+        </div>
+      </header>
+      <div class="person-actions">
+        ${canEdit ? `<button class="btn-sm btn-primary" data-act="edit">Edit</button>` : ""}
+        ${me.person_id && me.person_id !== id ? `<button class="btn-sm" data-act="relate-me">How are we related?</button>`
+          : `<button class="btn-sm" data-act="relate-from">Compare with…</button>`}
+        <button class="btn-sm" data-act="focus" aria-pressed="${focusOn}">${focusOn ? "Show everyone" : "Focus branch"}</button>
       </div>
       ${this.accountCard(p)}
-      ${facts ? `<dl class="facts">${facts}</dl>` : ""}
-      ${p.private ? `<p class="small muted">${esc(p.first_name)} is living, so their dates and places are only shown to people who can edit this tree.</p>` : ""}
-      ${p.issues?.length ? `
-        <section class="issues stack-sm" aria-labelledby="issues-h">
-          <h3 id="issues-h">Worth a second look</h3>
-          <ul class="issue-list">${p.issues.map(issueItem).join("")}</ul>
-          <p class="small muted">Fix a date with <b>Edit details</b>, or leave it if the records really say so. Only people who can edit this tree see these notes.</p>
-        </section>` : ""}
-      ${p.notes ? `<p>${esc(p.notes).replace(/\n/g, "<br>")}</p>` : ""}
-      <section class="stack-sm">
-        <h3>Family</h3>
-        ${rows.length ? rows.join("") : `<p class="muted small">No relatives linked yet.</p>`}
+      <div class="tabs" role="tablist" aria-label="About ${esc(p.first_name)}">
+        ${tabBtn("overview", "Overview")}${tabBtn("family", `Family${familyCount ? ` <span class="num">${familyCount}</span>` : ""}`)}${tabBtn("life", "Life")}
+      </div>
+
+      <section class="tab-pane stack" role="tabpanel" id="pane-overview" aria-labelledby="tab-overview" ${tab === "overview" ? "" : "hidden"}>
+        ${facts ? `<dl class="facts">${facts}</dl>` : ""}
+        ${p.private ? `<p class="small muted">${esc(p.first_name)} is living, so their dates and places are only shown to people who can edit this tree.</p>` : ""}
+        ${p.issues?.length ? `
+          <section class="issues stack-sm" aria-labelledby="issues-h">
+            <h3 id="issues-h">Worth a second look</h3>
+            <ul class="issue-list">${p.issues.map(issueItem).join("")}</ul>
+            <p class="small muted">Fix a date with <b>Edit</b>, or leave it if the records really say so. Only people who can edit this tree see these notes.</p>
+          </section>` : ""}
+        ${p.notes ? `<p class="person-notes">${esc(p.notes).replace(/\n/g, "<br>")}</p>` : (!facts && !p.private ? `<div class="empty"><strong>Every life has a story</strong><span>${canEdit ? "Add dates, a birthplace or the stories people tell with <b>Edit</b>." : "Nothing has been written down here yet."}</span></div>` : "")}
+        ${isOwner && !p.account ? `<p class="small muted"><a href="${esc(this.app.CFG.shareUrl)}?person=${id}">Invite ${esc(p.first_name)} to claim this leaf</a></p>` : ""}
+        ${canEdit ? `<div><button class="btn-ghost btn-sm text-danger" data-act="delete">Remove from tree</button></div>` : ""}
       </section>
-      <section class="stack-sm">
-        <h3>Explore</h3>
-        <div class="chip-row">
-          <button class="btn-sm" data-act="focus" aria-pressed="${focusOn}">${focusOn ? "Show everyone" : "Focus on this branch"}</button>
-          ${me.person_id && me.person_id !== id ? `<button class="btn-sm" data-act="relate-me">How are we related?</button>`
-            : `<button class="btn-sm" data-act="relate-from">Compare with…</button>`}
-        </div>
-      </section>
-      ${canEdit ? `
-        <section class="stack-sm">
-          <h3>Add family</h3>
-          <div class="chip-row">
-            ${parentCount < 2 ? `<button class="btn-sm" data-add="parent">+ Parent</button>` : ""}
-            <button class="btn-sm" data-add="spouse">+ Partner</button>
-            <button class="btn-sm" data-add="child">+ Child</button>
-          </div>
-          ${this.store.people.length > 1 ? `
-          <details>
-            <summary>Link someone already on the tree</summary>
-            <div class="stack">
-              <div class="field"><label for="link-kind">${esc(p.first_name)} is the…</label>
-                <select id="link-kind"><option value="parent">parent of</option><option value="child">child of</option><option value="spouse">partner of</option></select></div>
-              <div class="field"><label for="link-other">Person</label>
-                <select id="link-other">${[...this.store.people].filter((o) => o.id !== id).sort((a, b) => fullName(a).localeCompare(fullName(b)))
-                  .map((o) => `<option value="${o.id}">${esc(fullName(o))}</option>`).join("")}</select></div>
-              <div><button class="btn-sm" data-act="link">Link them</button></div>
+
+      <section class="tab-pane stack" role="tabpanel" id="pane-family" aria-labelledby="tab-family" ${tab === "family" ? "" : "hidden"}>
+        ${rows.length ? rows.join("") : `<div class="empty"><strong>No relatives linked yet</strong><span>${canEdit ? "Add a parent, partner or child below." : ""}</span></div>`}
+        ${canEdit ? `
+          <div class="stack-sm">
+            <h3>Add family</h3>
+            <div class="chip-row">
+              ${parentCount < 2 ? `<button class="btn-sm" data-add="parent">+ Parent</button>` : ""}
+              <button class="btn-sm" data-add="spouse">+ Partner</button>
+              <button class="btn-sm" data-add="child">+ Child</button>
             </div>
-          </details>` : ""}
-        </section>
-        <div class="btn-row">
-          <button data-act="edit">Edit details</button>
-          <button class="btn-ghost text-danger" data-act="delete">Remove from tree</button>
-        </div>` : ""}
-      ${isOwner && !p.account ? `<p class="small muted"><a href="${esc(this.app.CFG.shareUrl)}?person=${id}">Invite ${esc(p.first_name)} to claim this leaf</a></p>` : ""}
+            ${this.store.people.length > 1 ? `
+            <details>
+              <summary>Link someone already on the tree</summary>
+              <div class="stack">
+                <div class="field"><label for="link-kind">${esc(p.first_name)} is the…</label>
+                  <select id="link-kind"><option value="parent">parent of</option><option value="child">child of</option><option value="spouse">partner of</option></select></div>
+                <div class="field"><label for="link-other">Person</label>
+                  <select id="link-other">${[...this.store.people].filter((o) => o.id !== id).sort((a, b) => fullName(a).localeCompare(fullName(b)))
+                    .map((o) => `<option value="${o.id}">${esc(fullName(o))}</option>`).join("")}</select></div>
+                <div><button class="btn-sm" data-act="link">Link them</button></div>
+              </div>
+            </details>` : ""}
+          </div>` : ""}
+      </section>
+
+      <section class="tab-pane" role="tabpanel" id="pane-life" aria-labelledby="tab-life" ${tab === "life" ? "" : "hidden"}>
+        ${lifeHtml}
+      </section>
       <p class="error" role="alert"></p>`);
+
+    // Tabs: click or arrow keys; the choice carries over as you move between people.
+    const tabs = [...this.el.querySelectorAll("[role=tab]")];
+    const showTab = (key, focus = false) => {
+      this.tab = key;
+      tabs.forEach((t) => {
+        const on = t.dataset.tab === key;
+        t.setAttribute("aria-selected", String(on));
+        t.tabIndex = on ? 0 : -1;
+        if (on && focus) t.focus();
+        this.el.querySelector(`#pane-${t.dataset.tab}`).hidden = !on;
+      });
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => showTab(t.dataset.tab));
+      t.addEventListener("keydown", (e) => {
+        const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (step) { e.preventDefault(); showTab(tabs[(i + step + tabs.length) % tabs.length].dataset.tab, true); }
+      });
+    });
+
+    // Your relationship to this person, named by Kinroot's own engine, once you've claimed your leaf.
+    if (me.person_id && me.person_id !== id) {
+      const key = `${me.person_id}:${id}`;
+      const fill = (term) => {
+        const el = this.el.querySelector("[data-rel]");
+        if (el && term && this.store.selected === id) { el.textContent = `Your ${term}`; el.hidden = false; }
+      };
+      this._rel = this._rel || new Map();
+      if (this._rel.has(key)) fill(this._rel.get(key));
+      else this.app.api.relationship(me.person_id, id).then((r) => { this._rel.set(key, r?.term || ""); fill(r?.term); }).catch(() => {});
+    } else if (me.person_id === id) {
+      const el = this.el.querySelector("[data-rel]");
+      el.textContent = "You";
+      el.hidden = false;
+    }
 
     this.on("[data-act=back]", "click", () => this.app.deselect());
     this.on("[data-goto]", "click", (e) => this.app.select(Number(e.currentTarget.dataset.goto), { fly: true }));
