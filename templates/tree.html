@@ -4,14 +4,13 @@
 {% block html_class %}tree-html{% endblock %}
 {% block body_class %}tree-page{% endblock %}
 {% block head %}
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
+{# Our own modules are listed too, mapped to fingerprinted URLs, so a deploy never mixes old and new files. #}
+{% set modules = versioned_modules("js/tree") %}
+{% set _ = modules.update({
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}) %}
+<script type="importmap">{{ {"imports": modules} | tojson }}</script>
 {% endblock %}
 {% block content %}
 <div class="tree-layout">

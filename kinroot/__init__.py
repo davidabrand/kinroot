@@ -1,4 +1,5 @@
 """Kinroot — your family tree, in its best light."""
+import hashlib
 import os
 import secrets
 from datetime import datetime, timedelta
@@ -6,6 +7,7 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 from markupsafe import Markup, escape
 from werkzeug.exceptions import HTTPException
+from werkzeug.security import safe_join
 
 from . import auth, db, family, trees
 from .dates import format_date, utc_now
@@ -84,11 +86,31 @@ def create_app(test_config=None):
             resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         return resp
 
+    # Cache-busting: every static URL carries a fingerprint of the file's contents
+    # (/static/css/style.css?v=3f2a9c...). When a deploy changes a file, its URL
+    # changes, so browsers fetch the new copy instead of reusing a stale one. This
+    # matters on PythonAnywhere, whose static file server sends no cache headers.
+    @app.url_defaults
+    def version_static_urls(endpoint, values):
+        if endpoint == "static" and "v" not in values:
+            version = _static_version(app.static_folder, values.get("filename", ""))
+            if version:
+                values["v"] = version
+
+    def versioned_modules(folder):
+        """Import-map entries for every JS module in static/<folder>, so modules that
+        import each other by relative path ("./panel.js") also get fingerprinted URLs."""
+        root = os.path.join(app.static_folder, folder)
+        names = sorted(n for n in os.listdir(root) if n.endswith(".js")) if os.path.isdir(root) else []
+        return {url_for("static", filename=f"{folder}/{n}", v=None): url_for("static", filename=f"{folder}/{n}")
+                for n in names}
+
     @app.context_processor
     def globals_for_templates():
         me = auth.current_user()
         return {"me": me, "csrf_token": auth.csrf_token, "this_year": datetime.now().year,
-                "nav_counts": family.counts(me["id"]) if me else None}
+                "nav_counts": family.counts(me["id"]) if me else None,
+                "versioned_modules": versioned_modules}
 
     app.add_template_filter(format_date, "fdate")
     app.add_template_filter(_ago, "ago")
@@ -112,6 +134,23 @@ def create_app(test_config=None):
                                message=messages.get(e.code, e.description)), e.code
 
     return app
+
+
+_STATIC_VERSIONS = {}
+
+
+def _static_version(static_folder, filename):
+    """A short content hash for a static file, or None for folders and missing files.
+    Cached by modification time and size, so each file is read once per change."""
+    path = safe_join(static_folder, filename) if filename else None
+    if not path or not os.path.isfile(path):
+        return None
+    st = os.stat(path)
+    key = (path, st.st_mtime_ns, st.st_size)
+    if key not in _STATIC_VERSIONS:
+        with open(path, "rb") as f:
+            _STATIC_VERSIONS[key] = hashlib.sha1(f.read()).hexdigest()[:10]
+    return _STATIC_VERSIONS[key]
 
 
 def _secret_key(instance_dir):
