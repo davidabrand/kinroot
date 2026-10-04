@@ -87,7 +87,7 @@
   </section>
 
   <section aria-labelledby="privacy-title">
-    <h2 id="privacy-title">{{ m.icon("shield") }} Privacy</h2>
+    <h2 id="privacy-title">Privacy</h2>
     <form method="post" class="stack">
       {{ m.csrf() }}<input type="hidden" name="action" value="privacy">
       <label class="check"><input type="checkbox" name="hide_living" {{ 'checked' if tree.hide_living }}>

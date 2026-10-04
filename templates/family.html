@@ -4,9 +4,8 @@
 {% block content %}
 <main class="page">
   <div class="page-head">
-    <p class="eyebrow">Family</p>
     <h1>Talk to the people on your tree</h1>
-    <p class="lede">Connect with relatives who've claimed their leaf, or with families who share your ancestors. You can message each other once a request is accepted.</p>
+    <p class="lede">Message relatives who've claimed their leaf, and meet families who share your ancestors.</p>
   </div>
 
   <div class="family-grid">
@@ -39,7 +38,7 @@
         </section>
       {% endif %}
 
-      <section class="card stack" aria-labelledby="convos-title">
+      <section class="ruled-section" aria-labelledby="convos-title">
         <h2 id="convos-title">Conversations</h2>
         {% if connected %}
           <div class="stack-sm">
@@ -62,7 +61,7 @@
       </section>
 
       {% if outgoing %}
-        <section class="card stack" aria-labelledby="sent-title">
+        <section class="ruled-section" aria-labelledby="sent-title">
           <h2 id="sent-title">Requests you've sent</h2>
           <ul class="list">
             {% for r in outgoing %}
@@ -75,7 +74,7 @@
     </div>
 
     <div class="side-stack">
-      <section class="card stack" aria-labelledby="suggest-title">
+      <section class="ruled-section" aria-labelledby="suggest-title">
         <h2 id="suggest-title">Relatives on your trees</h2>
         {% if suggestions %}
           <ul class="list">
@@ -103,8 +102,8 @@
         {% endif %}
       </section>
 
-      <section class="card stack" aria-labelledby="matches-title">
-        <h2 id="matches-title">{{ m.icon("route") }} Relatives you may have</h2>
+      <section class="ruled-section" aria-labelledby="matches-title">
+        <h2 id="matches-title">Relatives you may have</h2>
         <p class="muted small">Ancestors on your trees who also appear in another family's tree. Only people who've passed away are matched, and only in trees whose owners allow it.</p>
         {% if matches %}
           <ul class="list">
@@ -138,7 +137,7 @@
       </section>
 
       {% if blocked %}
-        <section class="card stack" aria-labelledby="blocked-title">
+        <section class="ruled-section" aria-labelledby="blocked-title">
           <h2 id="blocked-title">Blocked</h2>
           <ul class="list">
             {% for b in blocked %}

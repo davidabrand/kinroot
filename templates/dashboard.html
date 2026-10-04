@@ -42,8 +42,7 @@
 {% else %}
 <main class="page">
   <div class="page-head">
-    <p class="eyebrow">{{ greeting }}, {{ me.name.split()[0] }}</p>
-    <h1>Your family trees</h1>
+    <h1>{{ greeting }}, {{ me.name.split()[0] }}</h1>
   </div>
 
   <div class="dash-grid">
@@ -59,7 +58,8 @@
                   {{ t.people_count }} {{ 'person' if t.people_count == 1 else 'people' }}
                   {% if c.shape %}· {{ c.shape | length }} generation{{ '' if c.shape | length == 1 else 's' }}{% endif %}
                 </span>
-                <span class="meta">{{ m.role_pill(t.role, role_label) }}{% if t.role != 'owner' %}<span>from {{ t.owner_name }}</span>{% endif %}</span>
+                {# Your own trees need no label; shared ones say whose they are and what you can do. #}
+                {% if t.role != 'owner' %}<span class="meta">Shared by {{ t.owner_name }} · {{ 'can edit' if t.role == 'editor' else 'view only' }}</span>{% endif %}
               </div>
             </a>
           </li>
@@ -68,7 +68,6 @@
           <li>
             <form method="post" action="{{ url_for('trees.new_tree') }}" class="tree-card new-tree">
               {{ m.csrf() }}
-              <div class="preview" aria-hidden="true"><span class="sprout">{{ m.icon("sprout") }}</span></div>
               <div class="body">
                 <label for="tree-name" class="name">Plant a new tree</label>
                 <input id="tree-name" name="name" placeholder="The {{ me.name.split()[-1] if me.name.split()|length > 1 else 'Smith' }} family" required maxlength="120">
@@ -90,7 +89,7 @@
     </div>
 
     <aside class="side-stack">
-      <section class="card stack" aria-labelledby="family-title">
+      <section class="ruled-section" aria-labelledby="family-title">
         <div class="section-head"><h2 id="family-title">Family</h2><a href="{{ url_for('family.hub') }}">Open</a></div>
         {% if family.requests or family.unread %}
           <p>
@@ -98,13 +97,13 @@
             {%- if family.requests and family.unread %} and {% endif -%}
             {%- if family.unread %}<strong>{{ family.unread }}</strong> unread message{{ '' if family.unread == 1 else 's' }}{% endif -%}
             .</p>
-          <a class="btn btn-primary btn-sm" href="{{ url_for('family.hub') }}">{{ m.icon("message") }} See them</a>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('family.hub') }}">See them</a>
         {% else %}
           <p class="muted small">When relatives claim their leaf on your tree, you can connect and message each other here.</p>
         {% endif %}
       </section>
 
-      <section class="card stack" aria-labelledby="upcoming-title">
+      <section class="ruled-section" aria-labelledby="upcoming-title">
         <h2 id="upcoming-title">Coming up</h2>
         {% if upcoming %}
           <ul class="event-list">

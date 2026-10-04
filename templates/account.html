@@ -4,7 +4,6 @@
 {% block content %}
 <main class="page narrow">
   <div class="page-head with-action">
-    <p class="eyebrow">Account</p>
     <h1>{{ me.name }}</h1>
     <p class="muted">{{ me.email }}</p>
     <form method="post" action="{{ url_for('auth.logout') }}" class="head-action">{{ m.csrf() }}<button class="btn-sm">Log out</button></form>

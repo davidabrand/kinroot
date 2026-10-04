@@ -311,16 +311,15 @@ details[open] > :not(summary) { animation: rise-in var(--dur) var(--ease) both; 
   .hero { padding-top: 96px; }
   .hero-art { max-width: 520px; }
 }
-.features { max-width: 1160px; margin: 0 auto; padding: 56px clamp(16px, 4vw, 48px); display: grid; gap: 36px; }
-.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 28px 32px; }
-.feature { display: grid; gap: 8px; align-content: start; }
-.feature .icon { width: 40px; height: 40px; color: var(--leaf); }
-.feature p { color: var(--ink-soft); }
-.steps { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
-.steps li { counter-increment: step; display: grid; gap: 6px; align-content: start; padding-top: 14px; border-top: 2px solid var(--honey); }
-.steps li::before { content: counter(step); font: 800 2.2rem/1 var(--display); color: var(--honey-ink); }
+.features { max-width: 1160px; margin: 0 auto; padding: var(--sp-8) clamp(16px, 4vw, 48px) var(--sp-7); display: grid; gap: var(--sp-6); }
+.features > h2 { font-size: var(--fs-h1); max-width: 20ch; }
+/* Features read as a list set in type: a hairline, a name, a sentence. No icons, no tiles. */
+.feature-list { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-5) var(--sp-6); }
+.feature-list > div { display: grid; gap: 6px; align-content: start; padding-top: var(--sp-3); border-top: 1px solid var(--line); }
+.feature-list dt { font: 700 var(--fs-h3)/1.25 var(--display); }
+.feature-list dd { margin: 0; color: var(--ink-soft); }
 .promise { background: var(--surface); border-block: 1px solid var(--line); }
-.promise-inner { max-width: 1160px; margin: 0 auto; padding: 48px clamp(16px, 4vw, 48px); display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; align-items: center; }
+.promise-inner { max-width: 1160px; margin: 0 auto; padding: var(--sp-7) clamp(16px, 4vw, 48px); display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-5); align-items: start; }
 .site-footer { max-width: 1160px; margin: 0 auto; padding: 28px clamp(16px, 4vw, 48px) 48px; display: flex; gap: 12px; justify-content: space-between; flex-wrap: wrap; color: var(--ink-soft); font-size: var(--fs-small); }
 @media (prefers-reduced-motion: no-preference) {
   .mote { animation: drift 9s ease-in-out infinite alternate; }
@@ -541,21 +540,19 @@ a.tree-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb
 .tree-card .name { font: 800 1.3rem/1.15 var(--display); }
 .tree-card .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; color: var(--ink-soft); font-size: var(--fs-small); }
 /* "Plant a new tree": a dashed tile in the same grid as the trees */
-.tree-card.new-tree { margin: 0; border-style: dashed; border-width: 1.5px; box-shadow: none; background: transparent; }
+.tree-card.new-tree { margin: 0; grid-template-rows: 1fr; align-content: center; border-style: dashed; border-width: 1.5px; box-shadow: none; background: transparent; }
 .tree-card.new-tree:hover, .tree-card.new-tree:focus-within { transform: none; border-color: var(--honey); }
-.tree-card.new-tree .preview { background: var(--surface-2); place-items: center; }
-.tree-card.new-tree .sprout { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
-  background: var(--honey-soft); color: var(--honey-ink); }
-.tree-card.new-tree .sprout .icon { width: 26px; height: 26px; }
-.tree-card.new-tree .body { gap: 10px; }
+.tree-card.new-tree .body { gap: 10px; align-content: center; }
 .tree-card.new-tree label.name { font-size: 1.3rem; font-weight: 800; }
-.dash-import { padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .dash-import[open] > summary { margin-bottom: var(--sp-3); }
+/* Sidebar sections: a hairline and a small heading, not another box. */
+.ruled-section { display: grid; gap: var(--sp-3); align-content: start; padding-top: var(--sp-4); border-top: 1px solid var(--line); }
+.ruled-section h2 { font-size: var(--fs-h3); }
 input[type="file"] { padding: 6px; }
 input[type="file"]::file-selector-button { font: 600 .92rem var(--body); color: var(--ink); background: var(--surface-2);
   border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 12px; margin-right: 10px; cursor: pointer; }
 input[type="file"]::file-selector-button:hover { border-color: var(--honey); }
-.side-stack { display: grid; gap: 16px; align-content: start; }
+.side-stack { display: grid; gap: var(--sp-6); align-content: start; }
 .event-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .event-list li { display: grid; grid-template-columns: 48px 1fr; gap: 12px; align-items: center; }
 .date-chip { width: 48px; height: 52px; border-radius: var(--r-sm); background: var(--honey-soft); display: grid; place-items: center; align-content: center; gap: 0; line-height: 1; }
@@ -640,7 +637,7 @@ details.menu > summary::-webkit-details-marker { display: none; }
 
 /* side panel */
 .side-panel { background: var(--surface); border-left: 1px solid var(--line); overflow-y: auto; padding: 22px; display: grid; gap: 18px; align-content: start; }
-.side-panel h2 { font-size: 1.7rem; font-weight: 800; }
+.side-panel h2 { font-size: 1.5rem; font-weight: 800; }
 .side-panel h3 { font: 700 var(--fs-tiny)/1.3 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
 .panel-head { display: grid; gap: 10px; justify-items: start; }
 .portrait { width: 104px; height: 104px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 4px var(--honey), 0 10px 24px -8px rgb(0 0 0 / 40%); }
@@ -648,10 +645,15 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; }
 .facts dt { color: var(--ink-soft); font-size: var(--fs-small); }
 .facts dd { margin: 0; }
-.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.stat { padding: 12px; border-radius: var(--r-md); background: var(--surface-2); display: grid; gap: 2px; }
-.stat b { font: 800 1.6rem/1 var(--display); font-variant-numeric: tabular-nums; }
-.stat span { font-size: var(--fs-tiny); color: var(--ink-soft); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+/* Overview numbers: set in type on one line, no tiles. (dt comes first for screen readers; shown below the number.) */
+.stat-row { display: flex; gap: var(--sp-6); margin: 0; padding-bottom: var(--sp-4); border-bottom: 1px solid var(--line); }
+.stat { display: flex; flex-direction: column-reverse; gap: 2px; }
+.stat dd { margin: 0; font: 800 1.75rem/1 var(--display); font-variant-numeric: tabular-nums; }
+.stat dt { font-size: var(--fs-small); color: var(--ink-soft); }
+.rel-group { display: grid; gap: 2px; }
+.rel-group > .kind { padding-inline: 8px; font-size: var(--fs-small); color: var(--ink-soft); }
+.rel-group + .rel-group { margin-top: var(--sp-2); }
+.touch-tip { display: none; }
 .rel-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .rel-list li { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 6px 8px; border-radius: var(--r-sm); }
 .rel-list li:hover { background: var(--surface-2); }
@@ -684,6 +686,7 @@ details.menu > summary::-webkit-details-marker { display: none; }
   .side-panel { border-left: none; border-top: 1px solid var(--line); border-radius: 22px 22px 0 0; margin-top: -18px; position: relative; z-index: 5; box-shadow: 0 -12px 30px -18px rgb(0 0 0 / 40%); }
   .side-panel::before { content: ""; width: 44px; height: 5px; border-radius: var(--r-pill); background: var(--line); justify-self: center; margin: -8px 0 -4px; }
   .scene-hint { display: none; }
+  .touch-tip { display: block; }   /* the on-scene hint is hidden on phones, so the panel says it instead */
   .tool .label { display: none; }
   .timelapse { bottom: 26px; }
 }
@@ -793,7 +796,6 @@ h2 .icon, h3 .icon { vertical-align: -0.14em; color: var(--leaf); }
   .page-head.with-action { grid-template-columns: 1fr; }
   .page-head .head-action { grid-column: 1; grid-row: auto; justify-self: start; }
   .inline-form > button { flex: 1 1 100%; }   /* full-width actions are easier to hit with a thumb */
-  .tree-card.new-tree .preview { height: 72px; }
 }
 
 /* Comfortable tap targets on touch devices, without enlarging anything on a mouse-driven desktop. */

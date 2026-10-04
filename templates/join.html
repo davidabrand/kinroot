@@ -5,7 +5,6 @@
 <main class="page narrow">
   <div class="card stack" style="text-align: center; justify-items: center; gap: 16px">
     {{ m.mark("mark") }}
-    <p class="eyebrow">You're invited</p>
     <h1>{{ invite.inviter_name }} invited you to “{{ invite.tree_name }}”</h1>
     {% if invite.person_first and not invite.person_user %}
       <p class="lede">They've saved a leaf for you: <strong>{{ invite.person_first }} {{ invite.person_last }}</strong>. Join to claim it.</p>

@@ -55,16 +55,14 @@ export class Panel {
     const gens = people.length ? layout.maxGen + 1 : 0;
     const sorted = [...people].sort((a, b) => fullName(a).localeCompare(fullName(b)));
     const flagged = sorted.filter((p) => p.issues?.length);
+    // The tree's name is already on the scene, so the panel opens straight on the numbers.
     this.render(`
-      <div class="panel-head">
-        <p class="eyebrow">${esc(tree.name)}</p>
-        <h2>${people.length ? "Your family at a glance" : "An empty tree, ready to grow"}</h2>
-      </div>
-      <div class="stat-row">
-        <div class="stat"><b>${people.length}</b><span>People</span></div>
-        <div class="stat"><b>${gens}</b><span>${gens === 1 ? "Generation" : "Generations"}</span></div>
-        <div class="stat"><b>${years.length ? Math.min(...years) : "–"}</b><span>Earliest</span></div>
-      </div>
+      ${people.length ? `<h2 class="sr-only">Overview of ${esc(tree.name)}</h2>
+      <dl class="stat-row">
+        <div class="stat"><dt>People</dt><dd>${people.length}</dd></div>
+        <div class="stat"><dt>${gens === 1 ? "Generation" : "Generations"}</dt><dd>${gens}</dd></div>
+        <div class="stat"><dt>Earliest</dt><dd>${years.length ? Math.min(...years) : "–"}</dd></div>
+      </dl>` : `<h2>An empty tree, ready to grow</h2>`}
       ${people.length ? `
         <div class="btn-row">
           <button class="btn-primary" data-act="grow">▶ Watch it grow</button>
@@ -92,7 +90,7 @@ export class Panel {
             ${sorted.map((p) => `<li><button class="who" data-goto="${p.id}">${esc(fullName(p))}</button><span class="muted small">${esc(lifespan(p))}</span></li>`).join("")}
           </ul>
         </details>
-        <p class="small muted">Tip: drag to turn the tree, scroll or pinch to zoom, right-drag to slide.</p>` : ""}`);
+        <p class="small muted touch-tip">Drag to turn the tree, pinch to zoom, tap a name.</p>` : ""}`);
     this.on("[data-act=grow]", "click", () => this.app.timelapse.open());
     this.on("[data-act=relate]", "click", () => this.relate());
     this.on("[data-act=add]", "click", () => this.personForm({ mode: "add" }));
@@ -107,25 +105,25 @@ export class Panel {
     this.view = "person";
     const { fam, byId, canEdit, isOwner, me, rels } = this.store;
     const parentCount = (fam.parents.get(id) || []).length;
-    const relRow = (otherId, kind, relId) => {
+    const relRow = (otherId, relId) => {
       const o = byId.get(otherId);
       if (!o) return "";
-      return `<li><span><span class="kind">${kind}</span><button class="who" data-goto="${o.id}">${esc(fullName(o))}</button></span>
-        ${canEdit && relId ? `<button class="linklike danger small" data-unlink="${relId}" title="Remove this link">Unlink</button>` : ""}</li>`;
+      return `<li><button class="who" data-goto="${o.id}">${esc(fullName(o))}</button>
+        ${canEdit && relId ? `<button class="linklike danger small" data-unlink="${relId}" aria-label="Unlink ${esc(fullName(o))}">Unlink</button>` : ""}</li>`;
     };
-    const rows = [];
+    // Relatives grouped by kind, each group labelled once ("Children", not "Child" on every row).
+    const groups = { parents: [], partners: [], children: [], siblings: [] };
     for (const r of rels) {
-      if (r.kind === "parent" && r.person_b === id) rows.push(relRow(r.person_a, "Parent", r.id));
-    }
-    for (const r of rels) {
-      if (r.kind === "spouse" && (r.person_a === id || r.person_b === id)) rows.push(relRow(r.person_a === id ? r.person_b : r.person_a, "Partner", r.id));
-    }
-    for (const r of rels) {
-      if (r.kind === "parent" && r.person_a === id) rows.push(relRow(r.person_b, "Child", r.id));
+      if (r.kind === "parent" && r.person_b === id) groups.parents.push(relRow(r.person_a, r.id));
+      else if (r.kind === "parent" && r.person_a === id) groups.children.push(relRow(r.person_b, r.id));
+      else if (r.kind === "spouse" && (r.person_a === id || r.person_b === id)) groups.partners.push(relRow(r.person_a === id ? r.person_b : r.person_a, r.id));
     }
     const siblings = new Set();
     for (const par of fam.parents.get(id) || []) for (const c of fam.children.get(par) || []) if (c !== id) siblings.add(c);
-    for (const s of siblings) rows.push(relRow(s, "Sibling", null));
+    for (const s of siblings) groups.siblings.push(relRow(s, null));
+    const LABELS = { parents: ["Parent", "Parents"], partners: ["Partner", "Partners"], children: ["Child", "Children"], siblings: ["Sibling", "Siblings"] };
+    const rows = Object.entries(groups).filter(([, list]) => list.length).map(([key, list]) =>
+      `<div class="rel-group"><span class="kind">${LABELS[key][list.length === 1 ? 0 : 1]}</span><ul class="rel-list">${list.join("")}</ul></div>`);
 
     const facts = [["Born", p.birth_display], ["Birthplace", p.birth_place], ["Died", p.death_display]]
       .filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
@@ -153,7 +151,7 @@ export class Panel {
       ${p.notes ? `<p>${esc(p.notes).replace(/\n/g, "<br>")}</p>` : ""}
       <section class="stack-sm">
         <h3>Family</h3>
-        ${rows.length ? `<ul class="rel-list">${rows.join("")}</ul>` : `<p class="muted small">No relatives linked yet.</p>`}
+        ${rows.length ? rows.join("") : `<p class="muted small">No relatives linked yet.</p>`}
       </section>
       <section class="stack-sm">
         <h3>Explore</h3>
@@ -369,7 +367,7 @@ export class Panel {
     const options = (sel) => sorted.map((p) => `<option value="${p.id}" ${p.id === sel ? "selected" : ""}>${esc(fullName(p))}${p.account?.is_me ? " (you)" : ""}</option>`).join("");
     this.render(`
       <p><button class="linklike" data-act="back">← Back</button></p>
-      <div class="panel-head"><p class="eyebrow">Relationship finder</p><h2>How are we related?</h2></div>
+      <h2>How are we related?</h2>
       <p class="muted small">Pick two people. Kinroot names the relationship and lights up the path between them on the tree.</p>
       <form class="stack" data-relate>
         <div class="field"><label for="rel-a">From</label><select id="rel-a">${options(first)}</select></div>
