@@ -350,6 +350,7 @@ body.landing .flash { background: rgba(17, 18, 15, .9); border-color: var(--k-ha
 .no-sda .in { opacity: 1; transform: none; }
 
 /* ---------- ≤ 900px: a proper phone composition ---------- */
+.kr-figure { display: none; }
 @media (max-width: 900px) {
   body.landing { --k-gutter: 20px; --k-header: 68px; }
   .kr-header { grid-template-columns: 1fr auto; padding: 0 20px; }
@@ -358,8 +359,11 @@ body.landing .flash { background: rgba(17, 18, 15, .9); border-color: var(--k-ha
   .kr-brand span { font-size: 19px; }
   .kr-account { gap: 14px; }
 
-  /* The tree stays with you as a contained frame across the top; the story flows beneath it. */
-  .kr-scene { height: 46svh; margin-bottom: 0; z-index: 2; }
+  /* Phones: the tree is the hero's picture at the top of the page and scrolls away with it,
+     never floating over the story. Sections that show something with the tree carry their own copy. */
+  .kr-scene { position: relative; height: 50svh; margin-bottom: 0; z-index: 0; }
+  .kr-figure { display: block; height: auto; aspect-ratio: 1 / 1.02; margin: 26px -20px 6px; pointer-events: none; }
+  .kr-figure .kt { position: absolute; inset: 0; }
   .kr-scene::after { content: ""; position: absolute; inset: auto 0 0; height: 30%; background: linear-gradient(0deg, var(--k-ink), transparent); }
   .kr-atmos { background: linear-gradient(180deg, rgba(4, 5, 4, .55) 0%, transparent 28%); }
   .kt-name, .kt-years { display: none; }
@@ -378,7 +382,8 @@ body.landing .flash { background: rgba(17, 18, 15, .9); border-color: var(--k-ha
   .kr-trio { grid-template-columns: 1fr; gap: 22px; }
   .kr-time-copy { margin: 28px 0 0; }
   .kr-timeline { margin-top: 36px; }
-  .kr-years li:nth-child(even) { visibility: hidden; }
+  .kr-years li { display: none; }
+  .kr-years li:nth-child(3n + 1) { display: block; }       /* 1900, 1960, 2020: room for the year beside them */
   .kr-relate { padding-bottom: 88px; }
   .kr-talk { margin: 40px 0 0; max-width: none; }
   .kr-privacy { min-height: auto; padding-bottom: 22vh; }

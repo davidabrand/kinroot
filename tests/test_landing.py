@@ -47,3 +47,12 @@ def test_background_tree_is_never_tilted():
     css = (Path(__file__).resolve().parent.parent / "static" / "css" / "landing.css").read_text(encoding="utf-8")
     for rule in re.findall(r"[^{}]*\.kt-world[^{}]*\{[^}]*\}", css):
         assert "rotate" not in rule and "skew" not in rule, rule.strip()
+
+
+def test_phones_get_the_tree_inside_each_demo_section(app):
+    """On phones the hero tree scrolls away; the sections that show something with the tree
+    (time-lapse, relationship, together) carry their own framed copy instead of a floating one."""
+    page = app.test_client().get("/").get_data(as_text=True)
+    for section in ("time", "relate", "together"):
+        chunk = page.split(f'id="{section}"', 1)[1].split("</section>", 1)[0]
+        assert 'class="kr-scene kr-figure"' in chunk

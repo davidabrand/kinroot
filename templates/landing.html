@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% set arrow %}<svg class="kr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg>{% endset %}
+{% set figure %}<div class="kr-scene kr-figure" data-stage="explore" aria-hidden="true"></div>{% endset %}
 {% set lock %}<svg class="kr-ico" viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8.5" rx="1.6"/><path d="M6.8 9V6.6a3.2 3.2 0 0 1 6.4 0V9"/></svg>{% endset %}
 {% set import_url = url_for('auth.register', next=url_for('trees.dashboard') ~ '#import') %}
 
@@ -66,6 +67,7 @@
 
     <section class="kr-sec kr-time" id="time" data-stage="time" aria-labelledby="time-title">
       <h2 id="time-title" class="kr-display kr-time-title rv">Watch a century <em>unfold.</em></h2>
+      {{ figure }}
       <div class="kr-time-copy rv2">
         <p class="kr-body">Press play and people appear in the year they were born. Generations take shape in front of you, while Kinroot keeps each person where they belong.</p>
         <p class="kr-small">Leaves turn warm gold in remembrance of relatives who have passed.</p>
@@ -87,6 +89,7 @@
       <div class="kr-relate-copy rv">
         <p class="kr-pair">You <span aria-hidden="true">+</span><span class="sr-only">and</span> Elena</p>
         <h2 id="relate-title" class="kr-display kr-term">Second cousin <em>once removed</em></h2>
+        {{ figure }}
         <p class="kr-body">Kinroot follows the family path and names the relationship for you.</p>
         <p class="kr-small">Pick any two people. See the connection instantly.</p>
       </div>
@@ -96,6 +99,7 @@
       <div class="kr-copy rv">
         <p class="kr-eyebrow">Together</p>
         <h2 id="together-title" class="kr-display">Your family knows <em>pieces</em> you don't.</h2>
+        {{ figure }}
         <p class="kr-body">Invite relatives into the tree. They can claim their place, add what they know and help the family's story become more complete.</p>
       </div>
       <dl class="kr-trio rv2">

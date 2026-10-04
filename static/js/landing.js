@@ -2,8 +2,12 @@
 // Plain JS, no libraries. Observers instead of scroll polling; the only scroll
 // work (header state, hero fade) is batched into one requestAnimationFrame.
 (() => {
-  const scene = document.querySelector(".kr-scene");
+  const scene = document.querySelector(".kr-scene:not(.kr-figure)");
   if (!scene) return;
+  // Phones show a framed copy of the tree inside the sections that demonstrate something with it.
+  const figures = [...document.querySelectorAll(".kr-figure")];
+  const drawing = scene.querySelector(".kr-tree");
+  for (const fig of figures) if (drawing) fig.appendChild(drawing.cloneNode(true));
   const root = document.documentElement;
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const desktop = matchMedia("(min-width: 901px)");
@@ -18,6 +22,8 @@
   function setStage(section) {
     const stage = section.dataset.stage;
     if (stage !== "begin") scene.dataset.stage = stage;      // the paper covers the tree; it keeps its last pose
+    const fig = section.querySelector(".kr-figure");
+    if (fig) fig.dataset.stage = stage;                       // a phone's copy takes its pose as you reach it
     const indexId = INDEX_FOR[section.id];
     indexLinks.forEach((a) => {
       const on = a.dataset.for === indexId;
@@ -60,8 +66,8 @@
   onScroll();
 
   // ---- 3. "Watch a century unfold": people appear in the year they were born.
-  const nodes = [...scene.querySelectorAll(".kt-node")];
-  const lines = [...scene.querySelectorAll(".kt-line")];
+  const nodes = [...document.querySelectorAll(".kr-scene .kt-node")];
+  const lines = [...document.querySelectorAll(".kr-scene .kt-line")];
   const playBtn = document.querySelector(".kr-play");
   const yearOut = document.querySelector(".kr-year");
   const rail = document.querySelector(".kr-rail");
@@ -121,9 +127,9 @@
   });
 
   // ---- 3b. On phones the tree is a framed picture, so crop the drawing tightly around it.
-  const svg = scene.querySelector(".kt");
-  const WIDE = svg?.getAttribute("viewBox");
-  const frame = () => svg?.setAttribute("viewBox", desktop.matches ? WIDE : "240 90 900 920");
+  const svgs = [...document.querySelectorAll(".kr-scene .kt")];
+  const WIDE = svgs[0]?.getAttribute("viewBox");
+  const frame = () => svgs.forEach((svg) => svg.setAttribute("viewBox", desktop.matches ? WIDE : "240 90 900 920"));
   desktop.addEventListener?.("change", frame);
   frame();
 
