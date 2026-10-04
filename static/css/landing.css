@@ -164,8 +164,8 @@ body.landing .flash { background: rgba(17, 18, 15, .9); border-color: var(--k-ha
 .kt-node.kt-new, .kt-line.kt-new { opacity: 0; }
 .kt-line.g4 { stroke-dashoffset: 1; }
 
-/* 02 Explore: the tree turns a little and the youngest generation appears. */
-.kr-scene[data-stage="explore"] .kt-world { transform: translate(-18px, 14px) rotate(-1.4deg) scale(.96); }
+/* 02 Explore: the tree eases back a little and the youngest generation appears. It always stays level. */
+.kr-scene[data-stage="explore"] .kt-world { transform: translate(-18px, 14px) scale(.96); }
 .kr-scene:not([data-stage="hero"]) .kt-node.g4:not(.kt-new) { opacity: 1; }
 .kr-scene:not([data-stage="hero"]) .kt-line.g4:not(.kt-new) { opacity: 1; stroke-dashoffset: 0; }
 

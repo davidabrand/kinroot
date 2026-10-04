@@ -38,3 +38,12 @@ def test_logged_in_visitors_still_skip_the_homepage(app):
     register(c, "ann@example.com")
     resp = c.get("/")
     assert resp.status_code == 302 and resp.headers["Location"].endswith("/trees")
+
+
+def test_background_tree_is_never_tilted():
+    """The homepage tree shifts and zooms between sections but must always stay level."""
+    import re
+    from pathlib import Path
+    css = (Path(__file__).resolve().parent.parent / "static" / "css" / "landing.css").read_text(encoding="utf-8")
+    for rule in re.findall(r"[^{}]*\.kt-world[^{}]*\{[^}]*\}", css):
+        assert "rotate" not in rule and "skew" not in rule, rule.strip()
