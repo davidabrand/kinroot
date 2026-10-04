@@ -9,6 +9,7 @@
 {% block flashes %}{% endblock %}
 {% block content %}
 <main class="auth-scene">
+  {% set auth_line = "Your family is <em>waiting.</em>" %}
   {% include "partials/auth_scene.html" %}
   {# The #sign-in on the switch links brings phones straight to the card; so does the script below after an error. #}
   <section class="auth-card" id="sign-in" aria-labelledby="auth-title">

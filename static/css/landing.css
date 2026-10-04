@@ -396,57 +396,79 @@ body.landing .flash { background: rgba(17, 18, 15, .9); border-color: var(--k-ha
 }
 
 /* ==========================================================================
-   Sign-in pages (log in, sign up): the homepage scene, with the form where
-   the story sits. Always the dark palette, whatever the device setting.
+   Sign-in pages (log in, sign up): a split composition. Left, the dark Kinroot
+   world with the homepage's tree; right, a warm paper sheet holding the form,
+   like the homepage's final page.
    ========================================================================== */
-body.auth-page {
-  /* Pin the app's tokens to their dark values here, so shared pieces (fields, flashes) match. */
-  --bg: #090A09; --surface: #11120F; --surface-2: #181914; --ink: #F1EBDD; --ink-soft: #A8A397; --line: #2A2924;
-  --leaf: #D2B77D; --leaf-soft: #1F1C15; --honey: #BE9B5E; --honey-ink: #D2B77D; --honey-soft: #221E15;
-  --danger: #E28A72; --danger-soft: #2A1712; color-scheme: dark;
-}
-.auth-page .kr-scene { position: fixed; inset: 0; height: auto; margin: 0; }
+body.auth-page { background: var(--k-ink); }
+.auth-scene { min-height: 100vh; min-height: 100svh; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(400px, .85fr); }
+.auth-world { position: relative; }
+.auth-page .kr-tree { translate: calc(var(--px, 0) * 8px) calc(var(--py, 0) * 6px - 8vh); }   /* lift the tree clear of the line */
+.auth-page .kr-scene { position: sticky; top: 0; height: 100vh; height: 100svh; margin: 0; z-index: 0; }
 .auth-page .kr-atmos { background:
-    linear-gradient(90deg, rgba(4, 5, 4, .9) 0%, rgba(4, 5, 4, .55) 32%, transparent 56%),
-    linear-gradient(0deg, rgba(4, 5, 4, .6) 0%, transparent 35%); }
-.auth-scene { position: relative; z-index: 1; min-height: 100vh; min-height: 100svh; display: grid; align-items: center;
-  padding: calc(var(--k-header) + 24px) var(--k-gutter) 56px; box-sizing: border-box; }
-.auth-card { width: min(440px, 100%); display: grid; gap: 26px; view-transition-name: auth-card; scroll-margin-top: 100vh;
-  animation: kr-rise 1s var(--k-ease) .1s backwards; }
+    linear-gradient(0deg, rgba(4, 5, 4, .85) 0%, transparent 42%),
+    linear-gradient(180deg, rgba(4, 5, 4, .45) 0%, transparent 25%); }
+.auth-line { position: absolute; left: var(--k-gutter); right: var(--k-gutter); bottom: clamp(36px, 7vh, 72px); z-index: 2; margin: 0;
+  font: 500 clamp(40px, 4vw, 64px)/.98 var(--k-serif); letter-spacing: -.02em; color: var(--k-ivory); text-wrap: balance; }
+.auth-line em { font-style: italic; color: var(--k-gold-soft); }
+
+/* The paper sheet. App tokens are pinned to paper here, so shared pieces (fields, flashes) match. */
+.auth-card {
+  --bg: #EEE7D9; --surface: #F6F1E7; --surface-2: #E9E1D1; --ink: #14130F; --ink-soft: #5F584B; --line: #D6CCB8;
+  --leaf: #6F5733; --leaf-soft: #E4D9C2; --honey: #A88346; --honey-ink: #6F5733; --honey-soft: #EADFC8;
+  --danger: #A33F2B; --danger-soft: #F1DCD3; color-scheme: light;
+  position: relative; z-index: 1; display: grid; align-content: center; gap: 26px;
+  padding: calc(var(--k-header) + 24px) clamp(28px, 4.5vw, 72px) 56px; background: var(--k-paper); color: var(--k-paper-ink);
+  view-transition-name: auth-card; scroll-margin-top: 100vh; }
+.auth-card > * { width: 100%; max-width: 420px; animation: kr-rise .9s var(--k-ease) .1s backwards; }
 .auth-card .stack-sm { display: grid; gap: 0; }
-.auth-card .kr-eyebrow { margin-bottom: 18px; }
-.auth-card h1 { font-size: clamp(44px, 4.4vw, 68px); line-height: .95; }
-.auth-card .kr-body { margin-top: 18px; font-size: 16px; }
+.auth-card .kr-eyebrow { margin-bottom: 18px; color: var(--k-bronze); }
+.auth-card .kr-eyebrow::before { background: var(--k-bronze); }
+.auth-card h1.kr-display { font-size: clamp(40px, 3.4vw, 56px); line-height: .98; color: var(--k-paper-ink); }
+.auth-card .kr-body { margin-top: 16px; font-size: 15.5px; color: rgba(20, 19, 15, .66); }
 .auth-card form { display: grid; gap: 18px; }
 .auth-card .field { display: grid; gap: 8px; }
-.auth-card label { font: 600 11.5px/1 var(--k-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--k-muted); }
-.auth-card label .hint { margin-left: 6px; font-size: 11.5px; letter-spacing: .04em; text-transform: none; color: var(--k-faint); }
-.auth-card input { height: 52px; padding: 0 16px; border-radius: 12px; font: 400 16px var(--k-sans); color: var(--k-ivory);
-  background: rgba(241, 235, 221, .045); border: 1px solid rgba(241, 235, 221, .16); }
-.auth-card input:hover { border-color: rgba(241, 235, 221, .28); }
-.auth-card input:focus { border-color: var(--k-gold-soft); box-shadow: 0 0 0 3px rgba(190, 155, 94, .22); outline: none; }
+.auth-card label { font: 600 11.5px/1 var(--k-sans); letter-spacing: .16em; text-transform: uppercase; color: rgba(20, 19, 15, .62); }
+.auth-card label .hint { margin-left: 6px; font-size: 11.5px; letter-spacing: .04em; text-transform: none; color: rgba(20, 19, 15, .5); }
+.auth-card input { height: 52px; padding: 0 16px; border-radius: 12px; font: 400 16px var(--k-sans); color: var(--k-paper-ink);
+  background: #F7F2E8; border: 1px solid rgba(20, 19, 15, .16); }
+.auth-card input:hover { border-color: rgba(20, 19, 15, .3); }
+.auth-card input:focus { border-color: var(--k-bronze); box-shadow: 0 0 0 3px rgba(142, 115, 73, .18); outline: none; }
+.auth-card .kr-btn-primary { background: var(--k-paper-ink); color: var(--k-paper); }
+.auth-card .kr-btn-primary:hover { background: #2a2620; }
+.auth-card .kr-btn-quiet { background: transparent; border-color: rgba(20, 19, 15, .22); color: var(--k-paper-ink); backdrop-filter: none; }
+.auth-card .kr-btn-quiet:hover { border-color: var(--k-bronze); }
 .auth-card form .kr-btn { width: 100%; margin-top: 6px; }
-.auth-card .flash { margin: 0; }
-.auth-switch { display: flex; align-items: center; gap: 14px; margin: 0; font-size: 13px; color: var(--k-faint); }
-.auth-switch::before, .auth-switch::after { content: ""; flex: 1; height: 1px; background: var(--k-hairline); }
 .auth-card > .kr-btn { width: 100%; }
-.kr-account-note { font-size: 13px; color: var(--k-faint); }
-.auth-continue .auth-card, .auth-morph .auth-card, .auth-card:has(.flash) { animation: none; }
+.auth-card .flash { margin: 0; }
+.auth-card :focus-visible { outline-color: var(--k-bronze); }
+.auth-switch { display: flex; align-items: center; gap: 14px; margin: 0; font-size: 13px; color: rgba(20, 19, 15, .5); }
+.auth-switch::before, .auth-switch::after { content: ""; flex: 1; height: 1px; background: rgba(20, 19, 15, .12); }
+/* The header crosses both halves: the brand sits on the dark world, the actions on paper. */
+.auth-page .kr-header { background: transparent; }
+.auth-page .kr-account .kr-btn-primary { background: var(--k-paper-ink); color: var(--k-paper); }
+.auth-page .kr-account .kr-btn-quiet { background: transparent; border-color: rgba(20, 19, 15, .22); color: var(--k-paper-ink); backdrop-filter: none; }
+.kr-account-note { font-size: 13px; color: rgba(20, 19, 15, .55); }
+.auth-continue .auth-card > *, .auth-morph .auth-card > *, .auth-card:has(.flash) > * { animation: none; }
 ::view-transition-group(*) { animation-duration: .55s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
 
 @media (max-width: 900px) {
-  /* Phones: the tree is a framed picture at the top; the form follows below it. */
-  .auth-page .kr-scene { position: relative; inset: auto; height: 34svh; }
-  .auth-scene { display: block; padding: var(--k-header) 0 48px; }
-  .auth-card { padding: 8px 20px 0; width: auto; scroll-margin-top: 16px; }
-  .auth-card h1 { font-size: clamp(40px, 11vw, 56px); }
+  /* Phones: a short window onto the tree, then the paper sheet with the form. */
+  .auth-scene { display: block; }
+  .auth-world { height: 36svh; }
+  .auth-page .kr-scene { position: relative; height: 36svh; }
+  .auth-line { font-size: clamp(30px, 8.5vw, 42px); bottom: 22px; }
+  .auth-card { padding: 36px 20px 48px; border-radius: 22px 22px 0 0; margin-top: -18px; scroll-margin-top: 16px; }
+  .auth-card > * { max-width: none; }
   .kr-account-note { display: none; }
+  .auth-page .kr-account .kr-btn-primary { background: var(--k-ivory); color: var(--k-ink); }
+  .auth-page .kr-account .kr-btn-quiet { border-color: rgba(241, 235, 221, .3); color: var(--k-ivory); }
 }
 
 /* ---------- reduced motion: everything visible, nothing drifting ---------- */
 @media (prefers-reduced-motion: reduce) {
   html:has(body.landing) { scroll-behavior: auto; }
-  .kr-in, .kt-world, .kt-med, .kt-breathe, .kt-dust circle, .kt-glint, .kr-cue i::after, .kt-route-bloom, .auth-card,
+  .kr-in, .kt-world, .kt-med, .kt-breathe, .kt-dust circle, .kt-glint, .kr-cue i::after, .kt-route-bloom, .auth-card > *,
   .rv, .rv2, .rv3 { animation: none !important; }
   .kt-glint, .kt-route-bloom { display: none; }
   .no-sda .rv, .no-sda .rv2, .no-sda .rv3 { opacity: 1; transform: none; }

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as m with context %}
 {% block title %}Sharing & settings · {{ tree.name }} · Kinroot{% endblock %}
+{% block app_title %}<a href="{{ url_for('trees.dashboard') }}">My trees</a><span class="sep">/</span><a href="{{ url_for('trees.tree_view', tree_id=tree.id) }}">{{ tree.name }}</a><span class="sep">/</span><span class="here">Invite &amp; settings</span>{% endblock %}
 {% block content %}
 <main class="page narrow">
   <div class="page-head">

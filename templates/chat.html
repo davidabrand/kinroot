@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as m with context %}
 {% block title %}{{ other.name }} · Kinroot{% endblock %}
+{% block app_title %}<a href="{{ url_for('family.hub') }}">Family &amp; messages</a><span class="sep">/</span><span class="here">{{ other.name }}</span>{% endblock %}
 {% block content %}
 <main class="chat" data-connection="{{ connection.id }}" data-last="{{ messages[-1].id if messages else 0 }}">
   <header class="chat-head">

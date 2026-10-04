@@ -1,8 +1,11 @@
 {# The sign-in pages stand in the same scene as the homepage: the same tree, in the same place,
    with the form where the homepage's story sits. Purely decorative. #}
 {% set scene = landing_scene() %}
+<div class="auth-world">
 <div class="kr-scene" data-stage="hero" aria-hidden="true">
   <div class="kr-light"></div>
   <div class="kr-tree">{% include "partials/landing_tree.svg" %}</div>
   <div class="kr-atmos"></div>
+</div>
+{% if auth_line %}<p class="auth-line" aria-hidden="true">{{ auth_line | safe }}</p>{% endif %}
 </div>

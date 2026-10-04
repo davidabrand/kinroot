@@ -9,6 +9,7 @@
 {% block flashes %}{% endblock %}
 {% block content %}
 <main class="auth-scene">
+  {% set auth_line = "Every tree begins with <em>one person.</em>" %}
   {% include "partials/auth_scene.html" %}
   {# The #sign-up on the switch links brings phones straight to the card; so does the script below after an error. #}
   <section class="auth-card" id="sign-up" aria-labelledby="auth-title">
