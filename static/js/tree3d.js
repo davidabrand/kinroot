@@ -31,9 +31,10 @@ const app = {
     if (this.focusId && !s.byId.has(this.focusId)) this.focusId = null;
     $("empty-scene").hidden = s.people.length > 0;
     // Search, time-lapse, relationships and views have nothing to work on in an empty tree: show them once someone's there.
-    for (const el of [$("btn-grow"), $("btn-relate"), $("btn-flat"), $("btn-reset"), document.querySelector(".scene-toolbar .search")]) {
+    for (const el of [$("btn-grow"), $("btn-relate"), $("btn-flat"), document.querySelector(".cam-controls"), document.querySelector(".scene-toolbar .search")]) {
       if (el) el.hidden = s.people.length === 0;
     }
+    $("btn-me").hidden = !s.me.person_id;   // "Centre on me" once you've claimed your leaf
     this.search.update(s.people);
     if (this.timelapse.isOpen) this.timelapse.close();
     if (this.scene) {
@@ -160,6 +161,9 @@ function branchOf(id, fam) {
 
 function wireToolbar() {
   $("btn-reset").addEventListener("click", () => app.scene?.frameAll());
+  $("btn-zoom-in").addEventListener("click", () => app.scene?.zoomBy(0.72));
+  $("btn-zoom-out").addEventListener("click", () => app.scene?.zoomBy(1.38));
+  $("btn-me").addEventListener("click", () => app.store.me.person_id && app.select(app.store.me.person_id, { fly: true }));
   $("btn-grow").addEventListener("click", () => app.timelapse.open());
   $("btn-relate").addEventListener("click", () => app.panel.relate());
   $("btn-add")?.addEventListener("click", () => app.panel.personForm({ mode: "add" }));

@@ -124,7 +124,7 @@ p { margin: 0; }
 /* Serif for the emotional moments (page titles, names), small spaced capitals for section labels. */
 .display { font: 500 clamp(2.6rem, 2.4vw + 1.6rem, 3.9rem)/1 var(--display); letter-spacing: -.02em; }
 .display em { font-style: italic; color: var(--honey-ink); }
-.label, h2.label, h3.label, .ruled-section h2.label { margin: 0; font: 600 .7rem/1.3 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--honey-ink); }
+.kicker, h2.kicker, h3.kicker, .ruled-section h2.kicker { margin: 0; font: 600 .7rem/1.3 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--honey-ink); }
 .eyebrow { display: flex; align-items: center; gap: 12px; }
 .eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--honey); flex: none; }
 .page-head.center .eyebrow { justify-content: center; }
@@ -519,6 +519,11 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .menu[open] > .menu-list { animation: pop-in var(--dur-fast) var(--ease); }
 .menu-list a, .menu-list button { width: 100%; display: flex; justify-content: flex-start; gap: 10px; border: none; background: none; border-radius: var(--r-sm); padding: 9px 11px; color: var(--ink); text-decoration: none; font-weight: 500; }
 .menu-list a:hover, .menu-list button:hover { background: var(--honey-soft); color: var(--ink); }
+.cam-controls { position: absolute; right: 14px; bottom: 14px; z-index: 3; display: grid; padding: 4px; border-radius: var(--r-md); }
+.cam-controls button { width: 38px; height: 38px; padding: 0; border: none; border-radius: var(--r-sm); background: none; color: #F1EBDD; }
+.cam-controls button:hover { background: rgb(241 235 221 / 10%); color: #fff; box-shadow: none; transform: none; }
+.cam-controls button + button { margin-top: 2px; }
+.cam-controls .icon { width: 17px; height: 17px; }
 .scene-hint { position: absolute; left: 12px; bottom: 12px; font-size: .82rem; padding: 6px 11px; border-radius: var(--r-pill); z-index: 2; }
 .empty-scene { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; z-index: 2; pointer-events: none; }
 .empty-scene > div { pointer-events: auto; max-width: 380px; padding: 24px; border-radius: var(--r-lg); display: grid; gap: 10px; }

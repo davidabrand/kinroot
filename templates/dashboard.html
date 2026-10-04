@@ -52,7 +52,7 @@
     <div class="dash-main">
       {# Continue exploring: the most recent tree, as a window into the dark world. #}
       <section class="continue" aria-labelledby="continue-title">
-        <p class="label">Continue exploring</p>
+        <p class="kicker">Continue exploring</p>
         <a class="continue-stage theme-ink" href="{{ url_for('trees.tree_view', tree_id=t.id) }}" aria-label="Open {{ t.name }}">
           <span class="continue-art">{{ m.mini_tree(lead.shape) }}</span>
         </a>
@@ -77,7 +77,7 @@
 
       {% if cards | length > 1 %}
         <section class="ruled-section" aria-labelledby="others-title">
-          <h2 id="others-title" class="label">Your other trees</h2>
+          <h2 id="others-title" class="kicker">Your other trees</h2>
           <ul class="tree-list">
             {% for c in cards[1:] %}{% set o = c.tree %}
               <li>
@@ -94,7 +94,7 @@
       {% endif %}
 
       <section class="ruled-section plant" aria-labelledby="plant-title">
-        <h2 id="plant-title" class="label">Plant another tree</h2>
+        <h2 id="plant-title" class="kicker">Plant another tree</h2>
         <form method="post" action="{{ url_for('trees.new_tree') }}" class="inline-form">
           {{ m.csrf() }}
           <div class="field"><label for="tree-name" class="sr-only">Name your new tree</label>
@@ -110,7 +110,7 @@
 
     <aside class="side-stack">
       <section class="ruled-section" aria-labelledby="family-title">
-        <div class="section-head"><h2 id="family-title" class="label">Family</h2><a class="small" href="{{ url_for('family.hub') }}">Open</a></div>
+        <div class="section-head"><h2 id="family-title" class="kicker">Family</h2><a class="small" href="{{ url_for('family.hub') }}">Open</a></div>
         {% if family.requests or family.unread %}
           <p>
             {%- if family.requests %}<strong>{{ family.requests }}</strong> connection request{{ '' if family.requests == 1 else 's' }} waiting{% endif -%}
@@ -124,7 +124,7 @@
       </section>
 
       <section class="ruled-section" aria-labelledby="upcoming-title">
-        <h2 id="upcoming-title" class="label">Coming up</h2>
+        <h2 id="upcoming-title" class="kicker">Coming up</h2>
         {% if upcoming %}
           <ul class="event-list">
             {% for e in upcoming %}

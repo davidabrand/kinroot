@@ -82,10 +82,23 @@ export class TreeScene {
     this.flat = false;
     this.bounds = new THREE.Box3(new THREE.Vector3(-4, 0, -2), new THREE.Vector3(4, 8, 2));
     this._v = new THREE.Vector3();
+    this._dirty = 3;            // frames still to draw; nothing is drawn while this is 0 and nothing moves
     this._initRenderer();
     this._initScene();
     this._initInput();
+    // Draw only when something changes. Every method that alters what's on screen asks for a redraw;
+    // camera movement, animations and growing nodes keep the loop drawing until they settle.
+    for (const name of ["resize", "build", "emphasize", "showPath", "clearPath", "setYear", "endTimeline", "setFlat",
+                        "setAutoRotate", "moveCamera", "_applyTime", "_fitShadows"]) {
+      const original = this[name].bind(this);
+      this[name] = (...args) => { const out = original(...args); this.invalidate(); return out; };
+    }
+    for (const c of [this.controls, this.orthoControls]) c.addEventListener("change", () => this.invalidate());
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) this.invalidate(); });
   }
+
+  // Ask for the next few frames to be drawn (two extra cover anything that settles a frame late).
+  invalidate(frames = 3) { this._dirty = Math.max(this._dirty, frames); }
 
   // ------------------------------------------------------------ setup
   _initRenderer() {
@@ -497,6 +510,7 @@ export class TreeScene {
       else if (h > w) { tex.repeat.set(1, w / h); tex.offset.set(0, (1 - w / h) / 2); }
       this.textures.set(url, tex);
       done(tex);
+      this.invalidate();                 // a portrait arrived: show it
     });
   }
 
@@ -593,6 +607,21 @@ export class TreeScene {
     dir.y = Math.max(dir.y, 0.05);
     dir.normalize();
     this.moveCamera(target.clone().addScaledVector(dir, 10), target, 900);
+  }
+
+  // Zoom in (factor < 1) or out (> 1) toward the current target, within the controls' limits.
+  zoomBy(factor) {
+    if (this.flat) {
+      const zoom = Math.min(this.orthoControls.maxZoom, Math.max(this.orthoControls.minZoom, this.ortho.zoom / factor));
+      this.ortho.zoom = zoom;
+      this.ortho.updateProjectionMatrix();
+      this.invalidate();
+      return;
+    }
+    const target = this.controls.target.clone();
+    const offset = this.camera.position.clone().sub(target);
+    const dist = Math.min(this.controls.maxDistance, Math.max(this.controls.minDistance, offset.length() * factor));
+    this.moveCamera(target.clone().add(offset.setLength(dist)), target, 450);
   }
 
   moveCamera(pos, target, ms = 900) {
@@ -824,14 +853,19 @@ export class TreeScene {
 
   // ------------------------------------------------------------ render loop
   _frame(t) {
+    // (Hidden tabs need no check: browsers already pause animation frames there.)
+    const moved = (this.flat ? this.orthoControls : this.controls).update();   // true while dragging, damping or auto-rotating
+    const growing = this._growing;
+    if (!moved && !growing && !this.animations.length && this._dirty <= 0) return;   // idle: draw nothing
+    if (this._dirty > 0) this._dirty--;
     this.animations = this.animations.filter((a) => {
       const k = Math.min(1, (t - a.start) / a.ms);
       a.step(easeInOut(k));
       return k < 1;
     });
     const cam = this.activeCamera();
-    (this.flat ? this.orthoControls : this.controls).update();
     this.sky.position.copy(cam.position);
+    this._growing = false;
     for (const node of this.nodes.values()) {
       const g = node.group;
       if (!g.visible) continue;
@@ -841,7 +875,7 @@ export class TreeScene {
       if (node.appearAt != null) {
         const k = Math.min(1, (t - node.appearAt) / 650);
         g.scale.setScalar(Math.max(0.001, node.baseScale * easeOutBack(k)));
-        if (k >= 1) node.appearAt = null;
+        if (k >= 1) node.appearAt = null; else this._growing = true;
       }
     }
     this.motes?.update(t);
