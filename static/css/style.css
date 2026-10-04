@@ -249,6 +249,7 @@ a:focus-visible { border-radius: var(--r-xs); }
   .sb-scrim { position: fixed; inset: 0; z-index: 25; background: rgb(0 0 0 / 55%); }
   .app-menu, .app-bar-brand { display: inline-flex; }
   .app-bar { min-height: 56px; }
+  .app-bar-title a, .app-bar-title .sep { display: none; }   /* phones: just where you are; the menu has the rest */
   .sheet { margin-right: 0; border-radius: 18px 18px 0 0; }
   /* Collapsed on a desktop shouldn't leave phones with an icon-only drawer. */
   .sb-collapsed .sb-word, .sb-collapsed .sb-label, .sb-collapsed .sb-nav a > span, .sb-collapsed .sb-me > span, .sb-collapsed .sb-logout > span { display: revert; }
@@ -715,6 +716,7 @@ details.menu > summary::-webkit-details-marker { display: none; }
   .side-panel { border-left: none; border-top: 1px solid var(--line); border-radius: 22px 22px 0 0; margin-top: -18px; position: relative; z-index: 5; box-shadow: 0 -12px 30px -18px rgb(0 0 0 / 40%); }
   .side-panel::before { content: ""; width: 44px; height: 5px; border-radius: var(--r-pill); background: var(--line); justify-self: center; margin: -8px 0 -4px; }
   .scene-hint { display: none; }
+  .has-shell .scene-title { display: none; }   /* the top bar already names the tree */
   .touch-tip { display: block; }   /* the on-scene hint is hidden on phones, so the panel says it instead */
   .tool .label { display: none; }
   .timelapse { bottom: 26px; }
