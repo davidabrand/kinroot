@@ -57,7 +57,8 @@ export class Timelapse {
     this._shownYear = null;
     this.year = this.start;
     this.app.scene.setYear(this.start, this.years, false);
-    this.app.scene.frameAll(true, { lift: 0.14 });   // the whole family's space, clear of the playback bar
+    // The whole family's space, clear of the playback bar (on a phone the bar counts as covered space).
+    this.app.scene.frameAll(true, { lift: this.app.sheet?.active ? 0 : 0.14 });
     this.showYear();
     this.play();
   }

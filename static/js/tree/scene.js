@@ -64,6 +64,8 @@ export class TreeScene {
     this.state = { keep: null, selected: null, path: null, hover: null };
     this.timeline = null;
     this.flat = false;
+    this.insetBottom = 0;       // px of the stage covered at the bottom (the phone sheet); framing avoids it
+    this.insetTop = 0;          // ...and at the top (the phone toolbar)
     this.animations = [];
     this.bounds = new THREE.Box3(new THREE.Vector3(-4, -2, -2), new THREE.Vector3(4, 6, 2));
     this._dirty = 3;
@@ -492,6 +494,35 @@ export class TreeScene {
     this._clamping = false;
   }
 
+  // Something now covers the bottom `px` of the stage (the phone sheet). The view shifts so whoever
+  // you're looking at stays in the open part, rather than disappearing under it.
+  setInsetBottom(px) {
+    const h = this.container.clientHeight || 1;
+    const next = Math.max(0, Math.min(px, h * 0.7));
+    const delta = next - this.insetBottom;
+    this.insetBottom = next;
+    if (!delta || !this.nodes.size) return;
+    if (this.flat) {
+      const shift = (delta / 2) * (this.ortho.top - this.ortho.bottom) / (h * this.ortho.zoom);
+      const from = this.orthoControls.target.clone(), to = from.clone().setY(from.y - shift);
+      this._animate(420, (k) => { this.orthoControls.target.lerpVectors(from, to, k); this.ortho.position.set(this.orthoControls.target.x, this.orthoControls.target.y, 300); }, true);
+      return;
+    }
+    const target = this.controls.target.clone();
+    const dist = this.camera.position.distanceTo(target);
+    const shift = (delta / 2) / (h / (2 * Math.tan((this.camera.fov * Math.PI) / 360) * dist));
+    const move = new THREE.Vector3(0, -shift, 0);
+    this.moveCamera(this.camera.position.clone().add(move), target.add(move), 420);
+  }
+
+  // World units to move the camera target down so a point centred in the open part of the stage.
+  _insetShift(dist) {
+    const px = (this.insetBottom - this.insetTop) / 2;
+    if (!px) return 0;
+    const h = this.container.clientHeight || 1;
+    return px / (h / (2 * Math.tan((this.camera.fov * Math.PI) / 360) * dist));
+  }
+
   // Frame every person currently shown (or a filtered part of the family).
   frameAll(animate = true, opts = {}) {
     const keep = this.state.keep;
@@ -535,9 +566,11 @@ export class TreeScene {
       this.invalidate();
       return;
     }
-    const dist = this._fitDistance(box) * (1 + lift);
+    const h = this.container.clientHeight || 1;
+    const open = Math.max(0.3, (h - this.insetBottom - this.insetTop) / h);   // share of the stage left open
+    const dist = this._fitDistance(box) * (1 + lift) / open;
     const target = center.clone();
-    target.y -= size.y * lift;
+    target.y -= size.y * lift + this._insetShift(dist);
     const dir = new THREE.Vector3(0.1, 0.12, 1).normalize();
     this.moveCamera(target.clone().addScaledVector(dir, dist), target, animate ? 1100 : 0);
   }
@@ -565,6 +598,7 @@ export class TreeScene {
     }
     const offset = this.camera.position.clone().sub(this.controls.target);
     const dist = Math.min(offset.length(), this._distanceFor(62));
+    target.y -= this._insetShift(dist);
     this.moveCamera(target.clone().add(offset.setLength(dist)), target, 900);
   }
 
@@ -575,7 +609,9 @@ export class TreeScene {
     const t = node.target;
     const target = new THREE.Vector3(t.x, t.y - 0.3, t.z);
     const offset = this.camera.position.clone().sub(this.controls.target);
-    this.moveCamera(target.clone().add(offset.setLength(this._distanceFor(104))), target, 900);
+    const dist = this._distanceFor(104);
+    target.y -= this._insetShift(dist);
+    this.moveCamera(target.clone().add(offset.setLength(dist)), target, 900);
   }
 
   // Face the family straight on again, keeping where you're looking and how close.

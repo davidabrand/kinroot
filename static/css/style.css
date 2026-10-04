@@ -556,7 +556,10 @@ body.tree-page .topbar { position: relative; top: 0; }
 .has-shell.tree-page .app-main { min-height: 0; height: 100%; }
 .has-shell.tree-page .sheet { display: flex; min-height: 0; overflow: hidden; margin-right: 0; border-radius: 24px 0 0 0; }
 .has-shell.tree-page .tree-layout { flex: 1; }
-.has-shell.tree-page .side-panel { border-left: 1px solid var(--line); }
+.has-shell.tree-page .panel-sheet { border-left: 1px solid var(--line); }
+.panel-sheet { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--surface); }
+.panel-sheet > .side-panel { flex: 1; min-height: 0; border-left: none; }
+.sheet-grip { display: none; }
 /* ---------- the tree stage: a family suspended in warm dark space ---------- */
 .scene-wrap { position: relative; min-height: 0; overflow: hidden; container-type: inline-size;
   background: radial-gradient(ellipse 64% 60% at 50% 50%, #18170F 0%, #11120E 40%, #090A09 78%); }
@@ -792,25 +795,41 @@ details.menu > summary::-webkit-details-marker { display: none; }
 .issue-tag.impossible { background: var(--danger-soft); color: var(--danger); }
 
 @media (max-width: 860px) {
-  body.tree-page { overflow: auto; height: auto; }
-  .tree-layout { grid-template-columns: 1fr; }
-  .scene-wrap { height: 68vh; height: 68dvh; min-height: 420px; }
-  .side-panel { border-left: none; border-top: 1px solid var(--line); border-radius: 22px 22px 0 0; margin-top: -18px; position: relative; z-index: 5; box-shadow: 0 -12px 30px -18px rgb(0 0 0 / 40%); }
-  .side-panel::before { content: ""; width: 44px; height: 5px; border-radius: var(--r-pill); background: var(--line); justify-self: center; margin: -8px 0 -4px; }
+  /* Phones: the tree fills the screen, like a map; details live in a bottom sheet over it. */
+  .tree-layout { position: relative; display: block; }
+  .scene-wrap { position: absolute; inset: 0; }
+  .panel-sheet { --peek: 132px; position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; height: calc(100% - 52px);
+    border-radius: 22px 22px 0 0; border-top: 1px solid var(--line); box-shadow: 0 -18px 40px -22px rgb(0 0 0 / 70%);
+    transform: translateY(calc(100% - var(--peek))); transition: transform .42s cubic-bezier(.2, .7, .2, 1); will-change: transform; }
+  .panel-sheet[data-sheet="half"] { transform: translateY(48%); }
+  .panel-sheet[data-sheet="full"] { transform: translateY(0); }
+  .panel-sheet.dragging { transition: none; }
+  .has-shell.tree-page .panel-sheet { border-left: none; }
+  .sheet-grip { display: grid; place-items: center; flex: none; width: 100%; height: 30px; min-height: 0; padding: 0; border: 0; border-radius: 22px 22px 0 0;
+    background: none; box-shadow: none; cursor: grab; touch-action: none; }
+  .sheet-grip:hover { background: none; box-shadow: none; transform: none; }
+  .sheet-grip > span { width: 40px; height: 4px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--ink) 22%, transparent); }
+  .sheet-grip:focus-visible > span { background: var(--honey); }
+  .panel-sheet > .side-panel { padding-top: 4px; overscroll-behavior: contain; }
+  .panel-sheet[data-sheet="peek"] > .side-panel { overflow: hidden; }
   .scene-hint { display: none; }
   .touch-tip { display: block; }   /* the on-scene hint is hidden on phones, so the panel says it instead */
-  /* The toolbar becomes a compact bar along the bottom; search takes the whole bar while you type. */
-  .tree-bar { top: auto; bottom: 30px; left: 12px; right: 12px; transform: none; max-width: none; justify-content: space-between; }
+  /* A compact toolbar along the top (the sheet owns the bottom); search takes the whole bar while you type. */
+  .tree-bar { top: 10px; left: 10px; right: 10px; transform: none; max-width: none; justify-content: space-between; }
   .tree-bar .label, .bar-sep { display: none; }
   .tree-bar .search { flex: 1; min-width: 0; }
   .tree-bar .search input, .tree-bar .search input:focus { width: 100%; }
   .tree-bar .search:focus-within { position: absolute; inset: 5px; z-index: 2; }
   .tree-bar .search:focus-within input { background: #14150F; }
-  .tree-bar .search-results { top: auto; bottom: calc(100% + 12px); left: 0; right: 0; min-width: 0; transform-origin: bottom left; }
-  .tree-bar .menu-list { top: auto; bottom: calc(100% + 11px); }
-  .cam-controls { bottom: 86px; right: 12px; }
-  .timelapse-on .tree-bar { display: none; }
-  .timelapse { bottom: 26px; }
+  .tree-bar .search #search-input { width: 100%; }
+  .tree-bar .search-results { left: 0; right: 0; min-width: 0; max-height: 50vh; background: #0E0F0C; backdrop-filter: none; }
+  .tree-bar > .bar-btn, .tree-bar summary.bar-btn { flex: none; width: 40px; padding: 0; justify-content: center; }
+  /* The family filter shrinks to its icon; tapping it opens the phone's own picker. */
+  .tool-select { position: relative; }
+  .tool-select select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+  .cam-controls { top: 66px; bottom: auto; right: 10px; }
+  .kn-gen { display: none; }
+  .timelapse { bottom: calc(var(--peek, 132px) + 12px); }
 }
 
 /* ==========================================================================
@@ -922,6 +941,7 @@ h2 .icon, h3 .icon { vertical-align: -0.14em; color: var(--leaf); }
   .btn, button, .topnav a, .topnav .navbtn, select, input:not([type="checkbox"]):not([type="range"]),
   .bar-btn, .search-results button, .menu-list a, .menu-list button { min-height: 44px; }
   .btn-sm, button.btn-sm { min-height: 40px; }
+  #btn-zoom-in, #btn-zoom-out { display: none; }       /* pinch does this on a touch screen */
   details:not(.menu) > summary { min-height: 40px; }
 }
 

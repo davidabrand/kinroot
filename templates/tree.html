@@ -87,12 +87,16 @@
     <p class="scene-hint">Drag to move · scroll to zoom · right-drag to tilt · double-click a portrait to come close</p>
   </section>
 
-  <aside class="side-panel theme-paper" id="panel" aria-label="Details" aria-busy="true">
-    <span class="sr-only">Loading your family…</span>
-    <span class="skel title" aria-hidden="true"></span>
-    <span class="skel" aria-hidden="true"></span>
-    <span class="skel short" aria-hidden="true"></span>
-  </aside>
+  {# Beside the tree on a wide screen; on a phone, a bottom sheet over it (drag or tap the grip). #}
+  <div class="panel-sheet theme-paper" id="panel-sheet">
+    <button type="button" class="sheet-grip" id="sheet-grip" aria-controls="panel" aria-expanded="false" aria-label="Show more details"><span aria-hidden="true"></span></button>
+    <aside class="side-panel" id="panel" aria-label="Details" aria-busy="true">
+      <span class="sr-only">Loading your family…</span>
+      <span class="skel title" aria-hidden="true"></span>
+      <span class="skel" aria-hidden="true"></span>
+      <span class="skel short" aria-hidden="true"></span>
+    </aside>
+  </div>
 </div>
 <script>
   window.KINROOT = {

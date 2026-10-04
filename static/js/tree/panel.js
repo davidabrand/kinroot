@@ -98,7 +98,7 @@ export class Panel {
             ${sorted.map((p) => `<li><button class="who" data-goto="${p.id}">${esc(fullName(p))}</button><span class="muted small">${esc(lifespan(p))}</span></li>`).join("")}
           </ul>
         </details>
-        <p class="small muted touch-tip">Drag to turn the tree, pinch to zoom, tap a name.</p>` : ""}`);
+        <p class="small muted touch-tip">Drag to move around, pinch to zoom, tap a portrait. Pull this sheet up for more.</p>` : ""}`);
     this.on("[data-act=grow]", "click", () => this.app.timelapse.open());
     this.on("[data-act=relate]", "click", () => this.relate());
     this.on("[data-act=add]", "click", () => this.personForm({ mode: "add" }));
@@ -381,6 +381,7 @@ export class Panel {
   // ------------------------------------------------------------ add / edit form
   personForm({ mode, person = null, link = null, self = false }) {
     // (`link` may be updated on submit to follow the relationship chosen in the form.)
+    this.app.sheet?.raise("full");            // phones: a form needs the whole sheet
     this.view = "form";
     const { byId, me } = this.store;
     const other = link ? byId.get(link.to) : null;
@@ -536,6 +537,7 @@ export class Panel {
 
   // ------------------------------------------------------------ how are we related?
   relate(a = null, b = null, auto = false) {
+    this.app.sheet?.raise("half");
     this.view = "relate";
     const { people, me } = this.store;
     const sorted = [...people].sort((x, y) => fullName(x).localeCompare(fullName(y)));

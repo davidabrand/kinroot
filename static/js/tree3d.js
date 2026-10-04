@@ -4,6 +4,7 @@ import { computeLayout } from "./tree/layout.js";
 import { Panel } from "./tree/panel.js";
 import { filterSet, FILTERS } from "./tree/filters.js";
 import { Search } from "./tree/search.js";
+import { Sheet } from "./tree/sheet.js";
 import { Timelapse } from "./tree/timelapse.js";
 import { download, slug } from "./tree/util.js";
 
@@ -143,11 +144,13 @@ const app = {
     if (this.focusId && this.focusId !== id && !branchOf(this.focusId, this.store.fam).has(id)) this.focusId = null;
     this.clearPath(false);
     this.emphasize();
+    this.sheet?.raise("half");
     this.panel.person(id);
     if (fly && this.scene) this.scene.flyTo(id);
   },
 
   deselect() {
+    this.sheet?.set("peek");
     this.store.selected = null;
     this.focusId = null;
     this.clearPath(false);
@@ -180,10 +183,15 @@ const app = {
     const grow = document.getElementById("btn-grow");
     grow?.setAttribute("aria-pressed", String(open));
     grow?.querySelector(".label")?.replaceChildren(open ? "Stop" : "Watch it grow");
-    if (open) this.panel.grow();
+    if (open) { this.sheet?.set("peek"); this.panel.grow(); }
     else {
       this.emphasize();
       this.store.selected ? this.panel.person(this.store.selected) : this.panel.overview();
+    }
+    // Phones: the playback bar sits over the tree above the sheet, so framing keeps clear of it too.
+    if (this.scene && this.sheet?.active) {
+      const bar = document.getElementById("timelapse");
+      this.scene.insetBottom = this.sheet.covered() + (open ? 12 + bar.offsetHeight : 0);
     }
   },
 };
@@ -247,6 +255,8 @@ function wireToolbar() {
 
 async function boot() {
   app.panel = new Panel(app, $("panel"));
+  // Phones: the panel is a bottom sheet; the tree keeps whoever you're looking at above it.
+  app.sheet = new Sheet($("panel-sheet"), $("sheet-grip"), { onChange: (px) => app.scene?.setInsetBottom(px) });
   app.search = new Search($("search-input"), $("search-results"), (id) => app.select(id, { fly: true }));
   app.timelapse = new Timelapse(app, $("timelapse"));
   wireToolbar();
@@ -259,6 +269,12 @@ async function boot() {
       // An "Unknown" parent slot: add that parent right there.
       onUnknown: (childId) => app.store.canEdit && app.panel.personForm({ mode: "add", link: { to: childId, as: "parent" } }),
     });
+    app.scene.insetBottom = app.sheet.covered();
+    // Phones: the toolbar floats over the top of the tree; keep people clear of it too.
+    const bar = document.querySelector(".tree-bar");
+    const topInset = () => { app.scene.insetTop = app.sheet.active && bar ? bar.offsetTop + bar.offsetHeight : 0; };
+    topInset();
+    new ResizeObserver(topInset).observe($("scene"));
   } catch (err) {
     console.error("Kinroot: 3D view unavailable", err);
     app.scene = null;
