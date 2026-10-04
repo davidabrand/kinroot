@@ -12,6 +12,18 @@ from .dates import format_date
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 API_HEADER = ("X-Requested-With", "Kinroot")
+# Locks where scripts, styles, fonts and images may load from. The 3D view loads
+# three.js from jsDelivr and fonts from Google; everything else is same-origin.
+# 'unsafe-inline' is kept because the pages use a few small inline scripts.
+CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; "
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+    "font-src 'self' https://fonts.gstatic.com; "
+    "img-src 'self' data:; "
+    "connect-src 'self'; "
+    "base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+)
 
 
 def create_app(test_config=None):
@@ -67,6 +79,9 @@ def create_app(test_config=None):
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
         resp.headers.setdefault("X-Frame-Options", "DENY")
         resp.headers.setdefault("Referrer-Policy", "same-origin")
+        resp.headers.setdefault("Content-Security-Policy", CONTENT_SECURITY_POLICY)
+        if request.is_secure:
+            resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         return resp
 
     @app.context_processor

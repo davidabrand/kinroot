@@ -27,5 +27,16 @@
     <div><button>Change password</button></div>
   </form>
   <form method="post" action="{{ url_for('auth.logout') }}">{{ m.csrf() }}<button class="btn-ghost">Log out</button></form>
+
+  <section class="card stack danger-zone" aria-labelledby="delete-account-title">
+    <h2 id="delete-account-title">Delete your account</h2>
+    <p class="muted small">This permanently deletes your account and every tree you own, for everyone they're shared with. Trees other people own stay, but you'll be removed from them. This can't be undone.</p>
+    <form method="post" class="inline-form">
+      {{ m.csrf() }}<input type="hidden" name="action" value="delete_account">
+      <div class="field"><label for="del-pw">Your password</label>
+        <input id="del-pw" name="password" type="password" required autocomplete="current-password"></div>
+      <button class="btn-danger">Delete my account</button>
+    </form>
+  </section>
 </main>
 {% endblock %}

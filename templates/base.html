@@ -45,6 +45,7 @@
     {% endwith %}
   {% endblock %}
   {% block content %}{% endblock %}
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

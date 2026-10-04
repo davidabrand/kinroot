@@ -1,4 +1,5 @@
 """Accounts: sign up, log in, log out, account settings, and form protection."""
+import os
 import secrets
 import time
 from collections import defaultdict, deque
@@ -15,6 +16,8 @@ bp = Blueprint("auth", __name__)
 MIN_PASSWORD = 8
 MAX_FAILED_LOGINS = 8           # per email + address ...
 FAILED_LOGIN_WINDOW = 10 * 60   # ... within ten minutes
+DEFAULT_MAX_REGISTRATIONS = 10  # new accounts per address per hour (override via config)
+REGISTRATION_WINDOW = 60 * 60
 
 
 # ------------------------------------------------------------------ helpers
@@ -22,7 +25,11 @@ FAILED_LOGIN_WINDOW = 10 * 60   # ... within ten minutes
 def current_user():
     if "user" not in g:
         uid = session.get("user_id")
-        g.user = get_db().execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone() if uid else None
+        user = get_db().execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone() if uid else None
+        # A changed password rotates the account's token, logging out other sessions.
+        if user is not None and user["session_token"] and session.get("tok") != user["session_token"]:
+            user = None
+        g.user = user
     return g.user
 
 
@@ -44,9 +51,13 @@ def safe_next(default_endpoint="trees.dashboard"):
     return url_for(default_endpoint)
 
 
-def log_in(user_id):
+def log_in(user_id, token=None):
     session.clear()
     session["user_id"] = user_id
+    if token is None:
+        row = get_db().execute("SELECT session_token FROM users WHERE id = ?", (user_id,)).fetchone()
+        token = row["session_token"] if row else None
+    session["tok"] = token
     session.permanent = True
 
 
@@ -77,6 +88,18 @@ def _too_many_attempts(key):
     return len(attempts) >= MAX_FAILED_LOGINS
 
 
+def _registrations():
+    return current_app.extensions.setdefault("kinroot_registrations", defaultdict(deque))
+
+
+def _too_many_registrations(ip):
+    q = _registrations()[ip]
+    now = time.time()
+    while q and now - q[0] > REGISTRATION_WINDOW:
+        q.popleft()
+    return len(q) >= current_app.config.get("MAX_REGISTRATIONS_PER_HOUR", DEFAULT_MAX_REGISTRATIONS)
+
+
 # ------------------------------------------------------------------ pages
 
 @bp.route("/register", methods=["GET", "POST"])
@@ -85,6 +108,9 @@ def register():
         return redirect(safe_next())
     form = {"name": "", "email": ""}
     if request.method == "POST":
+        if _too_many_registrations(request.remote_addr):
+            flash("Too many new accounts from here. Try again later.", "error")
+            return render_template("register.html", form=form)
         form["name"] = request.form.get("name", "").strip()[:80]
         form["email"] = request.form.get("email", "").strip().lower()[:200]
         password = request.form.get("password", "")
@@ -98,10 +124,12 @@ def register():
         elif db.execute("SELECT 1 FROM users WHERE email = ?", (form["email"],)).fetchone():
             flash("That email already has an account. Log in instead.", "error")
         else:
-            cur = db.execute("INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)",
-                             (form["email"], form["name"], generate_password_hash(password)))
+            token = secrets.token_urlsafe(16)
+            cur = db.execute("INSERT INTO users (email, name, password_hash, session_token) VALUES (?, ?, ?, ?)",
+                             (form["email"], form["name"], generate_password_hash(password), token))
             db.commit()
-            log_in(cur.lastrowid)
+            _registrations()[request.remote_addr].append(time.time())
+            log_in(cur.lastrowid, token)
             flash(f"Welcome to Kinroot, {form['name'].split()[0]}.", "success")
             return redirect(safe_next())
     return render_template("register.html", form=form)
@@ -157,9 +185,47 @@ def account():
             elif len(new) < MIN_PASSWORD:
                 flash(f"Use a new password with at least {MIN_PASSWORD} characters.", "error")
             else:
-                db.execute("UPDATE users SET password_hash = ? WHERE id = ?",
-                           (generate_password_hash(new), user["id"]))
+                new_token = secrets.token_urlsafe(16)
+                db.execute("UPDATE users SET password_hash = ?, session_token = ? WHERE id = ?",
+                           (generate_password_hash(new), new_token, user["id"]))
                 db.commit()
-                flash("Password changed.", "success")
+                session["tok"] = new_token   # keep THIS session signed in
+                flash("Password changed. Other devices have been signed out.", "success")
+        elif action == "delete_account":
+            if not check_password_hash(user["password_hash"], request.form.get("password", "")):
+                flash("Enter your current password to delete your account.", "error")
+                return redirect(url_for("auth.account"))
+            _delete_account(db, user["id"])
+            session.clear()
+            flash("Your account and the trees you owned have been deleted.", "success")
+            return redirect(url_for("landing"))
         return redirect(url_for("auth.account"))
     return render_template("account.html")
+
+
+def _safe_remove_photo(upload_dir, filename):
+    if not filename or "/" in filename or "\\" in filename or ".." in filename:
+        return
+    try:
+        os.remove(os.path.join(upload_dir, filename))
+    except OSError:
+        pass
+
+
+def _delete_account(db, uid):
+    """Delete a user, the trees they own (and everything in them), and their memberships.
+
+    Leaves they claimed on other people's trees are un-claimed (kept, just no longer linked),
+    and their connections and messages are removed by the database's cascades.
+    """
+    upload_dir = current_app.config["UPLOAD_DIR"]
+    owned = [r["id"] for r in db.execute("SELECT id FROM trees WHERE owner_id = ?", (uid,)).fetchall()]
+    for tid in owned:
+        for r in db.execute("SELECT photo FROM people WHERE tree_id = ? AND photo != ''", (tid,)).fetchall():
+            _safe_remove_photo(upload_dir, r["photo"])
+    db.execute("DELETE FROM invites WHERE created_by = ?", (uid,))
+    for tid in owned:
+        db.execute("DELETE FROM trees WHERE id = ?", (tid,))   # cascades people, rels, invites, members
+    db.execute("DELETE FROM tree_members WHERE user_id = ?", (uid,))
+    db.execute("DELETE FROM users WHERE id = ?", (uid,))        # cascades connections + messages; SET NULL claimed leaves
+    db.commit()

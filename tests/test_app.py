@@ -192,3 +192,87 @@ def test_old_databases_are_upgraded(tmp_path):
         row = conn.execute("SELECT birth_year, deceased FROM people").fetchone()
         assert row["birth_year"] == 1921 and row["deceased"] == 0
         assert conn.execute("PRAGMA user_version").fetchone()[0] == len(MIGRATIONS)
+
+
+def test_delete_person_can_be_undone(app):
+    c = app.test_client()
+    register(c, "dave@example.com")
+    tid = make_tree(c)
+    joe = add(c, tid, first_name="Joe", last_name="Brand", birth_date="1921", notes="A note")
+    ann = add(c, tid, first_name="Ann", link={"to": joe, "as": "spouse"})
+    sam = add(c, tid, first_name="Sam", link={"to": joe, "as": "child"})
+
+    # Delete Joe: gone, his links gone, and an undo snapshot comes back.
+    resp = c.delete(f"/api/trees/{tid}/people/{joe}", headers=H)
+    assert resp.status_code == 200 and resp.json["ok"] is True
+    undo = resp.json["undo"]
+    assert undo["person"]["first_name"] == "Joe" and undo["person"]["notes"] == "A note"
+    assert len(undo["relationships"]) == 2
+    data = c.get(f"/api/trees/{tid}").json
+    assert joe not in {p["id"] for p in data["people"]}
+    assert data["relationships"] == []
+
+    # Undo: Joe is back (same id, same details) and both links are restored.
+    back = c.post(f"/api/trees/{tid}/people/restore", json=undo, headers=H)
+    assert back.status_code == 200
+    person = back.json["person"]
+    assert person["id"] == joe and person["first_name"] == "Joe" and person["notes"] == "A note"
+    data = c.get(f"/api/trees/{tid}").json
+    assert joe in {p["id"] for p in data["people"]}
+    assert len(data["relationships"]) == 2
+
+    # Restoring needs edit rights.
+    viewer = app.test_client()
+    register(viewer, "cousin@example.com")
+    c.post(f"/trees/{tid}/share", data={"action": "add_member", "email": "cousin@example.com", "role": "viewer"})
+    assert viewer.post(f"/api/trees/{tid}/people/restore", json=undo, headers=H).status_code == 403
+
+
+def _mk_app(tmp_path, **extra):
+    cfg = {"INSTANCE_DIR": str(tmp_path), "DB_PATH": str(tmp_path / "t.db"),
+           "UPLOAD_DIR": str(tmp_path / "up"), "CSRF_ENABLED": False, "TESTING": True}
+    cfg.update(extra)
+    return create_app(cfg)
+
+
+def test_registration_is_rate_limited(tmp_path):
+    app = _mk_app(tmp_path, MAX_REGISTRATIONS_PER_HOUR=2)
+    assert register(app.test_client(), "a@example.com").status_code == 302
+    assert register(app.test_client(), "b@example.com").status_code == 302
+    assert register(app.test_client(), "c@example.com").status_code == 200   # blocked, not created
+    assert app.test_client().post("/login", data={"email": "c@example.com", "password": "password123"}).status_code == 200
+
+
+def test_password_change_signs_out_other_sessions(app):
+    a, b = app.test_client(), app.test_client()
+    register(a, "dave@example.com")
+    b.post("/login", data={"email": "dave@example.com", "password": "password123"})
+    assert a.get("/account").status_code == 200 and b.get("/account").status_code == 200
+    a.post("/account", data={"action": "password", "current_password": "password123", "new_password": "newpass12345"})
+    assert a.get("/account").status_code == 200    # the session that changed it stays in
+    assert b.get("/account").status_code == 302    # the other device is signed out
+
+
+def test_delete_account_removes_trees_and_membership(app):
+    owner, member = app.test_client(), app.test_client()
+    register(owner, "owner@example.com")
+    register(member, "cousin@example.com")
+    tid = make_tree(owner, "Brands")
+    add(owner, tid, first_name="Joe")
+    owner.post(f"/trees/{tid}/share", data={"action": "add_member", "email": "cousin@example.com", "role": "viewer"})
+    assert member.get(f"/api/trees/{tid}").status_code == 200
+    # wrong password: still logged in, nothing deleted
+    owner.post("/account", data={"action": "delete_account", "password": "wrong"})
+    assert owner.get("/account").status_code == 200
+    # correct password: logged out, account gone, tree gone for everyone
+    owner.post("/account", data={"action": "delete_account", "password": "password123"})
+    assert owner.get("/account").status_code == 302
+    assert app.test_client().post("/login", data={"email": "owner@example.com", "password": "password123"}).status_code == 200
+    assert member.get(f"/api/trees/{tid}").status_code == 404
+
+
+def test_security_headers_present(app):
+    r = app.test_client().get("/")
+    assert "Content-Security-Policy" in r.headers
+    assert r.headers.get("X-Content-Type-Options") == "nosniff"
+    assert r.headers.get("X-Frame-Options") == "DENY"

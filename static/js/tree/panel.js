@@ -94,6 +94,7 @@ export class Panel {
     if (!p) return this.overview();
     this.view = "person";
     const { fam, byId, canEdit, isOwner, me, rels } = this.store;
+    const parentCount = (fam.parents.get(id) || []).length;
     const relRow = (otherId, kind, relId) => {
       const o = byId.get(otherId);
       if (!o) return "";
@@ -148,7 +149,7 @@ export class Panel {
         <section class="stack-sm">
           <h3>Add family</h3>
           <div class="chip-row">
-            <button class="btn-sm" data-add="parent">+ Parent</button>
+            ${parentCount < 2 ? `<button class="btn-sm" data-add="parent">+ Parent</button>` : ""}
             <button class="btn-sm" data-add="spouse">+ Partner</button>
             <button class="btn-sm" data-add="child">+ Child</button>
           </div>
@@ -170,7 +171,7 @@ export class Panel {
           <button class="btn-ghost danger" data-act="delete" style="color:var(--danger)">Remove</button>
         </div>
         <div class="card flat stack" data-confirm hidden>
-          <p>Remove ${esc(fullName(p))} and their links from the tree? This can't be undone.</p>
+          <p>Remove ${esc(fullName(p))} and their links from the tree?</p>
           <div class="btn-row"><button class="btn-danger" data-act="delete-yes">Remove</button><button data-act="delete-no">Keep</button></div>
         </div>` : ""}
       ${isOwner && !p.account ? `<p class="small muted"><a href="${esc(this.app.CFG.shareUrl)}?person=${id}">Invite ${esc(p.first_name)} to claim this leaf</a></p>` : ""}
@@ -186,10 +187,18 @@ export class Panel {
     this.on("[data-act=delete]", "click", () => (this.el.querySelector("[data-confirm]").hidden = false));
     this.on("[data-act=delete-no]", "click", () => (this.el.querySelector("[data-confirm]").hidden = true));
     this.on("[data-act=delete-yes]", "click", this.guard(async () => {
-      await this.app.api.deletePerson(id);
+      const removedName = fullName(p);
+      const res = await this.app.api.deletePerson(id);
       this.app.store.selected = null;
       await this.app.refresh();
       this.app.deselect();
+      if (res && res.undo) {
+        this.app.toast(`Removed ${removedName}.`, "Undo", async () => {
+          const back = await this.app.api.restorePerson(res.undo);
+          await this.app.refresh();
+          if (back && back.person) this.app.select(back.person.id, { fly: true });
+        });
+      }
     }));
     this.on("[data-unlink]", "click", this.guard(async (e) => {
       await this.app.api.unlink(Number(e.currentTarget.dataset.unlink));
@@ -316,7 +325,18 @@ export class Panel {
       if (file) await this.app.api.uploadPhoto(saved.id, file);
       else if (form.querySelector("#f-photo-remove")?.checked) await this.app.api.removePhoto(saved.id);
       await this.app.refresh({ reframe: mode === "add" && this.store.people.length <= 1 });
-      this.app.select(saved.id, { fly: mode === "add" });
+      // Adding a second parent? Link the two parents as a couple (the usual
+      // case), so they sit together rather than looking like two separate roots.
+      if (mode === "add" && link && link.as === "parent" && other) {
+        const ps = this.store.fam.parents.get(other.id) || [];
+        if (ps.length === 2 && !(this.store.fam.spouses.get(ps[0]) || []).includes(ps[1])) {
+          try { await this.app.api.link(ps[0], ps[1], "spouse"); await this.app.refresh(); } catch (e) { /* non-fatal */ }
+        }
+      }
+      // Return to the person you were building around, so you can add the other
+      // parent or more children without accidentally chaining generations.
+      const focusId = (mode === "add" && link && (link.as === "parent" || link.as === "child")) ? other.id : saved.id;
+      this.app.select(focusId, { fly: mode === "add" });
     }));
     form.querySelector("#f-first").focus();
   }

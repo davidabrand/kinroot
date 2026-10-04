@@ -2,35 +2,69 @@
 {% import "_macros.html" as m with context %}
 {% block title %}My trees · Kinroot{% endblock %}
 {% block content %}
+{% if not cards %}
+{# First run: one clear path — name a tree and plant it. #}
+<main class="page narrow onboard">
+  <div class="onboard-art">{{ m.mini_tree(none) }}</div>
+  <div class="page-head center">
+    <p class="eyebrow">{{ greeting }}, {{ me.name.split()[0] }}</p>
+    <h1>Let's plant your first tree</h1>
+    <p class="lede">Start with yourself, or the oldest relative you know about. You can add everyone else from there, then invite family to fill in the rest.</p>
+  </div>
+
+  <form method="post" action="{{ url_for('trees.new_tree') }}" class="card stack onboard-form">
+    {{ m.csrf() }}
+    <div class="field">
+      <label for="tree-name">Name your tree</label>
+      <input id="tree-name" name="name" placeholder="The {{ me.name.split()[-1] if me.name.split()|length > 1 else 'Smith' }} family" required maxlength="120" autofocus>
+    </div>
+    <button class="btn-primary btn-lg">{{ m.icon("sprout") }} Plant my tree</button>
+  </form>
+
+  <ol class="onboard-steps">
+    <li><div class="s-body"><strong>Add the people you know</strong><span class="muted small">Names and dates — rough ones like “about 1950” are fine.</span></div></li>
+    <li><div class="s-body"><strong>Watch your tree grow</strong><span class="muted small">Everyone appears in a golden-hour 3D tree you can explore.</span></div></li>
+    <li><div class="s-body"><strong>Invite your family</strong><span class="muted small">Share a link so relatives can claim their leaf and add their side.</span></div></li>
+  </ol>
+
+  <details class="onboard-import">
+    <summary>Already have a tree elsewhere? Import a GEDCOM file</summary>
+    <form method="post" action="{{ url_for('trees.import_tree') }}" enctype="multipart/form-data" class="stack" style="margin-top: 12px">
+      {{ m.csrf() }}
+      <p class="hint">Export one from Ancestry, FamilySearch, MyHeritage or most genealogy apps. It becomes a new tree.</p>
+      <div class="field"><label for="gedcom">GEDCOM file</label>
+        <input id="gedcom" name="gedcom" type="file" accept=".ged,.gedcom,text/plain" required></div>
+      <div><button>{{ m.icon("upload") }} Import file</button></div>
+    </form>
+  </details>
+</main>
+
+{% else %}
 <main class="page">
   <div class="page-head">
     <p class="eyebrow">{{ greeting }}, {{ me.name.split()[0] }}</p>
-    <h1>{% if cards %}Your family trees{% else %}Let's plant your first tree{% endif %}</h1>
+    <h1>Your family trees</h1>
   </div>
 
   <div class="dash-grid">
     <div class="section">
-      {% if cards %}
-        <ul class="tree-cards">
-          {% for c in cards %}{% set t = c.tree %}
-            <li>
-              <a class="tree-card" href="{{ url_for('trees.tree_view', tree_id=t.id) }}">
-                <div class="preview">{{ m.mini_tree(c.shape) }}</div>
-                <div class="body">
-                  <span class="name">{{ t.name }}</span>
-                  <span class="meta num">
-                    {{ t.people_count }} {{ 'person' if t.people_count == 1 else 'people' }}
-                    {% if c.shape %}· {{ c.shape | length }} generation{{ '' if c.shape | length == 1 else 's' }}{% endif %}
-                  </span>
-                  <span class="meta">{{ m.role_pill(t.role, role_label) }}{% if t.role != 'owner' %}<span>from {{ t.owner_name }}</span>{% endif %}</span>
-                </div>
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="lede">Start with yourself, or with the oldest relative you know about. You can add everyone else from there.</p>
-      {% endif %}
+      <ul class="tree-cards">
+        {% for c in cards %}{% set t = c.tree %}
+          <li>
+            <a class="tree-card" href="{{ url_for('trees.tree_view', tree_id=t.id) }}">
+              <div class="preview">{{ m.mini_tree(c.shape) }}</div>
+              <div class="body">
+                <span class="name">{{ t.name }}</span>
+                <span class="meta num">
+                  {{ t.people_count }} {{ 'person' if t.people_count == 1 else 'people' }}
+                  {% if c.shape %}· {{ c.shape | length }} generation{{ '' if c.shape | length == 1 else 's' }}{% endif %}
+                </span>
+                <span class="meta">{{ m.role_pill(t.role, role_label) }}{% if t.role != 'owner' %}<span>from {{ t.owner_name }}</span>{% endif %}</span>
+              </div>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
 
       <div class="two-col" style="gap: 16px">
         <form method="post" action="{{ url_for('trees.new_tree') }}" class="card flat stack">
@@ -91,4 +125,5 @@
     </aside>
   </div>
 </main>
+{% endif %}
 {% endblock %}

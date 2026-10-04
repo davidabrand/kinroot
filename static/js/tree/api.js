@@ -25,6 +25,7 @@ export function createApi(treeId) {
     addPerson: (data) => call("POST", `${t}/people`, data),
     updatePerson: (id, data) => call("PUT", `${t}/people/${id}`, data),
     deletePerson: (id) => call("DELETE", `${t}/people/${id}`),
+    restorePerson: (undo) => call("POST", `${t}/people/restore`, undo),
     uploadPhoto: (id, file) => {
       const fd = new FormData();
       fd.append("photo", file);

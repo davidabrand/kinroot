@@ -93,5 +93,14 @@ box.addEventListener("input", () => {
 
 log.querySelectorAll(".bubble").forEach(stamp);
 scrollToEnd();
-setInterval(poll, POLL_MS);
-document.addEventListener("visibilitychange", () => !document.hidden && poll());
+
+// Poll only while the tab is actually open. When it's hidden we stop the timer
+// entirely (not just skip a tick), so a backgrounded chat does no work.
+let timer = null;
+const startPolling = () => { if (!timer) timer = setInterval(poll, POLL_MS); };
+const stopPolling = () => { if (timer) { clearInterval(timer); timer = null; } };
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopPolling();
+  else { poll(); startPolling(); }
+});
+if (!document.hidden) startPolling();

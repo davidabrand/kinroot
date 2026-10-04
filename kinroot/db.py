@@ -109,6 +109,10 @@ MIGRATIONS = [
     );
     CREATE INDEX idx_messages_connection ON messages(connection_id, id);
     """,
+    # 3 — a per-account session token, so changing your password logs out other devices
+    """
+    ALTER TABLE users ADD COLUMN session_token TEXT;
+    """,
 ]
 
 
@@ -119,7 +123,13 @@ def _backfill_years(db):
                    (year_of(r["birth_date"]), year_of(r["death_date"]), r["id"]))
 
 
-AFTER_MIGRATION = {2: _backfill_years}
+def _init_session_tokens(db):
+    import secrets
+    for r in db.execute("SELECT id FROM users").fetchall():
+        db.execute("UPDATE users SET session_token = ? WHERE id = ?", (secrets.token_urlsafe(16), r["id"]))
+
+
+AFTER_MIGRATION = {2: _backfill_years, 3: _init_session_tokens}
 
 
 def connect(path):

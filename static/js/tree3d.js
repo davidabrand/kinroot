@@ -45,6 +45,52 @@ const app = {
     this.scene.emphasize({ keep, selected: this.store.selected, path: this.pathIds });
   },
 
+  // A brief message at the bottom of the screen, optionally with one action
+  // (used for "Removed … — Undo"). Auto-dismisses after a few seconds.
+  toast(message, actionLabel, onAction) {
+    let host = document.getElementById("toast");
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "toast";
+      host.className = "toast glass";
+      host.setAttribute("role", "status");
+      document.body.appendChild(host);
+    }
+    clearTimeout(this._toastTimer);
+    host.textContent = "";
+    const msg = document.createElement("span");
+    msg.className = "toast-msg";
+    msg.textContent = message;
+    host.appendChild(msg);
+    if (actionLabel && onAction) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "toast-action";
+      btn.textContent = actionLabel;
+      btn.addEventListener("click", async () => {
+        clearTimeout(this._toastTimer);
+        btn.disabled = true;
+        try { await onAction(); } catch (e) { /* leave the toast; the panel shows errors */ }
+        this.dismissToast();
+      });
+      host.appendChild(btn);
+    }
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "toast-close";
+    close.setAttribute("aria-label", "Dismiss");
+    close.textContent = "\u00d7";
+    close.addEventListener("click", () => this.dismissToast());
+    host.appendChild(close);
+    host.classList.add("show");
+    this._toastTimer = setTimeout(() => this.dismissToast(), 8000);
+  },
+
+  dismissToast() {
+    clearTimeout(this._toastTimer);
+    document.getElementById("toast")?.classList.remove("show");
+  },
+
   select(id, { fly = true } = {}) {
     if (!this.store.byId.has(id)) return;
     this.store.selected = id;

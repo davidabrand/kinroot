@@ -549,10 +549,18 @@ def api_person(tree_id, person_id):
     person = person_in_tree(person_id, tree_id)
     db = get_db()
     if request.method == "DELETE":
-        remove_photo_file(person["photo"])
+        # Snapshot the person and their links first, so a delete can be undone.
+        snap = {k: person[k] for k in person.keys()}
+        rels = db.execute(
+            "SELECT person_a, person_b, kind FROM relationships "
+            "WHERE tree_id = ? AND (person_a = ? OR person_b = ?)",
+            (tree_id, person_id, person_id)).fetchall()
+        rel_list = [{"person_a": r["person_a"], "person_b": r["person_b"], "kind": r["kind"]} for r in rels]
+        # Keep the photo file on disk so Undo can bring it back; a never-undone
+        # delete leaves an unreferenced file, which is harmless.
         db.execute("DELETE FROM people WHERE id = ?", (person_id,))
         db.commit()
-        return jsonify(ok=True)
+        return jsonify(ok=True, undo={"person": snap, "relationships": rel_list})
     fields, error = clean_person(request.get_json(silent=True) or {}, partial=True)
     if error:
         return jsonify(error=error), 400
@@ -561,6 +569,51 @@ def api_person(tree_id, person_id):
                    list(fields.values()) + [person_id])
         db.commit()
     return jsonify(person=_person_response(tree_id, person_id))
+
+
+@bp.route("/api/trees/<int:tree_id>/people/restore", methods=["POST"])
+@login_required
+def api_restore_person(tree_id):
+    """Put back a person (and their links) that was just deleted — the Undo action."""
+    require_role(tree_id, "editor")
+    data = request.get_json(silent=True) or {}
+    snap = data.get("person") or {}
+    rels = data.get("relationships") or []
+    db = get_db()
+    cols = ["first_name", "last_name", "gender", "birth_date", "birth_place",
+            "death_date", "notes", "photo", "deceased", "birth_year", "death_year", "user_id"]
+    values = [snap.get(c) for c in cols]
+    old_id = snap.get("id")
+
+    # Reuse the original id when it's still free, so existing links feel unchanged;
+    # otherwise take a fresh one.
+    new_id = None
+    if isinstance(old_id, int) and not db.execute("SELECT 1 FROM people WHERE id = ?", (old_id,)).fetchone():
+        db.execute(
+            f"INSERT INTO people (id, tree_id, {', '.join(cols)}) "
+            f"VALUES (?, ?, {', '.join(['?'] * len(cols))})",
+            [old_id, tree_id] + values)
+        new_id = old_id
+    if new_id is None:
+        new_id = db.execute(
+            f"INSERT INTO people (tree_id, {', '.join(cols)}) "
+            f"VALUES (?, {', '.join(['?'] * len(cols))})",
+            [tree_id] + values).lastrowid
+
+    # Restore each link whose other end still exists in this tree.
+    for r in rels:
+        if r.get("kind") not in ("parent", "spouse"):
+            continue
+        a = new_id if r.get("person_a") == old_id else r.get("person_a")
+        b = new_id if r.get("person_b") == old_id else r.get("person_b")
+        ok_a = db.execute("SELECT 1 FROM people WHERE id = ? AND tree_id = ?", (a, tree_id)).fetchone()
+        ok_b = db.execute("SELECT 1 FROM people WHERE id = ? AND tree_id = ?", (b, tree_id)).fetchone()
+        if ok_a and ok_b:
+            db.execute(
+                "INSERT OR IGNORE INTO relationships (tree_id, person_a, person_b, kind) "
+                "VALUES (?, ?, ?, ?)", (tree_id, a, b, r["kind"]))
+    db.commit()
+    return jsonify(person=_person_response(tree_id, new_id))
 
 
 @bp.route("/api/trees/<int:tree_id>/people/<int:person_id>/photo", methods=["POST", "DELETE"])

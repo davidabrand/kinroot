@@ -629,3 +629,95 @@ h2 .icon, h3 .icon { vertical-align: -0.14em; color: var(--leaf); }
   .label3d .last { display: none; }
   .label3d { font-size: 11.5px; padding: 3px 7px 4px; }
 }
+
+/* ==========================================================================
+   Interaction polish — disabled states, in-flight feedback, touch targets
+   (added without disturbing the rules above; same tokens, same aesthetic)
+   ========================================================================== */
+
+/* Disabled controls: used by the "type the name to delete" guard and the
+   copy-link buttons. Clearly inert, and never springs on press. */
+.btn:disabled, button:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+.btn:disabled:active, button:disabled:active { transform: none; }
+
+/* "Working…" feedback while a form is submitting. A small spinner in the
+   button's own ink appears after the label (buttons are flex with a gap).
+   Auth buttons keep their own shimmer; the reduced-motion rule stops this. */
+button[aria-busy="true"] { cursor: progress; }
+button[aria-busy="true"]::after {
+  content: ""; width: 1em; height: 1em; flex: none;
+  border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+  animation: btn-spin .6s linear infinite;
+}
+/* Auth buttons already show their own shimmer, so skip the spinner there. */
+.auth-card button[aria-busy="true"]::after { content: none; }
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/* Comfortable tap targets on touch devices, without enlarging anything on a
+   mouse-driven desktop. */
+@media (pointer: coarse) {
+  .btn, button, .topnav a, .topnav .navbtn,
+  .tool, .search-results button, .menu-list a, .menu-list button { min-height: 44px; }
+  .btn-sm, button.btn-sm { min-height: 40px; }
+}
+
+/* ==========================================================================
+   Toast (bottom of the tree page) — used for "Removed … / Undo"
+   ========================================================================== */
+.toast {
+  position: fixed; left: 50%; bottom: 20px; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 50;
+  display: none; gap: 10px; align-items: center; max-width: calc(100% - 24px);
+  padding: 10px 10px 10px 16px; border-radius: 14px; color: #f6f2e6;
+  box-shadow: 0 16px 36px -16px rgb(0 0 0 / 55%);
+  opacity: 0; transform: translate(-50%, 14px); transition: opacity .25s ease, transform .25s ease;
+}
+.toast.show { display: flex; opacity: 1; transform: translate(-50%, 0); }
+.toast .toast-msg { font-weight: 500; }
+.toast .toast-action {
+  background: var(--honey); color: var(--on-honey); border-color: var(--honey);
+  font-weight: 700; padding: 7px 14px; min-height: 0;
+}
+.toast .toast-action:hover { background: var(--honey-hover); color: var(--on-honey); }
+.toast .toast-close {
+  background: transparent; border: none; color: #f6f2e6; font-size: 1.25rem; line-height: 1; padding: 4px 8px; min-height: 0;
+}
+.toast .toast-close:hover { color: #fff; }
+
+/* ==========================================================================
+   Interaction polish — disabled states, in-flight feedback, touch targets
+   ========================================================================== */
+.btn:disabled, button:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+.btn:disabled:active, button:disabled:active { transform: none; }
+button[aria-busy="true"] { cursor: progress; }
+button[aria-busy="true"]::after {
+  content: ""; width: 1em; height: 1em; flex: none;
+  border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+  animation: btn-spin .6s linear infinite;
+}
+.auth-card button[aria-busy="true"]::after { content: none; }
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+@media (pointer: coarse) {
+  .btn, button, .topnav a, .topnav .navbtn,
+  .tool, .search-results button, .menu-list a, .menu-list button { min-height: 44px; }
+  .btn-sm, button.btn-sm { min-height: 40px; }
+}
+
+/* ==========================================================================
+   First-run onboarding (empty dashboard)
+   ========================================================================== */
+.page-head.center { justify-items: center; text-align: center; }
+.onboard { gap: 20px; justify-items: center; }
+.onboard > * { width: 100%; }
+.onboard-art { width: 168px; margin: 4px auto -6px; }
+.onboard-art svg { width: 100%; height: auto; }
+.onboard-form { max-width: 460px; margin: 0 auto; }
+.onboard-form .btn-primary { width: 100%; }
+.onboard-steps { list-style: none; counter-reset: step; margin: 2px auto 0; padding: 0; max-width: 460px; display: grid; gap: 16px; }
+.onboard-steps li { counter-increment: step; display: flex; gap: 14px; align-items: flex-start; }
+.onboard-steps li::before {
+  content: counter(step); flex: none; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--honey-soft); color: var(--honey-ink); font: 800 1rem/30px var(--display); text-align: center;
+}
+.onboard-steps .s-body { display: grid; gap: 1px; }
+.onboard-import { max-width: 460px; margin: 0 auto; }
+.onboard-import > summary { color: var(--leaf); font-weight: 600; cursor: pointer; }
